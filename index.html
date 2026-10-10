@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Fill in eight slots and get a finished footnote in OSINT Style Guide form, with a source rating picker, rule checks, and a source list you can save to a file.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F4761'/%3E%3Cpath d='M13 8H9v16h4M19 8h4v16h-4' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+<title>OSINT Citation Generator</title>
+<style>
+body { margin: 0; }
+</style>
+<style>
+/* Layout: the form runs down the left in the guide's eight-slot order; the assembled footnote sits on a sticky sheet at the right, and moves above the form on a phone. */
+:root {
+  --bg: #EEF2F5;
+  --surface: #FFFFFF;
+  --sheet: #FFFFFF;
+  --ink: #13222C;
+  --muted: #566977;
+  --line: #CCD6DE;
+  --accent: #0F4761;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #DFEBF1;
+  --z-green: #C6E0B4;
+  --z-yellow: #FFE699;
+  --z-orange: #F8CBAD;
+  --z-red: #FF9999;
+  --z-gray: #D9D9D9;
+  --z-ink: #1B242B;
+  --fix: #9E2219;
+  --fix-bg: #FBE3E0;
+  --check: #6F4B00;
+  --check-bg: #FBEDC4;
+  --note: #35566B;
+  --note-bg: #E3EDF3;
+  --ok: #2A6637;
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-note: 'Times New Roman', Times, 'Liberation Serif', serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D151B; --surface: #152029; --sheet: #1A2630; --ink: #E3EAEF; --muted: #94A6B3;
+    --line: #2C3B46; --accent: #8CC4DD; --accent-ink: #0B1A22; --accent-soft: #1C323E;
+    --z-green: #35603A; --z-yellow: #7A6520; --z-orange: #8A5330; --z-red: #8A3636; --z-gray: #46525B; --z-ink: #F1F5F7;
+    --fix: #FFA79C; --fix-bg: #3F1D1A; --check: #F2CD6B; --check-bg: #3A2E10;
+    --note: #A9C9DB; --note-bg: #1C323E; --ok: #8FD19E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D151B; --surface: #152029; --sheet: #1A2630; --ink: #E3EAEF; --muted: #94A6B3;
+  --line: #2C3B46; --accent: #8CC4DD; --accent-ink: #0B1A22; --accent-soft: #1C323E;
+  --z-green: #35603A; --z-yellow: #7A6520; --z-orange: #8A5330; --z-red: #8A3636; --z-gray: #46525B; --z-ink: #F1F5F7;
+  --fix: #FFA79C; --fix-bg: #3F1D1A; --check: #F2CD6B; --check-bg: #3A2E10;
+  --note: #A9C9DB; --note-bg: #1C323E; --ok: #8FD19E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1180px; margin-inline: auto; padding-inline: clamp(16px, 3vw, 32px); padding-block: 28px 56px; display: flex; flex-direction: column; gap: 24px; }
+
+.mast { display: flex; flex-direction: column; gap: 10px; }
+.mast h1 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; color: var(--accent); text-wrap: balance; }
+.mast p { margin: 0; color: var(--muted); max-width: 64ch; }
+.pattern { font-family: var(--font-mono); font-size: 12.5px; color: var(--ink); background: var(--accent-soft); border-radius: 4px; padding: 8px 12px; overflow-x: auto; white-space: nowrap; max-width: 100%; }
+.pattern i { font-style: italic; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 32px; align-items: start; }
+.form { min-width: 0; display: flex; flex-direction: column; }
+.out { min-width: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); max-height: calc(100vh - 32px); overflow: auto; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .out { position: static; max-height: none; overflow: visible; order: -1; }
+}
+
+/* form */
+.slot { border-top: 1px solid var(--line); padding-block: 18px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.slot:first-child { border-top: 0; padding-top: 0; }
+.slot h2 { margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.slot h2 .num { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--accent); }
+.slot h2 .aside { font-size: 12.5px; font-weight: 400; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field > label, .field > .label { font-size: 13px; font-weight: 500; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.withbtn { display: flex; gap: 6px; min-width: 0; }
+.withbtn input { flex: 1 1 auto; }
+input[type="text"], textarea, select {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 4px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+textarea { resize: vertical; line-height: 1.4; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.types { display: flex; flex-wrap: wrap; gap: 6px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13.5px; }
+.chip input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 500; }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.formbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+[hidden] { display: none !important; }
+.chip.box input:checked + span::before { content: '\2713\00a0'; }
+.ver { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 3px; padding: 2px 7px; vertical-align: middle; margin-left: 4px; }
+.lib { display: flex; flex-direction: column; }
+.lib details.cat { border-top: 1px solid var(--line); padding: 6px 0; }
+.lib details.cat > summary { cursor: pointer; font-size: 13.5px; font-weight: 500; }
+.lib .cnt, .qg .cnt { color: var(--muted); font-weight: 400; font-family: var(--font-mono); font-size: 11.5px; margin-left: 6px; }
+.lib .g, .qg { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; padding: 6px 0; align-items: start; }
+.lib .gn, .qg .gn { font-size: 12.5px; color: var(--muted); padding-top: 4px; }
+.qgroups { display: flex; flex-direction: column; }
+.qg { border-top: 1px solid var(--line); }
+.qg:first-child { border-top: 0; }
+@media (max-width: 600px) { .lib .g, .qg { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+
+.btn { font: inherit; font-size: 13.5px; font-weight: 500; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.quiet { background: transparent; border-color: transparent; color: var(--accent); padding-inline: 6px; }
+.btn.quiet:hover { text-decoration: underline; }
+.btn.small { font-size: 12.5px; padding: 4px 9px; }
+
+.picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.pick { font: inherit; font-size: 12.5px; padding: 3px 10px; border: 1px dashed var(--line); border-radius: 999px; background: transparent; color: var(--muted); cursor: pointer; }
+.pick:hover { color: var(--accent); border-color: var(--accent); border-style: solid; }
+
+details.more { border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; }
+details.more > summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--accent); }
+details.more[open] > summary { margin-bottom: 12px; }
+details.more .inner { display: flex; flex-direction: column; gap: 12px; }
+
+/* rating matrix */
+.matrixwrap { display: flex; flex-direction: column; gap: 8px; max-width: 440px; }
+.matrix { display: grid; grid-template-columns: 26px repeat(6, minmax(0, 1fr)); gap: 3px; }
+.mh { font-family: var(--font-mono); font-size: 12px; color: var(--muted); display: flex; align-items: center; justify-content: center; }
+.mc { font-family: var(--font-mono); font-size: 12.5px; padding: 7px 0; border: 1px solid transparent; border-radius: 3px; color: var(--z-ink); cursor: pointer; }
+.mc[data-z="G"] { background: var(--z-green); }
+.mc[data-z="Y"] { background: var(--z-yellow); }
+.mc[data-z="O"] { background: var(--z-orange); }
+.mc[data-z="R"] { background: var(--z-red); }
+.mc[data-z="X"] { background: var(--z-gray); }
+.mc:hover { border-color: var(--ink); }
+.mc[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 1px; font-weight: 500; box-shadow: inset 0 0 0 1px var(--ink); }
+.ratingline { font-size: 13px; min-height: 1.45em; }
+.ratingline b { font-family: var(--font-mono); font-weight: 500; }
+
+/* output */
+.sheet { background: var(--sheet); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+.eyebrow { margin: 0; font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.exchip { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none; padding: 2px 7px; border-radius: 3px; background: var(--check-bg); color: var(--check); }
+.strip { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.strip li { font-family: var(--font-mono); font-size: 11.5px; padding: 2px 7px; border-radius: 3px; border: 1px solid var(--line); color: var(--muted); }
+.strip li[data-s="filled"] { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.strip li[data-s="missing"] { background: var(--fix-bg); border-color: transparent; color: var(--fix); }
+.strip li[data-s="nd"] { background: var(--check-bg); border-color: transparent; color: var(--check); }
+.preview { font-family: var(--font-note); font-size: 17.5px; line-height: 1.5; overflow-wrap: anywhere; min-height: 4.5em; margin: 0; }
+.preview.empty { color: var(--muted); font-family: var(--font-ui); font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.status { font-size: 12.5px; color: var(--ok); min-height: 1.45em; margin: 0; }
+.status.bad { color: var(--fix); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg label { position: relative; font-size: 12.5px; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { display: block; padding: 4px 10px; }
+.seg input:checked + span { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
+.optline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.checks li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13.5px; }
+.tag { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 0; border-radius: 3px; text-align: center; margin-top: 1px; }
+.tag.fix { background: var(--fix-bg); color: var(--fix); }
+.tag.check { background: var(--check-bg); color: var(--check); }
+.tag.note { background: var(--note-bg); color: var(--note); }
+.allclear { font-size: 13.5px; color: var(--ok); margin: 0; }
+
+.block { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.subline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.subline .txt { font-family: var(--font-note); font-size: 16px; line-height: 1.45; overflow-wrap: anywhere; }
+.saved { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.saved li { border-top: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 6px; }
+.saved li:first-child { border-top: 0; padding-top: 0; }
+.saved .txt { font-family: var(--font-note); font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
+.saved .n { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
+.filemsg { font-size: 12.5px; color: var(--ok); margin: 0; }
+.filemsg.bad { color: var(--fix); }
+.filemsg:empty { display: none; }
+.ask { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.exportrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+#fallbackBox { font-family: var(--font-mono); font-size: 12px; }
+.foot { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 72ch; }
+@media (prefers-reduced-motion: no-preference) { .btn, .mc, .pick { transition: border-color 120ms ease, filter 120ms ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <h1>OSINT Citation Generator <span class="ver">v2.1</span></h1>
+    <p>Pick a source type and fill the eight slots. The footnote assembles in house order with its punctuation, and slots that do not apply drop out along with theirs.</p>
+    <div class="pattern" aria-label="The citation pattern">Author, "Title," <i>Location</i> [Description] (Publisher: Date) URL/DOI: Locator.</div>
+  </header>
+
+  <div class="layout">
+    <form class="form" id="f" autocomplete="off" novalidate>
+      <div class="slot">
+        <h2>Source type</h2>
+        <fieldset class="types" id="types"><legend class="hint" style="padding:0;margin-bottom:8px">Sets the title style, the usual description, and which rules get checked.</legend></fieldset>
+        <div class="formbar">
+          <button type="button" class="btn small" id="clearBtn">Clear the form</button>
+          <button type="button" class="btn quiet small" id="sampleBtn">Show an example for this type</button>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-author">
+        <h2 id="h-author"><span class="num">1</span> Author</h2>
+        <div class="row">
+          <div class="field">
+            <label for="authors" id="authorsLabel">Authors</label>
+            <textarea id="authors" rows="3" placeholder="One per line"></textarea>
+            <p class="hint" id="authorsHint"></p>
+          </div>
+          <div class="field">
+            <label for="contribs">Editors, translators, contributors</label>
+            <textarea id="contribs" rows="3" placeholder="One per line"></textarea>
+            <select id="contribRole" aria-label="Role for names without one">
+              <option value="ed">Mark as (ed.)</option>
+              <option value="trans">Mark as (trans.)</option>
+              <option value="contr">Mark as (contr.)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="max-width:260px">
+          <label for="lead">Opens with</label>
+          <select id="lead">
+            <option value="">Nothing</option>
+            <option value="See">See</option>
+            <option value="Cited in">Cited in</option>
+            <option value="Quoted in">Quoted in</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-title">
+        <h2 id="h-title"><span class="num">2</span> Title</h2>
+        <div class="row">
+          <div class="field" style="grid-column: span 2; min-width: 0">
+            <label for="title">Title</label>
+            <input type="text" id="title" placeholder="As the source gives it">
+            <p class="hint">Keep the source's own capitalization. Reproduce an error and follow it with [sic].</p>
+          </div>
+          <div class="field">
+            <label for="titleStyle">Set as</label>
+            <select id="titleStyle">
+              <option value="quotes">"Quotes" (short work)</option>
+              <option value="italics">Italics (larger work)</option>
+              <option value="plain">Plain (no title)</option>
+            </select>
+          </div>
+        </div>
+        <details class="more" id="transBox">
+          <summary>Non-English or translated source</summary>
+          <div class="inner">
+            <div class="field">
+              <label for="transTitle">English translation of the title</label>
+              <input type="text" id="transTitle" placeholder="The Evolution of US Technology Policy Toward China">
+              <p class="hint">Put the original-language title in the Title field. The translation follows it in brackets.</p>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="origLang">Original language</label>
+                <input type="text" id="origLang" placeholder="Chinese">
+              </div>
+              <div class="field">
+                <label for="transBy">Translated by</label>
+                <select id="transBy">
+                  <option value="">Not stated, or a published translator</option>
+                  <option value="own">Me</option>
+                  <option value="machine">Machine translation</option>
+                </select>
+              </div>
+            </div>
+            <p class="hint">Credit a published translator in the contributors box with (trans.).</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-loc">
+        <h2 id="h-loc"><span class="num">3</span> Location</h2>
+        <div class="field">
+          <label for="location" id="locationLabel">Location</label>
+          <input type="text" id="location">
+          <p class="hint">The publication, platform, site, series, or archive that holds the source. Ten words or fewer. Always italic.</p>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-desc">
+        <h2 id="h-desc"><span class="num">4</span> Description <span class="aside">the bracket, never dropped</span></h2>
+        <div class="field">
+          <label for="descType">Kind of source</label>
+          <input type="text" id="descType" list="descList" placeholder="Start typing to search the library, or browse it below">
+          <datalist id="descList"></datalist>
+          <div class="picks" id="picks" aria-label="Common descriptions for this source type"></div>
+          <p class="hint" id="descHint"></p>
+        </div>
+        <details class="more" id="libBox">
+          <summary>Browse the library <span class="aside" id="libCount"></span></summary>
+          <div class="inner">
+            <input type="text" id="libFilter" placeholder="Filter: treaty, poll, footage, leak …" aria-label="Filter the library" autocomplete="off">
+            <div class="lib" id="lib"></div>
+            <p class="hint">Pick the most specific description that fits. If nothing fits, write a plain description of ten words or fewer and send a note so it can be added.</p>
+          </div>
+        </details>
+        <div class="field">
+          <label for="descDetails">Details</label>
+          <input type="text" id="descDetails">
+          <p class="hint">Volume and issue, report number, episode, edition, resolution and coordinates. Separate items with semicolons.</p>
+        </div>
+        <details class="more" id="qualBox">
+          <summary>Qualifiers <span class="aside" id="qualCount"></span></summary>
+          <div class="inner">
+            <p class="hint">A qualifier describes this copy of the source, not its kind: [Field Manual; leaked; scan]. It follows the details in the bracket. Language and access have their own controls.</p>
+            <div class="qgroups" id="quals"></div>
+          </div>
+        </details>
+        <div class="field">
+          <span class="label" id="accessLabel">Access</span>
+          <fieldset class="types" id="accessBox" aria-labelledby="accessLabel"></fieldset>
+          <div class="field" id="accessNoteWrap" hidden style="max-width:320px">
+            <label for="accessNote">Say what</label>
+            <input type="text" id="accessNote" placeholder="print only">
+          </div>
+          <p class="hint">Tick whatever stands between the reader and the source. Nothing ticked means free to read, which adds nothing. It goes in the bracket after the details and before the rating.</p>
+        </div>
+        <div class="field">
+          <span class="label" id="ratingLabel">Source rating <span class="aside" style="font-weight:400;color:var(--muted)">optional; click again to clear</span></span>
+          <div class="matrixwrap">
+            <div class="matrix" id="matrix" role="group" aria-labelledby="ratingLabel"></div>
+            <p class="ratingline" id="ratingLine" aria-live="polite"></p>
+            <p class="hint">Letters rate the source. Numbers rate the information. <span id="startHint"></span></p>
+          </div>
+          <input type="hidden" id="rating" value="">
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-pub">
+        <h2 id="h-pub"><span class="num">5</span> Publisher</h2>
+        <div class="field">
+          <label for="publisher" id="publisherLabel">Publisher</label>
+          <input type="text" id="publisher">
+          <p class="hint">Who issued it. Leave blank for journals, newspapers, magazines, and wires. A publisher that repeats the location is dropped for you.</p>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-date">
+        <h2 id="h-date"><span class="num">6</span> Date</h2>
+        <div class="row">
+          <div class="field">
+            <label for="date">Date</label>
+            <input type="text" id="date" placeholder="2/12/2026, Feb 12 2026, or 2018">
+          </div>
+          <div class="field">
+            <label for="dateKind">This date is when it was</label>
+            <select id="dateKind">
+              <option value="">Published</option>
+              <option value="updated">Last updated</option>
+              <option value="captured">Captured (imagery)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="accessed">Accessed</label>
+            <div class="withbtn">
+              <input type="text" id="accessed" placeholder="Live sources only">
+              <button type="button" class="btn small" data-today="accessed">Today</button>
+            </div>
+          </div>
+        </div>
+        <p class="hint">Any common format becomes DD Month YYYY. Slashes are read as month/day/year. A year alone stays a year. Blank becomes n.d.</p>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-url">
+        <h2 id="h-url"><span class="num">7</span> URL or DOI</h2>
+        <div class="field">
+          <label for="url">URL or DOI</label>
+          <input type="text" id="url" placeholder="https://… or 10.1234/example.5678" inputmode="url">
+          <p class="hint">Full link, never shortened. A bare DOI is rewritten as https://doi.org/….</p>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="archiveUrl">Archive link</label>
+            <input type="text" id="archiveUrl" placeholder="https://archive.ph/…" inputmode="url">
+          </div>
+          <div class="field">
+            <label for="archiveDate">Captured</label>
+            <div class="withbtn">
+              <input type="text" id="archiveDate" placeholder="Date you archived it">
+              <button type="button" class="btn small" data-today="archiveDate">Today</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-locator">
+        <h2 id="h-locator"><span class="num">8</span> Locator</h2>
+        <div class="field">
+          <label for="locator">Pages, section, or timestamp</label>
+          <input type="text" id="locator" placeholder="25-27">
+          <p class="hint">Numbers get p. or pp. and an en dash. Where there are no pages, name the section (Article 4(2)) or give the timestamp (See 30:15–32:40 for …). Never count paragraphs.</p>
+        </div>
+      </div>
+
+      <div class="slot" role="group" aria-labelledby="h-after">
+        <h2 id="h-after">After the citation</h2>
+        <div class="field">
+          <label for="note">Commentary</label>
+          <textarea id="note" rows="2" placeholder="Geolocation is this author's assessment based on the treeline visible at 0:12; not stated by the poster."></textarea>
+          <p class="hint">A caveat, how a date or location was established, or what could not be confirmed.</p>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="shortName">Short-form name</label>
+            <input type="text" id="shortName">
+            <p class="hint">Surname for later citations. Filled in for you; correct it for names like Xi Jinping.</p>
+          </div>
+          <div class="field">
+            <label for="shortTitle">Short title</label>
+            <input type="text" id="shortTitle">
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <aside class="out" aria-label="Assembled footnote">
+      <div class="sheet">
+        <p class="eyebrow"><span>Footnote</span><span class="exchip" id="exChip" hidden>Example</span></p>
+        <ul class="strip" id="strip" aria-label="Slot status"></ul>
+        <p class="preview" id="preview" aria-live="polite"></p>
+        <div class="actions">
+          <button type="button" class="btn primary" id="copyRich">Copy with italics</button>
+          <button type="button" class="btn" id="copyMd">Copy as Markdown</button>
+          <button type="button" class="btn" id="copyPlain">Copy plain</button>
+        </div>
+        <div class="optline">
+          <span id="italLabel">Set titles in</span>
+          <span class="seg" role="radiogroup" aria-labelledby="italLabel">
+            <label><input type="radio" name="ital" id="italI" value="i" checked><span>Italics</span></label>
+            <label><input type="radio" name="ital" id="italU" value="u"><span>Underline</span></label>
+          </span>
+        </div>
+        <p class="status" id="status" role="status"></p>
+        <textarea id="fallbackBox" rows="4" readonly hidden aria-label="Text to copy by hand"></textarea>
+
+        <div class="block">
+          <p class="eyebrow"><span>Checks against the guide</span></p>
+          <ul class="checks" id="checks"></ul>
+          <p class="allclear" id="allclear" hidden>Nothing to fix.</p>
+        </div>
+
+        <div class="block">
+          <p class="eyebrow"><span>Later citations of this source</span>
+            <label style="font-weight:400;letter-spacing:0;text-transform:none;font-size:12.5px;display:flex;gap:5px;align-items:center"><input type="checkbox" id="shortUseTitle" checked> short title</label>
+          </p>
+          <div class="subline"><span class="txt" id="shortOut"></span><button type="button" class="btn small" id="copyShort">Copy</button></div>
+          <div class="subline"><span class="txt" id="ibidOut"></span><button type="button" class="btn small" id="copyIbid">Copy</button></div>
+          <p class="hint">Ibid. breaks when footnotes are reordered. The short form is never wrong.</p>
+        </div>
+
+        <div class="block">
+          <p class="eyebrow"><span>Source list <span id="savedCount"></span></span>
+            <button type="button" class="btn small primary" id="addBtn" style="letter-spacing:0;text-transform:none">Add this source</button>
+          </p>
+          <ul class="saved" id="saved"></ul>
+          <p class="hint" id="savedEmpty">Sources you add stay in this browser, so you can build a piece's notes one after another and copy them together.</p>
+          <div class="actions" id="savedActions" hidden>
+            <button type="button" class="btn small" id="copyAll">Copy all, one per line</button>
+            <button type="button" class="btn small" id="copyJoined">Copy as one footnote</button>
+            <button type="button" class="btn quiet small" id="clearList">Empty the list</button>
+          </div>
+        </div>
+
+        <div class="block" id="fileBlock">
+          <p class="eyebrow"><span>List file</span></p>
+          <div class="field">
+            <label for="listName">List name</label>
+            <input type="text" id="listName" placeholder="The piece these sources belong to" autocomplete="off">
+          </div>
+          <div class="actions">
+            <button type="button" class="btn small" id="saveFile">Save list to a file</button>
+            <button type="button" class="btn small" id="openFile">Open a list file</button>
+          </div>
+          <div class="ask" id="mergeAsk" hidden>
+            <span id="mergeText"></span>
+            <div class="actions">
+              <button type="button" class="btn small" id="mergeAdd">Add them to this list</button>
+              <button type="button" class="btn small" id="mergeReplace">Replace this list</button>
+              <button type="button" class="btn quiet small" id="mergeCancel">Cancel</button>
+            </div>
+          </div>
+          <p class="hint" id="fileState"></p>
+          <div class="exportrow" id="exportRow">
+            <span>Export the footnotes as</span>
+            <button type="button" class="btn small" id="expDocx">Word</button>
+            <button type="button" class="btn small" id="expMd">Markdown</button>
+            <button type="button" class="btn small" id="expCsv">Spreadsheet (CSV)</button>
+          </div>
+          <p class="filemsg" id="fileMsg" role="status"></p>
+          <input type="file" id="pickFile" accept=".json,application/json" hidden>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <p class="foot">Version 2.1. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
+</div>
+
+<script id="core">
+var OSINT = (function () {
+  'use strict';
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  var REL = { A: 'Highly Reliable', B: 'Usually Reliable', C: 'Fairly Reliable', D: 'Not Usually Reliable', E: 'Unreliable', F: 'Unknown' };
+  var CRED = { 1: 'Confirmed', 2: 'Probable', 3: 'Possible', 4: 'Doubtful', 5: 'Improbable', 6: 'Unknown' };
+  var ZROWS = ['GGGYYX', 'GGYYOX', 'YYYOOX', 'OOOORX', 'RRRRRX', 'XXXXXX'];
+  var ZNAME = { G: 'Green', Y: 'Yellow', O: 'Orange', R: 'Red', X: 'Gray' };
+  var HANDLING = {
+    G: 'May be used as core evidence.',
+    Y: 'Usable with framing and corroboration. Say in the text that the claim is not confirmed.',
+    O: 'Weak. Use only where necessary, with the caveat stated in a footnote.',
+    R: 'Likely misleading or false. Cite only to identify and challenge the claim, never to support one.',
+    X: 'Unverifiable. May show that a claim is circulating; may never be the sole support for a judgment.'
+  };
+  var SHORTENERS = ['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'buff.ly', 'is.gd', 'lnkd.in', 'shorturl.at', 'rb.gy', 'tiny.cc', 'cutt.ly', 'trib.al', 'dlvr.it'];
+  var VOLATILE = ['x.com', 'twitter.com', 't.me', 'telegram.me', 'discord.com', 'discord.gg', 'facebook.com', 'instagram.com', 'tiktok.com', 'reddit.com', 'bsky.app', 'threads.net', 'vk.com', 'weibo.com', 'truthsocial.com', 'mastodon.social', 'medium.com', 'blogspot.com', 'wordpress.com'];
+  var ORG = /\b(Staff|Department|Ministry|Institute|Institution|University|Corporation|Council|Bureau|Service|Office|Agency|Labs?|PBC|Inc|LLC|Ltd|News|Organization|Bank|Fund|Union|Commission|Court|House|Congress|Parliament|Foundation|Center|Centre|Nations|Reserve|Government|Press|Group|Project|Analysts|Endowment|Command|Force|Navy|Army|accounts)\b/i;
+
+  function straight(s) { return String(s == null ? '' : s).replace(/[“”]/g, '"').replace(/[‘’]/g, "'"); }
+  function clean(s) { return straight(s).replace(/\s+/g, ' ').trim(); }
+  function lines(s) { return String(s == null ? '' : s).split(/[\n;]+/).map(clean).filter(Boolean); }
+  function listJoin(a) {
+    if (a.length <= 1) return a[0] || '';
+    if (a.length === 2) return a[0] + ' and ' + a[1];
+    return a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1];
+  }
+  function authorBlock(a) { return a.length >= 4 ? a.slice(0, 3).join(', ') + ', et al.' : listJoin(a); }
+  function contribList(raw, role) {
+    return lines(raw).map(function (n) { return /\((eds?|trans|contr)\.\)$/i.test(n) ? n : n + ' (' + (role || 'ed') + '.)'; });
+  }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function monthIndex(name) {
+    var n = String(name).toLowerCase().replace(/\.$/, '');
+    if (n.length < 3) return -1;
+    for (var i = 0; i < 12; i++) if (MONTHS[i].toLowerCase().indexOf(n) === 0) return i;
+    return -1;
+  }
+  function normDate(raw) {
+    var s = clean(raw), m, mi, d;
+    if (!s) return { text: '', level: 'none' };
+    if (/^n\.?\s?d\.?$/i.test(s)) return { text: 'n.d.', level: 'none' };
+    if (/^\d{4}$/.test(s)) return { text: s, level: 'year' };
+    function full(y, mo, da) {
+      mo = +mo; da = +da;
+      if (mo < 1 || mo > 12 || da < 1 || da > 31) return { text: s, level: 'raw' };
+      return { text: pad2(da) + ' ' + MONTHS[mo - 1] + ' ' + y, level: 'day' };
+    }
+    if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) return full(m[1], m[2], m[3]);
+    if ((m = s.match(/^(\d{4})-(\d{1,2})$/)) && +m[2] >= 1 && +m[2] <= 12) return { text: MONTHS[+m[2] - 1] + ' ' + m[1], level: 'month' };
+    if ((m = s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})$/))) {
+      return (+m[1] > 12 && +m[2] <= 12) ? full(m[3], m[2], m[1]) : full(m[3], m[1], m[2]);
+    }
+    if ((m = s.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})$/)) && (mi = monthIndex(m[2])) >= 0) return full(m[3], mi + 1, m[1]);
+    if ((m = s.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/)) && (mi = monthIndex(m[1])) >= 0) return full(m[3], mi + 1, m[2]);
+    if ((m = s.match(/^([A-Za-z]{3,9})\.?,?\s+(\d{4})$/)) && (mi = monthIndex(m[1])) >= 0) return { text: MONTHS[mi] + ' ' + m[2], level: 'month' };
+    return { text: s, level: 'raw' };
+  }
+  function normLocator(raw) {
+    var s = clean(raw).replace(/\.$/, ''), m, body;
+    if (!s) return '';
+    var PAGES = /^[\divxlcdm\s,–—-]+$/i;
+    body = s;
+    if ((m = s.match(/^pp?\.?\s*(.+)$/i)) && PAGES.test(m[1])) body = m[1];
+    if (PAGES.test(body) && /[\divxlcdm]/i.test(body)) {
+      var p = body.replace(/\s*[-–—]\s*/g, '–').replace(/\s*,\s*/g, ', ');
+      return (/[–,]/.test(p) ? 'pp. ' : 'p. ') + p;
+    }
+    return s.replace(/(\d)\s*[-–—]\s*(?=\d)/g, '$1–');
+  }
+  function hostOf(u) {
+    var m = String(u).match(/^[a-z]+:\/\/([^\/?#:]+)/i);
+    return m ? m[1].toLowerCase().replace(/^www\./, '') : '';
+  }
+  function hostIn(h, list) {
+    for (var i = 0; i < list.length; i++) if (h === list[i] || h.slice(-(list[i].length + 1)) === '.' + list[i]) return true;
+    return false;
+  }
+  function normUrl(raw) {
+    var s = String(raw == null ? '' : raw).trim(), doi = false;
+    if (!s) return { url: '', doi: false };
+    s = s.replace(/^doi:\s*/i, '');
+    if (/^10\.\d{4,9}\/\S+$/.test(s)) return { url: 'https://doi.org/' + s, doi: true };
+    if (/^(https?:\/\/)?(dx\.)?doi\.org\//i.test(s)) {
+      var fixed = 'https://doi.org/' + s.replace(/^(https?:\/\/)?(dx\.)?doi\.org\//i, '');
+      return { url: fixed, doi: fixed !== s };
+    }
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s) && /^[\w-]+(\.[\w-]+)+(\/|$|\?|#)/.test(s)) s = 'https://' + s;
+    return { url: s, doi: doi };
+  }
+  function cleanTitle(raw, style) {
+    var s = clean(raw), m = s.match(/^"(.*)"$/);
+    if (m && m[1].indexOf('"') === -1) s = m[1];
+    s = s.replace(/,$/, '');
+    if (style === 'quotes') s = s.replace(/"/g, "'");
+    return s;
+  }
+  function zoneOf(r) {
+    if (!/^[A-F][1-6]$/.test(r || '')) return '';
+    return ZROWS[+r[1] - 1]['ABCDEF'.indexOf(r[0])];
+  }
+  function words(s) { return s ? s.split(/\s+/).filter(Boolean).length : 0; }
+  function surname(n) {
+    var w = n.split(' ');
+    if (w.length > 3 || w.length < 2 || /\d/.test(n) || ORG.test(n)) return n;
+    return w[w.length - 1];
+  }
+  function deriveName(authors) {
+    var s = authors.map(surname);
+    if (s.length >= 4) return s[0] + ' et al.';
+    return listJoin(s);
+  }
+  function deriveShortTitle(t) {
+    var q = t.match(/^(.+?[?!])\s/);
+    if (q) return q[1];
+    var i = t.indexOf(':');
+    return (i > 0 ? t.slice(0, i) : t).trim();
+  }
+
+  function accessOf(st) {
+    var raw = Array.isArray(st.access) ? st.access : (st.access ? [st.access] : []);
+    var out = [];
+    raw.forEach(function (a) {
+      var v = a === 'other' ? clean(st.accessNote) : clean(a);
+      if (v && out.indexOf(v) === -1) out.push(v);
+    });
+    return out;
+  }
+  function has(list, x) { return list.indexOf(x) !== -1; }
+
+  function build(st) {
+    var seg = [], checks = [], slots = {};
+    function push(s, i) { if (!s) return; var l = seg[seg.length - 1]; if (l && l.i === !!i) l.s += s; else seg.push({ s: s, i: !!i }); }
+    function tail() { return seg.length ? seg[seg.length - 1].s.slice(-1) : ''; }
+    function sp() { if (seg.length && tail() !== ' ') push(' '); }
+    function add(level, msg) { checks.push({ level: level, msg: msg }); }
+
+    var style = st.titleStyle || 'quotes';
+    var authors = lines(st.authors), contribs = contribList(st.contribs, st.contribRole);
+    var who = authorBlock(authors), cb = listJoin(contribs);
+    if (who && cb) who += '; ' + cb; else if (cb) who = cb;
+    var title = cleanTitle(st.title, style), trans = cleanTitle(st.transTitle, style);
+    var rawLoc = clean(st.location), loc = rawLoc, locSame = false;
+    if (loc && title && loc.toLowerCase() === title.toLowerCase()) { loc = ''; locSame = true; }
+
+    var type = clean(st.descType), items = [];
+    if (type) items.push(type);
+    lines(st.descDetails).forEach(function (x) { items.push(x); });
+    var quals = Array.isArray(st.quals) ? st.quals.map(clean).filter(Boolean) : [];
+    quals.forEach(function (q) { items.push(q); });
+    var lang = clean(st.origLang);
+    if (st.transBy === 'machine') { items.push('machine translation'); if (lang) items.push('original in ' + lang); }
+    else { if (lang) items.push('original in ' + lang); if (st.transBy === 'own') items.push('translation by author'); }
+    var accessList = accessOf(st);
+    accessList.forEach(function (a) { items.push(a); });
+    var access = accessList.length > 0;
+    var descWords = words(items.join(' ').replace(/[;,]/g, ' '));
+    var rating = /^[A-F][1-6]$/.test(st.rating || '') ? st.rating : '';
+    if (rating) items.push(rating);
+
+    var pub = clean(st.publisher), pubSame = false;
+    if (pub && rawLoc && pub.toLowerCase() === rawLoc.toLowerCase()) { pub = ''; pubSame = true; }
+    var d = normDate(st.date), acc = normDate(st.accessed);
+    var u = normUrl(st.url), au = normUrl(st.archiveUrl), ad = normDate(st.archiveDate);
+    var locator = normLocator(st.locator), note = clean(st.note), lead = clean(st.lead);
+
+    var empty = !who && !title && !loc && !items.length && !pub && !d.text && !u.url && !locator;
+    if (empty) return { seg: [], checks: [], slots: {}, empty: true, rating: '', zone: '' };
+
+    if (lead) push(lead + ' ');
+    if (who) { push(who); if (title || loc) push(', '); }
+    var endP = /[?!]$/.test(title);
+    if (title) {
+      if (style === 'quotes') {
+        if (trans) { push('"' + title + '" ["' + trans + '"]'); if (loc) push(', '); }
+        else { push('"' + title + (loc && !endP ? ',' : '') + '"'); if (loc) push(' '); }
+      } else if (style === 'italics') {
+        push(title, true);
+        if (trans) { push(' ['); push(trans, true); push(']'); }
+        if (loc) push(endP && !trans ? ' ' : ', ');
+      } else {
+        push(title + (trans ? ' [' + trans + ']' : ''));
+        if (loc) push(', ');
+      }
+    }
+    if (loc) push(loc, true);
+    if (items.length) { sp(); push('[' + items.join('; ') + ']'); }
+
+    var dateText = d.text || 'n.d.';
+    if ((st.dateKind === 'updated' || st.dateKind === 'captured') && d.text && d.text !== 'n.d.') dateText = st.dateKind + ' ' + dateText;
+    if (acc.text) dateText += ', accessed ' + acc.text;
+    sp(); push('(' + (pub ? pub + ': ' : '') + dateText + ')');
+    if (u.url) { sp(); push(u.url); }
+    if (locator) push(': ' + locator);
+    if (!/[.?!]$/.test(tail()) || (u.url && !locator)) push('.');
+    if (au.url) push(' Archived: ' + au.url + (ad.text ? ' (captured ' + ad.text + ')' : '') + '.');
+    if (note) push(' ' + note + (/[.?!]$/.test(note) ? '' : '.'));
+
+    slots.author = who ? 'filled' : 'dropped';
+    slots.title = title ? 'filled' : 'missing';
+    slots.location = loc ? 'filled' : 'dropped';
+    slots.description = type ? 'filled' : 'missing';
+    slots.publisher = pub ? 'filled' : 'dropped';
+    slots.date = (d.text && d.text !== 'n.d.') ? 'filled' : 'nd';
+    slots.url = u.url ? 'filled' : 'dropped';
+    slots.locator = locator ? 'filled' : 'dropped';
+
+    if (!title) add('fix', 'No title. Where a source has none, write a plain description in the title slot and set it as a plain description.');
+    if (!type) add('fix', 'The description bracket is empty. It is the one slot that is never dropped.');
+    if (st.ai && rating !== 'F6') add('check', 'AI model output is rated F6 by default.');
+    var h = hostOf(u.url);
+    if (h && hostIn(h, SHORTENERS)) add('fix', 'That is a link shortener. Give the full URL.');
+    if (u.url && /[?&](utm_[a-z]+|fbclid|gclid|mc_cid|igshid)=/i.test(u.url)) add('check', 'The URL carries tracking parameters. Trim them so the link is the stable one.');
+    if ((st.volatile || (h && hostIn(h, VOLATILE))) && !au.url) add('check', 'Volatile source with no archive link. Archive it now and add the link and capture date.');
+    if (au.url && !ad.text) add('check', 'The archive link has no capture date.');
+    if (st.live && !acc.text) add('check', 'A continuously updated source needs an access date.');
+    if (st.dayDate && (d.level === 'year' || d.level === 'month')) add('check', 'This kind of source takes the full date: DD Month YYYY.');
+    var z = zoneOf(rating);
+    if (z && z !== 'G') add('check', rating + ' sits in the ' + ZNAME[z] + ' zone. ' + HANDLING[z]);
+    if (rating === 'C1') add('note', 'C1 is the weakest of the Green blocks. Say so when leaning on it.');
+    if (words(rawLoc) > 10) add('check', 'Location runs ' + words(rawLoc) + ' words. The guide asks for ten or fewer.');
+    if (!who && title) add('note', 'No author, so the footnote opens with the title. Use the organization if there is one, or the outlet plus Staff.');
+    if (authors.length >= 4) add('note', authors.length + ' authors: the first three are named, then et al.');
+    if (locSame) add('note', 'Location repeats the title, so it is dropped.');
+    if (pubSame) add('note', 'Publisher repeats the location, so it is dropped.');
+    if (!d.text) add('note', 'No date given, so the parenthetical reads n.d. If you can establish one, put [ca. YYYY] in the description and say how.');
+    if (d.level === 'raw') add('note', 'Date left as typed. House form is DD Month YYYY, or the year alone for books and journal articles.');
+    if (u.doi) add('note', 'DOI rewritten in resolvable form.');
+    if (descWords > 10) add('note', 'Description runs ' + descWords + ' words against a target of ten. Archival detail and imagery metadata often need the room.');
+    if (/^(cited|quoted) in$/i.test(lead)) add('note', 'A secondary citation inherits the weaker of the two ratings and is never stronger than the intermediary.');
+    if (trans && !lang) add('note', 'Translated title given without an original language. Add it so the bracket reads "original in …".');
+    if (st.transBy === 'machine') add('note', 'Check any quotation against the original before it is used as a quotation.');
+    if (access) add('note', 'Access is restricted, so some readers cannot check this source. Where a free version exists, such as a preprint or an official release, cite that instead or alongside.');
+    var tl = type.toLowerCase();
+    if (/unverified|suspected synthetic|suspected inauthentic|manipulated media|ai-generated/.test(tl) || has(quals, 'provenance unverified') || has(quals, 'suspected synthetic') || has(quals, 'AI-generated') || has(quals, 'digitally altered')) add('check', 'Unverified or synthetic material. Say in the commentary what was checked, what was not, and why it is cited at all.');
+    if (has(quals, 'retracted')) add('check', 'Retracted work. Cite it only to discuss the retraction, and say so in the commentary.');
+    if (/state media|party newspaper/.test(tl)) add('note', 'State or party media: evidence of official messaging first, of fact second.');
+    if (/^leaked|captured document|leak site|hacktivist/.test(tl) || has(quals, 'leaked') || has(quals, 'captured')) add('note', 'Leaked or captured material. Say how its authenticity was established, and rate the information on its own merits.');
+    if (/^(preprint paper|working paper)$/.test(tl) || has(quals, 'preprint') || has(quals, 'not peer-reviewed')) add('note', 'Not peer-reviewed. Say so in the text wherever the claim is load-bearing.');
+    if (type && !LIB_INDEX[tl]) add('note', 'That description is not in the library. Fine if it fits in ten words; send a note so it can be added.');
+    if (st.ai) add('note', 'Keep the prompt and transcript on file, and disclose the use in the piece itself as well as here.');
+    if (!rating && !st.ai) add('note', 'No rating. Optional, but expected on any source a reader might question.');
+
+    var order = { fix: 0, check: 1, note: 2 };
+    checks.sort(function (a, b) { return order[a.level] - order[b.level]; });
+    return { seg: seg, checks: checks, slots: slots, empty: false, rating: rating, zone: z };
+  }
+
+  function shortForms(st) {
+    var style = st.titleStyle || 'quotes';
+    var authors = lines(st.authors);
+    var name = clean(st.shortName) || deriveName(authors);
+    var full = cleanTitle(st.title, style);
+    var t = cleanTitle(st.shortTitle, style) || deriveShortTitle(full);
+    var useT = (st.shortUseTitle !== false || !name) && !!t;
+    var L = normLocator(st.locator);
+    var s = [], i = [];
+    function push(x, it) { if (!x) return; var l = s[s.length - 1]; if (l && l.i === !!it) l.s += x; else s.push({ s: x, i: !!it }); }
+    if (name) push(name);
+    if (useT) {
+      if (name) push(', ');
+      if (style === 'quotes') {
+        var endP = /[?!]$/.test(t);
+        push('"' + t + (endP ? '' : (L ? ',' : '.')) + '"');
+        if (L) push(' ' + L + '.');
+      } else {
+        push(t, style === 'italics');
+        push(L ? ', ' + L + '.' : '.');
+      }
+    } else if (name) {
+      push(L ? ', ' + L + '.' : (/\.$/.test(name) ? '' : '.'));
+    }
+    i.push({ s: 'Ibid.' + (L ? ', ' + L + '.' : ''), i: false });
+    return { short: s, ibid: i, name: deriveName(authors), title: deriveShortTitle(full) };
+  }
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function toHTML(seg, mode) {
+    var t = mode === 'u' ? 'u' : 'i';
+    return seg.map(function (x) { return x.i ? '<' + t + '>' + esc(x.s) + '</' + t + '>' : esc(x.s); }).join('');
+  }
+  function toMarkdown(seg) { return seg.map(function (x) { return x.i ? '*' + x.s + '*' : x.s; }).join(''); }
+  function toPlain(seg) { return seg.map(function (x) { return x.s; }).join(''); }
+  function joinSources(list) {
+    var out = [];
+    list.forEach(function (seg, n) {
+      var copy = seg.map(function (x) { return { s: x.s, i: x.i }; });
+      if (copy.length && n < list.length - 1) copy[copy.length - 1].s = copy[copy.length - 1].s.replace(/\.$/, '');
+      if (n > 0) out.push({ s: '; ', i: false });
+      out = out.concat(copy);
+    });
+    return out;
+  }
+
+  // ---- list files and exports ----
+  var CRC_T = null;
+  function crc32(b) {
+    var n, k, c, i, crc = 0xFFFFFFFF;
+    if (!CRC_T) { CRC_T = []; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); CRC_T[n] = c >>> 0; } }
+    for (i = 0; i < b.length; i++) crc = CRC_T[(crc ^ b[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function utf8(s) { return new TextEncoder().encode(s); }
+  function zipStore(files) {
+    var parts = [], central = [], offset = 0, cdSize = 0, total = 0, pos = 0, out;
+    function u16(n) { return [n & 255, (n >>> 8) & 255]; }
+    function u32(n) { return [n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255]; }
+    files.forEach(function (f) {
+      var name = utf8(f.name), crc = crc32(f.data), size = f.data.length;
+      var local = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(size), u32(size), u16(name.length), u16(0));
+      parts.push(new Uint8Array(local), name, f.data);
+      central.push([new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(size), u32(size), u16(name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(offset))), name]);
+      offset += local.length + name.length + size;
+    });
+    central.forEach(function (c) { parts.push(c[0], c[1]); cdSize += c[0].length + c[1].length; });
+    parts.push(new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length), u32(cdSize), u32(offset), u16(0))));
+    parts.forEach(function (p) { total += p.length; });
+    out = new Uint8Array(total);
+    parts.forEach(function (p) { out.set(p, pos); pos += p.length; });
+    return out;
+  }
+  function xesc(s) { return String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function docxBytes(title, segLists, mode) {
+    var FONT = '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>';
+    function run(text, it, bold, sz) {
+      sz = sz || 24;
+      return '<w:r><w:rPr>' + FONT + (bold ? '<w:b/>' : '') + (it && mode !== 'u' ? '<w:i/>' : '') + '<w:sz w:val="' + sz + '"/><w:szCs w:val="' + sz + '"/>' + (it && mode === 'u' ? '<w:u w:val="single"/>' : '') + '</w:rPr><w:t xml:space="preserve">' + xesc(text) + '</w:t></w:r>';
+    }
+    var body = '';
+    if (title) body += '<w:p><w:pPr><w:spacing w:after="240"/></w:pPr>' + run(title, false, true, 28) + '</w:p>';
+    segLists.forEach(function (seg, n) {
+      body += '<w:p><w:pPr><w:spacing w:after="160"/><w:ind w:left="432" w:hanging="432"/></w:pPr>' + run((n + 1) + '. ', false) + seg.map(function (x) { return run(x.s, x.i); }).join('') + '</w:p>';
+    });
+    var head = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    var doc = head + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' + body + '<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>';
+    var ct = head + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>';
+    var rels = head + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>';
+    return zipStore([{ name: '[Content_Types].xml', data: utf8(ct) }, { name: '_rels/.rels', data: utf8(rels) }, { name: 'word/document.xml', data: utf8(doc) }]);
+  }
+  function mdText(title, segLists) {
+    return (title ? '# ' + title + '\n\n' : '') + segLists.map(function (s, n) { return (n + 1) + '. ' + toMarkdown(s); }).join('\n') + '\n';
+  }
+  function csvCell(v) { v = String(v == null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function csvText(states, typeLabels) {
+    var rows = [['No.', 'Footnote', 'Short form', 'Source type', 'Authors', 'Editors, translators, contributors', 'Title', 'Title in English', 'Location', 'Kind of source', 'Details', 'Qualifiers', 'Original language', 'Access', 'Rating', 'Publisher', 'Date', 'Accessed', 'URL', 'Archive link', 'Archive captured', 'Locator', 'Commentary']];
+    states.forEach(function (st, n) {
+      var d = normDate(st.date);
+      rows.push([n + 1, toPlain(build(st).seg), toPlain(shortForms(st).short), (typeLabels && typeLabels[st.type]) || st.type || '',
+        lines(st.authors).join('; '), contribList(st.contribs, st.contribRole).join('; '), cleanTitle(st.title, 'plain'), cleanTitle(st.transTitle, 'plain'),
+        clean(st.location), clean(st.descType), lines(st.descDetails).join('; '), (Array.isArray(st.quals) ? st.quals : []).join('; '), clean(st.origLang),
+        accessOf(st).join('; '), /^[A-F][1-6]$/.test(st.rating || '') ? st.rating : '', clean(st.publisher),
+        ((st.dateKind === 'updated' || st.dateKind === 'captured') && d.text ? st.dateKind + ' ' : '') + d.text, normDate(st.accessed).text,
+        normUrl(st.url).url, normUrl(st.archiveUrl).url, normDate(st.archiveDate).text, normLocator(st.locator), clean(st.note)]);
+    });
+    return '﻿' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n') + '\r\n';
+  }
+  function listFile(name, items) {
+    return JSON.stringify({
+      app: 'OSINT Citation Generator', format: 1, name: name || '', savedAt: new Date().toISOString(),
+      sources: items.map(function (x) { return { id: x.id, footnote: toMarkdown(build(x.st).seg), fields: x.st }; })
+    }, null, 2) + '\n';
+  }
+  function parseListFile(text, typeNames, textKeys) {
+    var data;
+    try { data = JSON.parse(String(text).replace(/^﻿/, '')); } catch (e) { return { error: 'That is not a list file from this tool. It could not be read.' }; }
+    var arr = Array.isArray(data) ? data : (data && Array.isArray(data.sources) ? data.sources : null);
+    if (!arr) return { error: 'That is not a list file from this tool. It holds no source list.' };
+    function strArr(v) {
+      var a = Array.isArray(v) ? v : (typeof v === 'string' && v ? [v] : []);
+      return a.filter(function (x) { return typeof x === 'string'; }).map(function (x) { return x.slice(0, 200); }).slice(0, 40);
+    }
+    var items = [], seen = {};
+    arr.slice(0, 5000).forEach(function (x, n) {
+      var f = x && typeof x === 'object' ? (x.fields || x.st) : null;
+      if (!f || typeof f !== 'object') return;
+      var st = {};
+      textKeys.forEach(function (k) { st[k] = typeof f[k] === 'string' ? f[k].slice(0, 8000) : ''; });
+      st.type = typeNames.indexOf(f.type) !== -1 ? f.type : 'web';
+      st.access = strArr(f.access); st.quals = strArr(f.quals);
+      st.shortUseTitle = f.shortUseTitle !== false;
+      if (build(st).empty) return;
+      var id = typeof x.id === 'string' && x.id && x.id.length <= 80 ? x.id : 'f' + n + '-' + Math.floor(Math.random() * 1e9);
+      if (seen[id]) id += '-' + n;
+      seen[id] = 1;
+      items.push({ id: id, st: st });
+    });
+    return { name: data && typeof data.name === 'string' ? data.name.slice(0, 200) : '', items: items };
+  }
+
+  var LIB_INDEX = {};
+  function setLibrary(idx) { LIB_INDEX = idx || {}; }
+
+  return { build: build, shortForms: shortForms, setLibrary: setLibrary, accessOf: accessOf, toHTML: toHTML, toMarkdown: toMarkdown, toPlain: toPlain, joinSources: joinSources, docxBytes: docxBytes, mdText: mdText, csvText: csvText, listFile: listFile, parseListFile: parseListFile,
+    normDate: normDate, normLocator: normLocator, normUrl: normUrl, zoneOf: zoneOf, REL: REL, CRED: CRED, ZNAME: ZNAME, MONTHS: MONTHS, esc: esc };
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var C = OSINT;
+  function $(id) { return document.getElementById(id); }
+
+  var DEFAULT_AUTH_HINT = 'First name then surname. Keep surname-first order where it is the person\'s own (Xi Jinping). No named author: use the organization, or the outlet plus Staff.';
+  var TYPES = {
+    book: { label: 'Book', style: 'italics', picks: ["Monograph", "Trade Book", "Edited Volume", "Textbook", "Memoir", "Official History"], loc: 'Series, if the book belongs to one',
+      ph: { location: 'Usually blank for a book', publisher: 'Cornell University Press', descDetails: '', locator: '25-27' },
+      sample: { authors: 'Michael Beckley', title: "Unrivaled: Why America Will Remain the World's Sole Superpower", descType: 'Monograph', publisher: 'Cornell University Press', date: '2018', locator: '25-27' } },
+    journal: { label: 'Journal article', style: 'quotes', start: 'A for peer-reviewed research', picks: ["Peer-Reviewed Article", "Review Article", "Law Review Article", "Preprint Paper", "Working Paper", "Conference Paper"], loc: 'Journal',
+      ph: { location: 'Journal of Strategic Studies', publisher: 'Leave blank', descDetails: 'Vol. 45, No. 2', locator: '201-225' },
+      sample: { authors: 'Sebastian Rosato', title: 'The Flawed Logic of Democratic Peace Theory', location: 'The American Political Science Review', descType: 'Peer-Reviewed Article', descDetails: 'Vol. 97, No. 4', date: '2003', locator: '585-602' } },
+    news: { label: 'News or magazine', style: 'quotes', dayDate: true, start: 'B for major outlets, B–C for local and regional media', picks: ["News Article", "News Analysis", "Feature Article", "Wire Service Report", "Investigative Report", "Magazine Article", "Editorial / Op-Ed", "Explainer", "State Media Report"], loc: 'Outlet',
+      ph: { location: 'The New York Times', publisher: 'Leave blank', descDetails: '', locator: '' },
+      sample: { authors: 'Jane Doe', title: 'Harbor Authority Confirms Second Dredging Contract', location: 'The Example Dispatch', descType: 'News Article', rating: 'B2', date: '12 February 2026', url: 'https://www.example.com/2026/02/12/harbor-dredging-contract' } },
+    chapter: { label: 'Chapter or section', style: 'quotes', picks: ["Book Section", "Handbook Chapter", "Long-Form Publication by Think Tank", "Reference Work Entry", "Encyclopedia Article"], loc: 'Containing volume',
+      ph: { location: 'Title of the book or report the chapter sits in', publisher: 'RAND', descDetails: '', locator: 'Full page range of the chapter' },
+      sample: { authors: 'Michael S. Chase\nJeffrey Engstrom\nTai Ming Cheung\nKristen A. Gunness', title: "People's Liberation Army Modernization: Mid-1990s to 2025", location: "China's Incomplete Military Transformation: Assessing the Weaknesses of the People's Liberation Army (PLA)", descType: 'Long-Form Publication by Think Tank', publisher: 'RAND', date: '2015', locator: '13' } },
+    web: { label: 'Website or think tank', style: 'quotes', dayDate: true, start: 'B for think tanks, C–D for blogs and independent analysts', picks: ["Defense Analysis Article", "Policy Analysis", "Policy Brief", "Think Tank Report", "Expert Commentary", "Blog Post", "Web Page", "Corporate Press Release"], loc: 'Site',
+      ph: { location: 'War on the Rocks', publisher: 'Only if it differs from the site', descDetails: '', locator: '' },
+      sample: { authors: 'Michael Kofman\nRob Lee', title: "Not Built for Purpose: The Russian Military's Ill-Fated Force Design", location: 'War on the Rocks', descType: 'Defense Analysis Article', rating: 'B2', date: '6/2/2022', url: 'https://warontherocks.com/2022/06/not-built-for-purpose-the-russian-militarys-ill-fated-force-design/' } },
+    report: { label: 'Report or government document', style: 'italics', start: 'A for government documents, B for think tank and corporate reports', picks: ["Government Report", "CRS Report", "Think Tank Report", "Defense White Paper", "National Strategy Document", "GAO Report", "Whitepaper", "Research Report"], loc: 'Site or series',
+      ph: { location: 'White House Government Website', publisher: 'US Government', descDetails: 'Report #R12345', locator: 'CMC Reorganization Section' },
+      sample: { authors: 'The White House', title: 'National Security Strategy of the United States of America', location: 'White House Government Website', descType: 'National Strategy Document', rating: 'A1', publisher: 'US Government', date: 'Nov 2025', url: 'https://www.whitehouse.gov/wp-content/uploads/2025/12/2025-National-Security-Strategy.pdf' } },
+    social: { label: 'Social media post', style: 'quotes', dayDate: true, volatile: true, start: 'C for accounts with a track record, D–F for anonymous channels', picks: ["Social Media Post", "Thread", "Channel Post", "Video Post", "Short-Form Video", "Forum Post", "Deleted Post (Archived)", "Screenshot (Provenance Unverified)"], loc: 'Platform', pub: 'Publisher (account, if different from the author)',
+      authHint: 'The person, or the account as it appears.',
+      ph: { location: 'X', publisher: 'Account name', descDetails: 'deleted by 16 February 2026', locator: '' },
+      sample: { authors: 'ExampleMonitor', title: 'Drone Footage Near the River Crossing', location: 'X', descType: 'Social Media Post', rating: 'C3', date: '14 February 2026', url: 'https://x.com/example_monitor/status/1234567890', archiveUrl: 'https://archive.ph/example', archiveDate: '14 February 2026' } },
+    video: { label: 'Video or podcast', style: 'quotes', dayDate: true, start: 'C for channels with a track record', picks: ["Video", "Podcast", "Recorded Interview", "Lecture (Recorded)", "Combat Footage", "Livestream Archive"], loc: 'Platform', pub: 'Publisher (channel or show)',
+      ph: { location: 'YouTube', publisher: 'Channel or show name', descDetails: 'Eps. 225', locator: 'See 30:15-32:40 for …' },
+      sample: { authors: 'John Doe', title: 'How a Tiltrotor Moves from Hover to Forward Flight', location: 'YouTube', descType: 'Video', rating: 'C3', publisher: 'Example Aviation Channel', date: '17 March 2026', url: 'https://www.youtube.com/watch?v=EXAMPLE0000', locator: 'See 30:15-32:40 for discussion of airframe design' } },
+    archival: { label: 'Primary or archival', style: 'quotes', start: 'A for documents in a formal archive', picks: ["Archival Material", "Primary Source", "Declassified Document", "Historical Document", "FOIA-Released Document", "Oral History", "Personal Papers"], loc: 'Archive',
+      ph: { location: 'US National Archives Website', publisher: '', descDetails: 'Primary Source; Record Group 46', locator: '' },
+      sample: { authors: 'James Monroe', title: 'Message of President James Monroe at the Commencement of the First Session of the 18th Congress (The Monroe Doctrine)', location: 'US National Archives Website', descType: 'Archival Material', descDetails: 'Primary Source; Record Group 46; Records of the US Senate, 1789–1990', date: '2 December 1823', url: 'https://www.archives.gov/milestone-documents/monroe-doctrine' } },
+    live: { label: 'Live list or tracker', style: 'quotes', live: true, start: 'A for government registries', picks: ["Sanctions List", "Flight Tracking Data", "Ship Tracking (AIS)", "Business Registry Record", "Government Dataset", "Data Dashboard", "Patent Filing"], loc: 'Site',
+      ph: { location: 'US Treasury Dept. Website', publisher: 'US Government', descDetails: '', locator: '' },
+      sample: { authors: 'US Department of the Treasury', title: 'Specially Designated Nationals List', location: 'US Treasury Dept. Website', descType: 'Sanctions List', rating: 'A1', publisher: 'US Government', date: '08 March 2026', dateKind: 'updated', accessed: '11 March 2026', url: 'https://sanctionslist.ofac.treas.gov/Home/SdnList' } },
+    imagery: { label: 'Satellite imagery', style: 'quotes', live: true, start: 'A for raw imagery', picks: ["Commercial Satellite Imagery", "Synthetic Aperture Radar Imagery", "Government Satellite Release", "Annotated Satellite Imagery", "Drone Footage", "Geotagged Photo", "CCTV Footage"], loc: 'Platform', pub: 'Publisher (provider)',
+      authHint: 'The provider. A geolocation you worked out yourself belongs in the commentary, with the reasoning.',
+      ph: { location: 'Planet Explorer', publisher: 'Planet Labs PBC', descDetails: '3 m resolution; 45.7086° N, 34.4142° E', locator: '' },
+      sample: { authors: 'Planet Labs PBC', title: 'PlanetScope Imagery of Dzhankoi Airbase', location: 'Planet Explorer', descType: 'Commercial Satellite Imagery', descDetails: '3 m resolution; 45.7086° N, 34.4142° E', rating: 'B2', publisher: 'Planet Labs PBC', date: '09 March 2026', dateKind: 'captured', accessed: '11 March 2026', url: 'https://www.planet.com/explorer/' } },
+    ai: { label: 'AI model output', style: 'quotes', ai: true, dayDate: true, start: 'F. Model output is F6 by default', picks: ["AI Model Output"], loc: 'Platform', pub: 'Publisher (developer)', auth: 'Model name and version',
+      authHint: 'Give the version. A product name alone is not a citation.',
+      ph: { location: 'Claude.ai', publisher: 'Anthropic', descDetails: 'prompt and full transcript on file', locator: '' },
+      sample: { authors: 'Claude Opus 4.5', title: 'Summary of open-source reporting on PLA joint logistics', location: 'Claude.ai', descType: 'AI Model Output', descDetails: 'prompt and full transcript on file', rating: 'F6', publisher: 'Anthropic', date: '12 March 2026' } }
+  };
+  var LIB = [{"c": "Government and Legal", "g": [{"n": "Legislative", "i": ["Congressional Report", "CRS Report", "Parliamentary Report", "Public Law / Statute", "Testimony Transcript", "Hearing", "Bill", "Resolution", "Committee Report", "Conference Report", "Committee Print", "Prepared Testimony", "Legislative Debate Record", "Parliamentary Question", "Roll-Call Vote Record", "Legislative History", "Constitution", "Constitutional Amendment", "Local Ordinance"]}, {"n": "Executive and regulatory", "i": ["Government Report", "Ministry Publication", "Defense White Paper", "Executive Order", "Regulatory Filing", "Government Press Release", "Public Safety Announcement", "Presidential Proclamation", "Presidential Memorandum", "National Security Directive", "Signing Statement", "Decree", "Regulation", "Proposed Rule", "Final Rule", "Federal Register Notice", "Official Gazette Notice", "Agency Guidance", "Public Comment", "Government Fact Sheet", "National Strategy Document", "Government White Paper", "Consultation Paper", "Official Speech", "Official Statement", "Press Briefing Transcript", "Government Web Page", "Government Circular", "Travel Advisory", "Export Control List", "Commission Report", "Public Inquiry Report", "Environmental Impact Statement", "Official Biography"]}, {"n": "Party-state systems", "i": ["Party Document", "Party Congress Report", "Party Regulation", "State Planning Document"]}, {"n": "Courts and legal practice", "i": ["Court Record", "Legal Opinion", "Indictment", "Deposition", "Arbitration Ruling", "Court Opinion", "Dissenting Opinion", "Judgment", "Court Order", "Court Filing", "Legal Brief", "Amicus Brief", "Complaint", "Plea Agreement", "Sentencing Memorandum", "Affidavit", "Sworn Declaration", "Search Warrant", "Trial Transcript", "Trial Exhibit", "Oral Argument", "Docket Sheet", "Consent Decree", "Settlement Agreement", "Administrative Ruling", "Court-Martial Record", "Contract", "Legal Treatise"]}, {"n": "Budget, procurement, and oversight", "i": ["Budget Document", "Procurement Record", "Public Tender / Contract", "Inspector General Report", "Central Bank Report", "Budget Justification", "Contract Award Notice", "Grant Award Record", "Spending Database Record", "Audit Report", "GAO Report", "CBO Cost Estimate"]}, {"n": "Registries and public records", "i": ["Patent Filing", "Trademark Database", "Sanctions List", "Police Report", "Sanctions Designation Notice", "Land / Property Record", "Vital Record", "Professional License Record", "Accident Investigation Report", "Wanted Notice"]}, {"n": "Elections, lobbying, and disclosure", "i": ["Election Results", "Campaign Finance Filing", "Lobbying Disclosure", "Foreign Agent Registration", "Financial Disclosure", "Party Platform", "Campaign Material", "Ballot Measure"]}, {"n": "Intelligence and released records", "i": ["Intelligence Assessment", "FOIA-Released Document", "Declassified Document", "National Intelligence Estimate", "Threat Assessment", "MDR-Released Document"]}]}, {"c": "International Organizations and Diplomacy", "g": [{"n": "UN system", "i": ["UN Report", "UN Resolution", "Peacekeeping Report", "Secretary-General Report", "Panel of Experts Report", "Special Rapporteur Report", "Commission of Inquiry Report", "UN Meeting Record", "UN Voting Record", "Treaty Body Observations", "IAEA Report", "Inspection Report"]}, {"n": "Treaties and agreements", "i": ["Treaty", "Executive Agreement", "Convention", "Protocol", "Memorandum of Understanding", "Status of Forces Agreement", "Arms Control Agreement", "Peace Agreement", "Ceasefire Agreement", "Trade Agreement", "Treaty Reservation", "Negotiating Record"]}, {"n": "Diplomatic practice", "i": ["Diplomatic Cable", "Diplomatic Note", "Joint Statement", "Joint Communiqué", "Summit Declaration", "Foreign Ministry Briefing", "Official Readout"]}, {"n": "Alliances and regional bodies", "i": ["NATO Publication", "Regional Org Publication", "NATO Standardization Agreement", "EU Legal Act", "Council Conclusions"]}, {"n": "International finance and development", "i": ["World Bank Dataset", "IMF Report", "WHO Health Data", "WTO Trade Data", "OECD Report", "World Bank Report", "Development Bank Report", "IMF Country Report", "WTO Dispute Ruling"]}, {"n": "International courts and monitoring", "i": ["International Court Ruling", "Election Monitoring Report", "Advisory Opinion", "International Court Filing", "Arrest Warrant"]}]}, {"c": "Academic and Research", "g": [{"n": "Books", "i": ["Monograph", "Trade Book", "Edited Volume", "Book Section", "Textbook", "Open Textbook", "Handbook Chapter", "Scholarly Edition", "Anthology", "Collected Works", "Multivolume Work", "Memoir", "Autobiography", "Biography", "Published Diary", "Published Correspondence", "Published Document Collection", "Official History", "Self-Published Book", "Foreword or Introduction", "Exhibition Catalog", "Pamphlet"]}, {"n": "Journal literature", "i": ["Peer-Reviewed Article", "Literature Review", "Meta-Analysis", "Review Article", "Systematic Review", "Book Review", "Review Essay", "Research Note", "Scholarly Commentary", "Reply or Rejoinder", "Journal Editorial", "Special Issue Introduction", "Forum Contribution", "Case Study", "Replication Study", "Registered Report", "Data Paper", "Law Review Article", "Student Note", "Professional Journal Article", "Abstract", "Erratum", "Retraction Notice"]}, {"n": "Research papers and reports", "i": ["Working Paper", "Whitepaper", "Preprint Paper", "Research Report", "Field Research Report", "Technical Report", "Occasional Paper", "Discussion Paper", "Research Brief", "Pre-Registration", "Research Protocol", "Grant Proposal"]}, {"n": "Degrees and student work", "i": ["Dissertation", "Thesis", "Undergraduate Thesis", "Capstone Project", "Student Paper"]}, {"n": "Conferences and talks", "i": ["Conference Paper", "Lecture (Recorded)", "Conference Proceedings", "Conference Abstract", "Conference Poster", "Conference Presentation", "Keynote Address", "Panel Discussion", "Webinar", "Workshop Report"]}, {"n": "Unpublished and in progress", "i": ["Unpublished Manuscript", "Forthcoming Work", "Unpublished Data"]}]}, {"c": "Reference, Data, and Statistics", "g": [{"n": "Reference entries", "i": ["Reference Work Entry", "Encyclopedia Article", "Dictionary Entry", "Biographical Entry", "Wiki Article", "Country Profile"]}, {"n": "Reference volumes", "i": ["Statistical Yearbook", "Factbook", "Handbook", "Almanac", "Atlas", "Gazetteer", "Bibliography", "Annotated Bibliography", "Chronology", "Glossary", "Directory", "Style Manual", "Field Guide", "Library Catalog Record"]}, {"n": "Datasets", "i": ["Census Data", "Government Dataset", "Academic Dataset", "Index Dataset", "Data Aggregator", "Replication Data", "Event Dataset", "Time-Series Data", "Trade Statistics", "Database Record", "Codebook"]}, {"n": "Polling and surveys", "i": ["Public Opinion Poll", "Poll Crosstabs", "Survey Data", "Survey Instrument", "Expert Survey"]}, {"n": "Statistical products", "i": ["Statistical Release", "Data Dashboard", "Interactive Data Tool", "Forecast or Model Output", "Prediction Market Data"]}, {"n": "Charts and figures", "i": ["Reproduced Figure", "Data Visualization", "Infographic"]}]}, {"c": "Think Tank, Industry, and Finance", "g": [{"n": "Think tanks and policy shops", "i": ["Think Tank Report", "Policy Brief", "Policy Analysis", "Strategic Report", "Issue Brief", "Backgrounder", "Expert Commentary", "Task Force Report", "Scenario Study", "Event Transcript", "Interactive Tracker", "Sponsored Research Report", "Advocacy Group Report", "Consultancy Report"]}, {"n": "Corporate disclosure", "i": ["Quarterly Report", "Annual Report", "Investor Presentation", "SEC Filing", "Earnings Call Transcript", "Corporate Press Release", "M&A Filing", "Bankruptcy Record", "Stock Exchange Filing", "Prospectus", "Proxy Statement", "Financial Statement", "Auditor Report", "Sustainability Report", "Shareholder Letter", "Corporate Blog Post", "Company Web Page", "Job Posting"]}, {"n": "Markets and finance", "i": ["Credit Rating Report", "Market Research Report", "Analyst Note", "Market Data", "Commodity Price Data"]}, {"n": "Trade and industry", "i": ["Industry Whitepaper", "Trade Journal Article", "Professional Association Report", "Technical Standard", "Product Datasheet", "Product Brochure", "Product Catalog", "Trade Show Material", "User Manual", "Safety Data Sheet", "Business Survey"]}, {"n": "Ownership and commercial records", "i": ["Business Registry Record", "Ownership Database", "Beneficial Ownership Record", "Customs Record", "Bill of Lading", "Vessel Registry Record", "Aircraft Registry Record", "Insurance Record"]}]}, {"c": "News and Media", "g": [{"n": "Reporting", "i": ["News Article", "News Report", "Wire Service Report", "Investigative Report", "Magazine Article", "Newsletter Article", "Journalist Newsletter", "Fact-Check", "Conflict Reporting Platform", "Feature Article", "Live Blog", "News Brief", "Explainer", "Published Interview", "Profile", "Obituary", "Local News Report", "Student Newspaper Article", "Historical Newspaper Article", "Press Pool Report", "Aggregated News Report"]}, {"n": "Opinion and analysis", "i": ["News Analysis", "Editorial / Op-Ed", "Column", "Letter to the Editor", "Editorial Cartoon", "Satire", "Sponsored Content"]}, {"n": "Broadcast, audio, and video", "i": ["Broadcast Transcript", "TV Broadcast", "Radio Broadcast", "Live-Streamed Broadcast", "Podcast", "Video", "Broadcast Interview", "Press Conference", "Video Essay", "Newsreel"]}, {"n": "State and party media", "i": ["State Media Report", "State Media Commentary", "Party Newspaper Editorial"]}, {"n": "Monitoring and translation", "i": ["Media Monitoring Translation", "Press Digest"]}, {"n": "Visual and data journalism", "i": ["News Photograph", "Photo Essay", "Data Journalism Article", "Interactive Feature"]}]}, {"c": "Social, Web, and User-Generated", "g": [{"n": "Posts", "i": ["Social Media Post", "Video Post", "Reposted Content", "Blog Post", "Comment Section", "Thread", "Reply", "Quote Post", "Story Post", "Short-Form Video", "Livestream", "Livestream Chat Log", "Comment", "Meme"]}, {"n": "Messaging and channels", "i": ["Channel Post", "Group Chat Message", "Direct Message", "Voice Message", "Forwarded Message", "Chat Log Export"]}, {"n": "Accounts and platform features", "i": ["Account Profile", "Account Metadata", "Professional Profile", "Community Note", "Social Network Data"]}, {"n": "Forums and community", "i": ["Forum Post", "Forum Discussion", "Crowdsourced Investigation", "Q&A Site Answer", "Wiki Edit History", "User Review", "Mailing List Post", "Petition", "Crowdfunding Page", "Marketplace Listing", "Memorial Page"]}, {"n": "Web pages", "i": ["Archived Web Content", "Web Page", "Personal Website", "About Page", "FAQ Page"]}, {"n": "Capture and provenance", "i": ["Screenshot (Provenance Verified)", "Screenshot (Provenance Unverified)", "Deleted Post (Archived)", "Edited Post (Archived)", "Screen Recording"]}, {"n": "Synthetic and inauthentic", "i": ["AI-Generated Image", "AI-Generated Video", "AI-Generated Audio", "Suspected Synthetic Media", "Manipulated Media", "Suspected Inauthentic Account Post"]}]}, {"c": "Imagery, Geospatial, and Tracking", "g": [{"n": "Overhead imagery", "i": ["Commercial Satellite Imagery", "Government Satellite Release", "Satellite Time-Series", "Remote Sensing Dataset", "Synthetic Aperture Radar Imagery", "Multispectral Imagery", "Thermal / Infrared Imagery", "Nighttime Lights Data", "Active Fire Data", "Aerial Photograph", "Historical Aerial Photograph", "Declassified Reconnaissance Imagery", "Annotated Satellite Imagery"]}, {"n": "Ground-level imagery and footage", "i": ["Geotagged Photo", "Drone Footage", "Photograph (Verified)", "Video Footage (Verified)", "Audio Recording", "Livestream Archive", "Photograph (Unverified)", "Video Footage (Unverified)", "Street-Level Imagery", "CCTV Footage", "Dashcam Footage", "Body-Camera Footage", "Helmet-Camera Footage", "Webcam Feed"]}, {"n": "Maps and geodata", "i": ["GIS Dataset", "OpenStreetMap Data", "Terrain / Elevation Model", "Maritime Tracking Map", "Map", "Topographic Map", "Nautical Chart", "Historical Map", "Control-of-Terrain Map", "Interactive Map", "Crowdsourced Map", "3D Reconstruction", "Administrative Boundary Data"]}, {"n": "Movement tracking", "i": ["Flight Tracking Data", "Ship Tracking (AIS)", "Rail Tracking Data", "Port Authority Log", "Vehicle Tracking Data", "Aviation Accident Database", "Port Call Record", "Satellite Orbit Data", "Launch Notification", "Fitness Tracker Data", "Commercial Location Data", "Vehicle Registration Record"]}, {"n": "Notices, signals, and sensors", "i": ["NOTAM", "Navigational Warning", "GPS Interference Data", "Scanner Audio", "Seismic Data", "Weather Data"]}, {"n": "Verification products", "i": ["Geolocation Analysis", "Chronolocation Analysis", "File Metadata", "Reverse Image Search Result", "Visual Forensic Analysis"]}]}, {"c": "Military and Defense", "g": [{"n": "Doctrine and manuals", "i": ["Military Doctrine Publication", "Training Manual (Public)", "Training Manual (Leaked)", "Field Manual", "Joint Publication", "Technical Manual", "Law of War Manual", "Rules of Engagement", "Service Strategy Document", "Posture Statement", "Operating Concept"]}, {"n": "Operational records", "i": ["After-Action Report", "Operations Order", "Situation Report", "War Diary", "Unit History", "Lessons-Learned Report", "Staff Study", "Captured Document", "Intercepted Communication", "Service Record", "Award Citation", "Casualty List"]}, {"n": "Assessments and estimates", "i": ["Defense Analysis Article", "Order of Battle Assessment", "Casualty Estimate", "Wargame or Simulation", "Net Assessment", "Campaign Assessment", "Daily Intelligence Update", "Equipment Loss Tally", "Exercise Report", "War College Paper"]}, {"n": "Force data and equipment", "i": ["Defense Procurement Database", "Arms Transfer Database", "Conflict Incident Database", "Military Reference Yearbook", "Table of Organization and Equipment", "Equipment Recognition Guide", "Weapons System Fact Sheet", "Selected Acquisition Report", "Arms Catalog", "End-User Certificate", "Arms Export License Record", "Weapons Tracing Report"]}, {"n": "Official messaging", "i": ["Defense Ministry Briefing", "Military Press Release", "Operational Update", "Exercise Announcement", "Recruitment Material"]}, {"n": "Personal and frontline accounts", "i": ["Veteran / Soldier Account", "Military Blogger Post", "POW Statement", "Combat Footage"]}, {"n": "Armed group and propaganda material", "i": ["Armed Group Statement", "Claim of Responsibility", "Propaganda Video", "Propaganda Magazine", "Propaganda Leaflet", "Manifesto", "Religious Ruling", "Leader Message"]}]}, {"c": "Cyber and Technical", "g": [{"n": "Threat reporting", "i": ["Threat Intelligence Report", "Malware Analysis", "Security Blog Post", "Dark Web Monitoring Report", "Data Breach Disclosure", "Security Advisory", "Security Incident Report", "Threat Actor Profile", "Indicators of Compromise", "Sandbox Analysis Report", "Detection Rule", "Takedown Report", "Platform Transparency Report"]}, {"n": "Vulnerabilities", "i": ["CVE / NVD Entry", "Vulnerability Disclosure", "Proof-of-Concept Code", "Bug Bounty Report"]}, {"n": "Infrastructure and network data", "i": ["Network Scanning Data", "Sensor Network Data", "Smart Device Metadata", "Blockchain Transaction Record", "WHOIS Record", "DNS Record", "Passive DNS Data", "Certificate Transparency Log", "BGP Routing Data", "Internet Outage Data", "IP Geolocation Data", "Packet Capture", "Log File", "Smart Contract"]}, {"n": "Code and software", "i": ["Code Repository", "Technical Documentation", "Software", "Code Commit", "Issue Tracker Entry", "Release Notes", "API Documentation", "Technical Specification", "Request for Comments", "Mobile App", "App Store Listing"]}, {"n": "Leaks and illicit markets", "i": ["Leaked Dataset", "Leaked Document", "Internal Document", "Leak Database Entry", "Leak Site Post", "Dark Web Forum Post", "Dark Web Marketplace Listing", "Ransom Note", "Hacktivist Claim", "Paste Site Post"]}, {"n": "AI systems", "i": ["AI Model Output", "Model Card", "Dataset Card", "Benchmark Result"]}, {"n": "Platform rules", "i": ["Terms of Service", "Privacy Policy", "Community Guidelines"]}]}, {"c": "Science, Health, and Environment", "g": [{"n": "Clinical and public health", "i": ["Clinical Trial Registration", "Clinical Trial Results", "Clinical Practice Guideline", "Case Report", "Epidemiological Bulletin", "Disease Outbreak Notice", "Drug or Device Approval Record"]}, {"n": "Science and environment", "i": ["Scientific Assessment Report", "Environmental Monitoring Data", "Laboratory Protocol"]}, {"n": "Specimens and sites", "i": ["Museum Specimen Record", "Taxonomic Description", "Archaeological Site Report"]}]}, {"c": "NGO, Humanitarian, and Civil Society", "g": [{"n": "Reports and investigations", "i": ["Human Rights Report", "Transparency Org Report", "Anti-Corruption Report", "Field Investigation Report", "Open-Source Investigation", "Shadow Report", "Press Freedom Report"]}, {"n": "Humanitarian operations", "i": ["Crisis / Relief Update", "NGO Data", "Humanitarian Situation Report", "Needs Assessment", "Casualty Recording Database", "Witness Testimony"]}, {"n": "Statements and filings", "i": ["Public Statement", "Open Letter", "Charity Filing", "Foundation Grant Record"]}]}, {"c": "Archival and Primary Sources", "g": [{"n": "Archival records", "i": ["Archival Material", "Primary Source", "Historical Document", "Manuscript", "Archival Collection", "Personal Papers", "Finding Aid", "Meeting Minutes", "Telegram", "Ledger", "Logbook", "Colonial Administrative Record", "Mission Record", "Church Record", "Genealogical Record", "Will or Probate Record", "Passenger List"]}, {"n": "Personal writing and testimony", "i": ["Letter", "Memo", "Diary Entry", "Field Notes", "Oral History", "Oral Tradition"]}, {"n": "Printed and recorded ephemera", "i": ["Broadside", "Leaflet", "Ephemera", "Newspaper Clipping", "Archival Photograph", "Archival Audio Recording"]}]}, {"c": "Interviews, Communications, and Author's Own Work", "g": [{"n": "Interviews", "i": ["Personal Interview", "Recorded Interview", "Anonymized Interview", "Background Briefing", "Focus Group", "Survey Response"]}, {"n": "Communications", "i": ["Personal Communication", "E-mail", "Phone Call", "Text Message", "Video Call", "Q&A Remarks"]}, {"n": "Fieldwork", "i": ["Field Observation", "Site Visit Notes"]}, {"n": "Author's own work", "i": ["Author's Calculation", "Author's Compilation", "Author's Translation", "Author's Photograph", "Author's Dataset", "Author's Figure"]}]}, {"c": "Literary, Artistic, and Creative Works", "g": [{"n": "Literature", "i": ["Novel", "Short Story", "Poem", "Play", "Essay", "Graphic Novel", "Comic"]}, {"n": "Classical and sacred texts", "i": ["Classical Text", "Sacred Text", "Chronicle"]}, {"n": "Film, television, and music", "i": ["Film", "Documentary Film", "Short Film", "Television Episode", "Television Series", "Screenplay", "Music Recording", "Song", "Music Video", "Musical Score"]}, {"n": "Art, objects, and performance", "i": ["Artwork", "Poster", "Museum Object", "Exhibition", "Monument or Inscription", "Live Performance"]}, {"n": "Games", "i": ["Video Game", "Tabletop Game", "Game Rulebook", "Game Scenario"]}]}, {"c": "Education, Institutional, and General", "g": [{"n": "Teaching materials", "i": ["Syllabus", "Lecture Notes", "Lecture Slides", "Course Reader", "Online Course Module", "Study Guide", "Lesson Plan", "Curriculum Standard", "Standardized Test Material"]}, {"n": "Institutional documents", "i": ["Course Catalog", "Accreditation Report", "Institutional Research Report", "Program Review", "Institutional Policy", "Strategic Plan", "Charter or Bylaws", "Code of Conduct", "Organization Chart", "Standard Operating Procedure", "Organizational Newsletter", "Résumé / CV"]}, {"n": "General", "i": ["Advertisement", "Presentation", "Speech", "Sermon", "Press Kit", "Flyer", "Sign or Signage", "Label or Packaging", "Receipt or Invoice", "Event Program", "Form or Questionnaire"]}]}];
+  var LIBRARY = [], LIB_INDEX = {};
+  LIB.forEach(function (c) { c.g.forEach(function (g) { g.i.forEach(function (x) { LIBRARY.push(x); LIB_INDEX[x.toLowerCase()] = { cat: c.c, group: g.n }; }); }); });
+  var QUALIFIERS = [["Provenance", ["leaked", "declassified", "FOIA-released", "redacted", "captured", "official release", "provenance verified", "provenance unverified"]], ["Version", ["preprint", "accepted manuscript", "version of record", "advance online", "draft", "forthcoming", "revised", "corrected", "retracted", "superseded"]], ["Review status", ["peer-reviewed", "editor-reviewed", "student-edited", "not peer-reviewed", "review status unclear"]], ["Format", ["transcript", "video", "audio", "scan", "facsimile", "microfilm", "e-book", "audiobook", "abstract only", "excerpt"]], ["Capture status", ["archived", "edited after capture", "screenshot only", "reupload"]], ["Interest", ["industry-funded", "government-funded", "sponsored", "state-affiliated", "author affiliated with subject"]], ["Synthetic content", ["AI-generated", "AI-assisted", "suspected synthetic", "digitally altered"]]];
+  var NEIGHBORS = [[["Preprint Paper", "Working Paper"], "Preprint: posted publicly before peer review. Working Paper: issued in an institution's own series, and may never reach a journal. An accepted manuscript is a Peer-Reviewed Article with the qualifier \"accepted manuscript\"."], [["Dissertation", "Thesis", "Undergraduate Thesis"], "Dissertation, Thesis, Undergraduate Thesis: doctoral, master's, and bachelor's work, in that order (US usage; British usage reverses the first two)."], [["Monograph", "Trade Book", "Textbook"], "Monograph: a scholarly book making one sustained argument, usually from a university press. Trade Book: written for general readers. Textbook: written to teach a field, not to argue a thesis."], [["Peer-Reviewed Article", "Professional Journal Article", "Law Review Article", "Trade Journal Article"], "Peer-Reviewed: refereed by outside scholars. Professional Journal: reviewed by the journal's own editors. Law Review: edited by law students, usually without peer review. Trade Journal: published by industry press. Check the journal's own statement."], [["Literature Review", "Review Article", "Systematic Review", "Meta-Analysis"], "Literature Review: a narrative survey of scholarship. Review Article: a journal article synthesizing a field. Systematic Review: follows a stated, repeatable search method. Meta-Analysis: pools results statistically."], [["Book Review", "Review Essay"], "Book Review: assesses one book. Review Essay: uses several works to make a wider argument."], [["Whitepaper", "Industry Whitepaper", "Government White Paper", "Defense White Paper"], "Whitepaper: any organization's position paper. Industry Whitepaper: a vendor's or trade body's, with a commercial interest. Government White Paper: a formal policy proposal. Defense White Paper: a state's periodic statement of defense policy."], [["News Article", "News Analysis", "Feature Article", "Explainer"], "News Article: reports events. News Analysis: a reporter's interpretation of them. Feature Article: a longer narrative not tied to the day's news. Explainer: background on an issue, with no new reporting."], [["Editorial / Op-Ed", "Column", "Expert Commentary"], "Editorial / Op-Ed: the outlet's own voice, or an outside contributor's opinion. Column: a regular writer's recurring signed piece. Expert Commentary: a specialist's short analysis published by their own institution."], [["State Media Report", "State Media Commentary"], "State Media when a government or ruling party owns or directs the outlet. Evidence of official messaging first, of fact second."], [["Legal Opinion", "Court Opinion", "Judgment", "Court Order"], "Legal Opinion: advice from counsel or a law officer. Court Opinion: a court's written reasons. Judgment: the outcome the court entered. Court Order: a direction issued during a case."], [["Public Law / Statute", "Regulation", "Executive Order", "Decree"], "Statute: passed by a legislature. Regulation: issued by an agency under a statute. Executive Order: a head of government's direction to the executive branch. Decree: an executive act carrying the force of law, where the system allows it."], [["Testimony Transcript", "Prepared Testimony", "Hearing", "Deposition"], "Testimony Transcript: what the witness said, as recorded. Prepared Testimony: the written statement submitted beforehand, which can differ. Hearing: the whole proceeding. Deposition: sworn out-of-court testimony taken in litigation."], [["Treaty", "Convention", "Protocol", "Executive Agreement", "Memorandum of Understanding"], "Treaty: a binding international agreement. Convention: a multilateral treaty open to many states. Protocol: adds to or amends a treaty. Executive Agreement: binding, concluded by the US executive without Senate consent. Memorandum of Understanding: usually a non-binding statement of intent."], [["Leaked Document", "Internal Document", "Declassified Document", "FOIA-Released Document"], "Leaked: disclosed without authorization. Internal: not written for publication, but obtained legitimately. Declassified: formerly classified, released by the government's own decision. FOIA-Released: released on request under an information law, often redacted."], [["Personal Interview", "Recorded Interview", "Published Interview", "Oral History", "Personal Communication"], "Personal Interview: conducted by the author. Recorded Interview: a recording exists. Published Interview: appeared in an outlet. Oral History: recorded testimony held in a collection. Personal Communication: an informal exchange with the author."], [["Commercial Satellite Imagery", "Annotated Satellite Imagery", "Geolocation Analysis"], "Commercial Satellite Imagery: the provider's image. Annotated Satellite Imagery: the image with someone's markings added, so cite the annotator. Geolocation Analysis: a third party's worked conclusion about where something is."], [["Social Media Post", "Channel Post", "Reposted Content"], "Social Media Post: on an account's public feed. Channel Post: sent to a broadcast channel, as on Telegram. Reposted Content: material the account did not originate."]];
+  var ACCESS = [["paywalled", "Paywalled"], ["metered paywall", "Metered paywall"], ["free registration required", "Free registration required"], ["institutional access", "Institutional access"], ["region-restricted", "Region-restricted"], ["app only", "App only"], ["other", "Something else"]];
+
+  var TEXT_KEYS = ['lead', 'authors', 'contribs', 'contribRole', 'title', 'titleStyle', 'transTitle', 'origLang', 'transBy', 'location', 'descType', 'descDetails', 'accessNote', 'rating', 'publisher', 'date', 'dateKind', 'accessed', 'url', 'archiveUrl', 'archiveDate', 'locator', 'note', 'shortName', 'shortTitle'];
+  var SLOT_NAMES = [['author', 'Author'], ['title', 'Title'], ['location', 'Location'], ['description', 'Description'], ['publisher', 'Publisher'], ['date', 'Date'], ['url', 'URL/DOI'], ['locator', 'Locator']];
+  var SLOT_MARK = { filled: '✓', dropped: '–', missing: '!', nd: 'n.d.' };
+  var SLOT_WORD = { filled: 'filled', dropped: 'dropped', missing: 'missing', nd: 'no date' };
+  var K_DRAFT = 'osint-cite-draft-v1', K_LIST = 'osint-cite-list-v1', K_ITAL = 'osint-cite-ital-v1';
+
+  var usingExample = true, saved = [], editingId = null, lastSeg = [], statusTimer = null, clearArmed = false;
+  C.setLibrary(LIB_INDEX);
+
+  function checkedValues(name) {
+    return Array.prototype.map.call(document.querySelectorAll('input[name="' + name + '"]:checked'), function (i) { return i.value; });
+  }
+  function setChecked(name, values) {
+    var v = Array.isArray(values) ? values : (values ? [values] : []);
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="' + name + '"]'), function (i) { i.checked = v.indexOf(i.value) !== -1; });
+  }
+
+  function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function load(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+
+  function currentType() { var r = document.querySelector('input[name="type"]:checked'); return r ? r.value : 'news'; }
+  function read() {
+    var st = { type: currentType() };
+    TEXT_KEYS.forEach(function (k) { st[k] = $(k).value; });
+    st.access = checkedValues('access');
+    st.quals = checkedValues('qual');
+    st.shortUseTitle = $('shortUseTitle').checked;
+    var t = TYPES[st.type];
+    st.volatile = !!t.volatile; st.live = !!t.live; st.dayDate = !!t.dayDate; st.ai = !!t.ai;
+    return st;
+  }
+  function write(st) {
+    var r = $('type-' + (TYPES[st.type] ? st.type : 'news'));
+    if (r) r.checked = true;
+    TEXT_KEYS.forEach(function (k) { $(k).value = st[k] == null ? '' : st[k]; });
+    setChecked('access', st.access);
+    setChecked('qual', st.quals);
+    $('qualBox').open = Array.isArray(st.quals) && st.quals.length > 0;
+    if (!$('contribRole').value) $('contribRole').value = 'ed';
+    if (!$('titleStyle').value) $('titleStyle').value = TYPES[currentType()].style;
+    $('shortUseTitle').checked = st.shortUseTitle !== false;
+    $('transBox').open = !!(st.transTitle || st.origLang || st.transBy);
+  }
+  function blank(type) {
+    var st = { type: type, shortUseTitle: true };
+    TEXT_KEYS.forEach(function (k) { st[k] = ''; });
+    st.access = []; st.quals = [];
+    st.contribRole = 'ed'; st.titleStyle = TYPES[type].style;
+    return st;
+  }
+  function sampleState(type) {
+    var st = blank(type), s = TYPES[type].sample;
+    Object.keys(s).forEach(function (k) { st[k] = s[k]; });
+    return st;
+  }
+
+  function dressType() {
+    var t = TYPES[currentType()];
+    $('authorsLabel').textContent = t.auth || 'Authors';
+    $('authorsHint').textContent = (t.authHint || DEFAULT_AUTH_HINT) + (t.auth ? '' : ' One per line; four or more become the first three and et al.');
+    $('locationLabel').textContent = 'Location' + (t.loc ? ' (' + t.loc.charAt(0).toLowerCase() + t.loc.slice(1) + ')' : '');
+    $('publisherLabel').textContent = t.pub || 'Publisher';
+    $('location').placeholder = t.ph.location || '';
+    $('publisher').placeholder = t.ph.publisher || '';
+    $('descDetails').placeholder = t.ph.descDetails || '';
+    $('locator').placeholder = t.ph.locator || 'Pages, a named section, or a timestamp';
+    $('startHint').textContent = t.start ? 'Typical starting point for this kind of source: ' + t.start + '. Grade the specific source on its record.' : 'Grade the specific source on its record, not its category.';
+    var box = $('picks'); box.textContent = '';
+    t.picks.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'pick'; b.textContent = p;
+      b.addEventListener('click', function () { $('descType').value = p; touched(); render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function describeType(raw) {
+    var t = String(raw || '').trim(), key = t.toLowerCase(), el = $('descHint'), parts = [];
+    if (!t) { el.textContent = 'From the library, or a plain description of ten words or fewer.'; return; }
+    var hit = LIB_INDEX[key];
+    if (hit) parts.push(hit.cat + ' \u203a ' + hit.group + '.');
+    else parts.push('Not in the library.');
+    for (var i = 0; i < NEIGHBORS.length; i++) {
+      var terms = NEIGHBORS[i][0].map(function (x) { return x.toLowerCase(); });
+      if (terms.indexOf(key) !== -1) { parts.push(NEIGHBORS[i][1]); break; }
+    }
+    el.textContent = parts.join(' ');
+  }
+
+  function filterLibrary() {
+    var q = $('libFilter').value.trim().toLowerCase(), shown = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('#lib details.cat'), function (cat) {
+      var catShown = 0;
+      Array.prototype.forEach.call(cat.querySelectorAll('.g'), function (g) {
+        var gShown = 0;
+        Array.prototype.forEach.call(g.querySelectorAll('.pick'), function (b) {
+          var ok = !q || b.textContent.toLowerCase().indexOf(q) !== -1 || g.dataset.name.indexOf(q) !== -1;
+          b.hidden = !ok; if (ok) gShown++;
+        });
+        g.hidden = gShown === 0; catShown += gShown;
+      });
+      cat.hidden = catShown === 0;
+      if (q) cat.open = true; else if (cat.dataset.wasOpen !== '1') cat.open = false;
+      cat.querySelector('.cnt').textContent = q ? catShown + ' of ' + cat.dataset.total : cat.dataset.total;
+      shown += catShown;
+    });
+    $('libCount').textContent = q ? shown + ' of ' + LIBRARY.length + ' match' : LIBRARY.length + ' descriptions in ' + LIB.length + ' categories';
+  }
+
+  function paintMatrix() {
+    var val = $('rating').value;
+    Array.prototype.forEach.call(document.querySelectorAll('.mc'), function (b) { b.setAttribute('aria-pressed', b.dataset.r === val ? 'true' : 'false'); });
+    var line = $('ratingLine');
+    if (!val) { line.textContent = 'No rating selected.'; return; }
+    var z = C.zoneOf(val);
+    line.innerHTML = '<b>' + val + '</b> · ' + C.REL[val[0]] + ' source · ' + C.CRED[val[1]] + ' information · ' + C.ZNAME[z] + ' zone';
+  }
+
+  function render() {
+    var st = read(), r = C.build(st), mode = $('italU').checked ? 'u' : 'i';
+    lastSeg = r.seg;
+    var pv = $('preview');
+    if (r.empty) { pv.className = 'preview empty'; pv.textContent = 'Fill in a slot and the footnote appears here.'; }
+    else { pv.className = 'preview'; pv.innerHTML = C.toHTML(r.seg, mode); }
+    $('exChip').hidden = !usingExample;
+    $('accessNoteWrap').hidden = st.access.indexOf('other') === -1;
+    $('qualCount').textContent = st.quals.length ? st.quals.length + ' ticked' : 'optional';
+    describeType(st.descType);
+
+    var strip = $('strip'); strip.textContent = '';
+    SLOT_NAMES.forEach(function (s) {
+      var state = r.empty ? 'dropped' : r.slots[s[0]];
+      var li = document.createElement('li');
+      li.dataset.s = state;
+      li.textContent = SLOT_MARK[state] + ' ' + s[1];
+      li.setAttribute('aria-label', s[1] + ': ' + SLOT_WORD[state]);
+      strip.appendChild(li);
+    });
+
+    var ul = $('checks'); ul.textContent = '';
+    r.checks.forEach(function (c) {
+      var li = document.createElement('li'), tag = document.createElement('span'), msg = document.createElement('span');
+      tag.className = 'tag ' + c.level; tag.textContent = c.level;
+      msg.textContent = c.msg;
+      li.appendChild(tag); li.appendChild(msg); ul.appendChild(li);
+    });
+    var serious = r.checks.filter(function (c) { return c.level !== 'note'; }).length;
+    $('allclear').hidden = r.empty || serious > 0;
+
+    var sf = C.shortForms(st);
+    $('shortOut').innerHTML = r.empty ? '' : C.toHTML(sf.short, mode);
+    $('ibidOut').textContent = r.empty ? '' : C.toPlain(sf.ibid);
+    $('shortName').placeholder = sf.name || 'Surname';
+    $('shortTitle').placeholder = sf.title || 'Shortened title';
+    $('copyShort').disabled = $('copyIbid').disabled = r.empty;
+    ['copyRich', 'copyMd', 'copyPlain', 'addBtn'].forEach(function (id) { $(id).disabled = r.empty; });
+    $('addBtn').textContent = editingId ? 'Update this source' : 'Add this source';
+
+    paintMatrix();
+    store(K_DRAFT, { st: st, usingExample: usingExample });
+  }
+
+  function renderSaved() {
+    var ul = $('saved'), mode = $('italU').checked ? 'u' : 'i';
+    ul.textContent = '';
+    saved.forEach(function (item, n) {
+      var r = C.build(item.st);
+      var li = document.createElement('li');
+      var num = document.createElement('span'); num.className = 'n'; num.textContent = 'Source ' + (n + 1) + (item.id === editingId ? ' · open in the form' : '');
+      var txt = document.createElement('span'); txt.className = 'txt'; txt.innerHTML = C.toHTML(r.seg, mode);
+      var row = document.createElement('div'); row.className = 'actions';
+      [['Copy', function () { copyRich(C.toHTML(r.seg, mode), C.toPlain(r.seg), 'Source ' + (n + 1) + ' copied.', txt); }],
+       ['Edit', function () { editingId = item.id; usingExample = false; write(item.st); dressType(); render(); renderSaved(); $('authors').focus(); }],
+       ['Remove', function () { saved = saved.filter(function (x) { return x.id !== item.id; }); if (editingId === item.id) editingId = null; listChanged(); renderSaved(); render(); }]
+      ].forEach(function (a) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'btn small' + (a[0] === 'Copy' ? '' : ' quiet'); b.textContent = a[0];
+        b.addEventListener('click', a[1]); row.appendChild(b);
+      });
+      li.appendChild(num); li.appendChild(txt); li.appendChild(row); ul.appendChild(li);
+    });
+    $('savedCount').textContent = saved.length ? '(' + saved.length + ')' : '';
+    $('savedEmpty').hidden = saved.length > 0;
+    $('savedActions').hidden = saved.length === 0;
+    paintFile();
+  }
+
+  function say(msg, bad) {
+    var s = $('status'); s.textContent = msg; s.className = 'status' + (bad ? ' bad' : '');
+    clearTimeout(statusTimer);
+    if (!bad) statusTimer = setTimeout(function () { s.textContent = ''; }, 2600);
+  }
+  function selectNode(node) {
+    try { var sel = window.getSelection(), rg = document.createRange(); rg.selectNodeContents(node); sel.removeAllRanges(); sel.addRange(rg); } catch (e) {}
+  }
+  function byHand(text, node) {
+    if (node) { selectNode(node); say('The clipboard is blocked here. The text is selected: press Ctrl+C or Cmd+C.', true); return; }
+    var box = $('fallbackBox'); box.hidden = false; box.value = text; box.focus(); box.select();
+    say('The clipboard is blocked here. The text is selected below: press Ctrl+C or Cmd+C.', true);
+  }
+  function copyText(text, okMsg) {
+    $('fallbackBox').hidden = true;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { say(okMsg); }, function () { byHand(text, null); });
+    } else byHand(text, null);
+  }
+  function copyRich(html, plain, okMsg, node) {
+    $('fallbackBox').hidden = true;
+    var done = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+        navigator.clipboard.write([new ClipboardItem({
+          'text/html': new Blob(['<span>' + html + '</span>'], { type: 'text/html' }),
+          'text/plain': new Blob([plain], { type: 'text/plain' })
+        })]).then(function () { say(okMsg); }, function () { legacy(); });
+        done = true;
+      }
+    } catch (e) { done = false; }
+    if (!done) legacy();
+    function legacy() {
+      var holder = document.createElement('div');
+      holder.contentEditable = 'true';
+      holder.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:pre-wrap';
+      holder.innerHTML = html;
+      document.body.appendChild(holder);
+      selectNode(holder);
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(holder);
+      if (ok) say(okMsg); else byHand(plain, node || $('preview'));
+    }
+  }
+
+  function touched() { usingExample = false; }
+  function today() { var d = new Date(); return (d.getDate() < 10 ? '0' : '') + d.getDate() + ' ' + C.MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
+
+  // build static pieces
+  (function () {
+    var box = $('types');
+    Object.keys(TYPES).forEach(function (k) {
+      var lab = document.createElement('label'); lab.className = 'chip';
+      var inp = document.createElement('input'); inp.type = 'radio'; inp.name = 'type'; inp.value = k; inp.id = 'type-' + k;
+      var sp = document.createElement('span'); sp.textContent = TYPES[k].label;
+      lab.appendChild(inp); lab.appendChild(sp); box.appendChild(lab);
+      inp.addEventListener('change', function () {
+        var t = TYPES[k];
+        if (usingExample) { write(sampleState(k)); }
+        else {
+          $('titleStyle').value = t.style;
+          if (t.ai && !$('rating').value) $('rating').value = 'F6';
+        }
+        dressType(); render();
+      });
+    });
+    var dl = $('descList');
+    LIBRARY.forEach(function (x) { var o = document.createElement('option'); o.value = x; dl.appendChild(o); });
+
+    var lib = $('lib');
+    LIB.forEach(function (c) {
+      var cat = document.createElement('details'); cat.className = 'cat';
+      var total = 0;
+      var sum = document.createElement('summary'); sum.textContent = c.c;
+      var cnt = document.createElement('span'); cnt.className = 'cnt'; sum.appendChild(cnt); cat.appendChild(sum);
+      c.g.forEach(function (g) {
+        var row = document.createElement('div'); row.className = 'g'; row.dataset.name = g.n.toLowerCase();
+        var gn = document.createElement('span'); gn.className = 'gn'; gn.textContent = g.n;
+        var picks = document.createElement('div'); picks.className = 'picks';
+        g.i.forEach(function (x) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'pick'; b.textContent = x;
+          b.addEventListener('click', function () { $('descType').value = x; touched(); render(); });
+          picks.appendChild(b); total++;
+        });
+        row.appendChild(gn); row.appendChild(picks); cat.appendChild(row);
+      });
+      cat.dataset.total = total; cnt.textContent = total;
+      cat.addEventListener('toggle', function () { if (!$('libFilter').value.trim()) cat.dataset.wasOpen = cat.open ? '1' : '0'; });
+      lib.appendChild(cat);
+    });
+    $('libFilter').addEventListener('input', filterLibrary);
+    filterLibrary();
+
+    var qbox = $('quals');
+    QUALIFIERS.forEach(function (grp) {
+      var row = document.createElement('div'); row.className = 'qg';
+      var gn = document.createElement('span'); gn.className = 'gn'; gn.textContent = grp[0];
+      var set = document.createElement('div'); set.className = 'types';
+      grp[1].forEach(function (q) {
+        var lab = document.createElement('label'); lab.className = 'chip box';
+        var inp = document.createElement('input'); inp.type = 'checkbox'; inp.name = 'qual'; inp.value = q;
+        var sp = document.createElement('span'); sp.textContent = q;
+        lab.appendChild(inp); lab.appendChild(sp); set.appendChild(lab);
+      });
+      row.appendChild(gn); row.appendChild(set); qbox.appendChild(row);
+    });
+
+    var abox = $('accessBox');
+    ACCESS.forEach(function (a) {
+      var lab = document.createElement('label'); lab.className = 'chip box';
+      var inp = document.createElement('input'); inp.type = 'checkbox'; inp.name = 'access'; inp.value = a[0]; inp.id = 'access-' + a[0].replace(/\W+/g, '-');
+      var sp = document.createElement('span'); sp.textContent = a[1];
+      lab.appendChild(inp); lab.appendChild(sp); abox.appendChild(lab);
+    });
+    var m = $('matrix');
+    var corner = document.createElement('span'); corner.className = 'mh'; m.appendChild(corner);
+    'ABCDEF'.split('').forEach(function (L) { var h = document.createElement('span'); h.className = 'mh'; h.textContent = L; h.title = C.REL[L]; m.appendChild(h); });
+    for (var n = 1; n <= 6; n++) {
+      var rh = document.createElement('span'); rh.className = 'mh'; rh.textContent = n; rh.title = C.CRED[n]; m.appendChild(rh);
+      'ABCDEF'.split('').forEach(function (L) {
+        var code = L + n, b = document.createElement('button');
+        b.type = 'button'; b.className = 'mc'; b.textContent = code; b.dataset.r = code; b.dataset.z = C.zoneOf(code);
+        b.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-label', code + ': ' + C.REL[L] + ' source, ' + C.CRED[n] + ' information, ' + C.ZNAME[C.zoneOf(code)] + ' zone');
+        b.title = C.REL[L] + ' · ' + C.CRED[n];
+        b.addEventListener('click', function () { $('rating').value = $('rating').value === code ? '' : code; touched(); render(); });
+        m.appendChild(b);
+      });
+    }
+  })();
+
+  // events
+  $('f').addEventListener('input', function (e) { if (e.target.id === 'libFilter') return; if (e.target.name !== 'type') touched(); render(); });
+  $('f').addEventListener('change', function (e) { if (e.target.id === 'libFilter') return; if (e.target.name !== 'type') { touched(); render(); } });
+  $('f').addEventListener('submit', function (e) { e.preventDefault(); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-today]'), function (b) {
+    b.addEventListener('click', function () { $(b.dataset.today).value = today(); touched(); render(); });
+  });
+  ['date', 'accessed', 'archiveDate'].forEach(function (id) {
+    $(id).addEventListener('blur', function () { var d = C.normDate($(id).value); if (d.level !== 'raw' && d.text) { $(id).value = d.text; render(); } });
+  });
+  $('clearBtn').addEventListener('click', function () { usingExample = false; editingId = null; var b = blank(currentType()); if (TYPES[b.type].ai) b.rating = 'F6'; write(b); dressType(); render(); renderSaved(); $('authors').focus(); });
+  $('sampleBtn').addEventListener('click', function () { usingExample = true; editingId = null; write(sampleState(currentType())); dressType(); render(); renderSaved(); });
+  $('shortUseTitle').addEventListener('change', render);
+  $('italI').addEventListener('change', function () { store(K_ITAL, 'i'); render(); renderSaved(); });
+  $('italU').addEventListener('change', function () { store(K_ITAL, 'u'); render(); renderSaved(); });
+
+  function mode() { return $('italU').checked ? 'u' : 'i'; }
+  $('copyRich').addEventListener('click', function () { copyRich(C.toHTML(lastSeg, mode()), C.toPlain(lastSeg), mode() === 'u' ? 'Copied with underlining.' : 'Copied with italics.', $('preview')); });
+  $('copyMd').addEventListener('click', function () { copyText(C.toMarkdown(lastSeg), 'Copied as Markdown.'); });
+  $('copyPlain').addEventListener('click', function () { copyText(C.toPlain(lastSeg), 'Copied as plain text.'); });
+  $('copyShort').addEventListener('click', function () { var sf = C.shortForms(read()); copyRich(C.toHTML(sf.short, mode()), C.toPlain(sf.short), 'Short form copied.', $('shortOut')); });
+  $('copyIbid').addEventListener('click', function () { copyText($('ibidOut').textContent, 'Ibid. copied.'); });
+  $('addBtn').addEventListener('click', function () {
+    var st = read();
+    if (editingId) { saved.forEach(function (x) { if (x.id === editingId) x.st = st; }); editingId = null; say('Source updated.'); }
+    else { saved.push({ id: Date.now() + '-' + Math.floor(Math.random() * 1e6), st: st }); say('Added to the source list.'); }
+    listChanged(); renderSaved(); render();
+  });
+  $('copyAll').addEventListener('click', function () {
+    var segs = saved.map(function (x) { return C.build(x.st).seg; });
+    copyRich(segs.map(function (s) { return '<p>' + C.toHTML(s, mode()) + '</p>'; }).join(''), segs.map(C.toPlain).join('\n'), 'All ' + saved.length + ' sources copied.', $('saved'));
+  });
+  $('copyJoined').addEventListener('click', function () {
+    var j = C.joinSources(saved.map(function (x) { return C.build(x.st).seg; }));
+    copyRich(C.toHTML(j, mode()), C.toPlain(j), 'Copied as one footnote, sources separated by semicolons.', $('saved'));
+  });
+  $('clearList').addEventListener('click', function () {
+    var b = $('clearList');
+    if (!clearArmed) { clearArmed = true; b.textContent = 'Click again to empty the list'; setTimeout(function () { clearArmed = false; b.textContent = 'Empty the list'; }, 4000); return; }
+    clearArmed = false; b.textContent = 'Empty the list'; var left = releaseFile(); saved = []; editingId = null; listChanged(); renderSaved(); render();
+    if (left) fileSay('List emptied. ' + left + ' was left as it was and is no longer linked.');
+  });
+
+  // ---- list file: save, open, export ----
+  var K_NAME = 'osint-cite-listname-v1';
+  var inViewer = !!(window.claude && typeof window.claude.use === 'function');
+  var dlReady = Promise.resolve(null);
+  if (inViewer) { try { dlReady = Promise.resolve(window.claude.use('downloads')).catch(function () { return null; }); } catch (e) { dlReady = Promise.resolve(null); } }
+  var fsOK = !inViewer && typeof window.showSaveFilePicker === 'function' && typeof window.showOpenFilePicker === 'function';
+  var FS_TYPES = [{ description: 'OSINT source list', accept: { 'application/json': ['.json'] } }];
+  var linked = null, fileName = '', fileStatus = 'none', lastWrite = null, writeChain = Promise.resolve(), pendingLoad = null, noSave = false, fileTimer = null;
+  var TYPE_LABELS = {};
+  Object.keys(TYPES).forEach(function (k) { TYPE_LABELS[k] = TYPES[k].label; });
+
+  function fileSay(msg, bad) {
+    var s = $('fileMsg'); s.textContent = msg; s.className = 'filemsg' + (bad ? ' bad' : '');
+    clearTimeout(fileTimer);
+    if (!bad) fileTimer = setTimeout(function () { s.textContent = ''; }, 7000);
+  }
+  function clock(d) { try { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
+  function slug() {
+    var s = $('listName').value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    return s || 'osint-sources';
+  }
+  function listText() { return C.listFile($('listName').value.trim(), saved); }
+  function paintFile() {
+    var has = saved.length > 0, t;
+    $('saveFile').disabled = !has;
+    ['expDocx', 'expMd', 'expCsv'].forEach(function (id) { $(id).disabled = !has; });
+    $('saveFile').hidden = noSave; $('exportRow').hidden = noSave;
+    $('saveFile').textContent = linked ? 'Save now' : 'Save list to a file';
+    if (noSave) t = 'Files cannot be saved from this view. Opening a list file still works, and Copy all takes the list out as text.';
+    else if (linked) t = 'Linked to ' + fileName + '. Every change to the list is written to it' + (lastWrite ? ', last at ' + clock(lastWrite) : '') + '.';
+    else if (fileStatus === 'clean') t = 'Up to date with ' + fileName + '.';
+    else if (fileStatus === 'changed') t = 'Changed since it was last saved to ' + fileName + '. Save again to update the file.';
+    else t = (has ? 'Kept in this browser only so far. ' : '') + 'A list file holds every field of every source, so you can back it up, move it to another computer, and reopen it here to keep editing.';
+    if (!noSave && !linked && fsOK) t += ' In this browser the file you save to or open stays linked, and later changes are written to it for you.';
+    $('fileState').textContent = t;
+  }
+  function listChanged() {
+    store(K_LIST, saved);
+    if (linked) writeLinked(false);
+    else if (fileStatus === 'clean') fileStatus = 'changed';
+    paintFile();
+  }
+  function releaseFile() {
+    if (!linked) return '';
+    var n = fileName; linked = null; fileStatus = 'none';
+    return n;
+  }
+  function writeLinked(announce) {
+    var h = linked, text = listText();
+    if (!h) return Promise.resolve();
+    writeChain = writeChain.then(function () {
+      return h.createWritable().then(function (w) { return w.write(text).then(function () { return w.close(); }); });
+    }).then(function () {
+      fileStatus = 'clean'; lastWrite = new Date();
+      if (announce) fileSay('Saved to ' + fileName + '.');
+      paintFile();
+    }, function () {
+      if (linked === h) { linked = null; fileStatus = 'changed'; }
+      fileSay('Could not write to ' + fileName + '. The list is still in this browser. Save it to a file again.', true);
+      paintFile();
+    });
+    return writeChain;
+  }
+  function giveFile(filename, data, mime) {
+    var blob = (typeof Blob !== 'undefined' && data instanceof Blob) ? data : new Blob([data], { type: mime });
+    if (inViewer) {
+      return dlReady.then(function (d) {
+        if (!d) return 'unavailable';
+        return d.save({ filename: filename, data: blob }).then(function () { return 'saved'; }, function (e) {
+          var c = e && e.code;
+          if (c === 'declined') return 'declined';
+          if (c === 'rate_limited') return 'busy';
+          if (c === 'rejected_extension' || c === 'extension_not_enabled') return 'format';
+          if (c === 'bad_request' || c === 'transform_error' || c === 'too_large') return 'failed';
+          return 'unavailable';
+        });
+      });
+    }
+    try {
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      return Promise.resolve('saved');
+    } catch (e) { return Promise.resolve('failed'); }
+  }
+  function report(r) {
+    if (r === 'declined') fileSay('Nothing was saved.');
+    else if (r === 'busy') fileSay('A save prompt is already open. Answer that one first.', true);
+    else if (r === 'format') fileSay('That kind of file cannot be saved from this view.', true);
+    else if (r === 'failed') fileSay('That file could not be saved.', true);
+    else { noSave = true; paintFile(); }
+  }
+  function where() { return inViewer ? '' : ' Look in your downloads folder.'; }
+  function saveListFile() {
+    if (!saved.length) return;
+    if (linked) { writeLinked(true); return; }
+    var fname = slug() + '.json';
+    function download() {
+      return giveFile(fname, listText(), 'application/json').then(function (r) {
+        if (r === 'saved') { fileStatus = 'clean'; fileName = fname; fileSay('List saved as ' + fname + '.' + where()); }
+        else report(r);
+        paintFile();
+      });
+    }
+    if (fsOK) {
+      var p;
+      try { p = window.showSaveFilePicker({ suggestedName: fname, types: FS_TYPES }); } catch (e) { fsOK = false; download(); return; }
+      p.then(function (h) { linked = h; fileName = h.name || fname; return writeLinked(true); },
+        function (e) { if (e && e.name === 'AbortError') return; fsOK = false; return download(); });
+      return;
+    }
+    download();
+  }
+  function exportAs(kind) {
+    if (!saved.length) return;
+    var name = $('listName').value.trim(), fname, data, mime;
+    var segs = saved.map(function (x) { return C.build(x.st).seg; });
+    if (kind === 'docx') { fname = slug() + '-footnotes.docx'; data = C.docxBytes(name, segs, mode()); mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'; }
+    else if (kind === 'md') { fname = slug() + '-footnotes.md'; data = C.mdText(name, segs); mime = 'text/markdown'; }
+    else { fname = slug() + '-sources.csv'; data = C.csvText(saved.map(function (x) { return x.st; }), TYPE_LABELS); mime = 'text/csv'; }
+    giveFile(fname, data, mime).then(function (r) { if (r === 'saved') fileSay('Exported ' + fname + '.' + where()); else report(r); });
+  }
+  function withFlags(item) {
+    var t = TYPES[item.st.type];
+    item.st.volatile = !!t.volatile; item.st.live = !!t.live; item.st.dayDate = !!t.dayDate; item.st.ai = !!t.ai;
+    return item;
+  }
+  function offerLoad(text, fname, handle) {
+    var res = C.parseListFile(text, Object.keys(TYPES), TEXT_KEYS);
+    if (res.error) { fileSay(res.error, true); return; }
+    if (!res.items.length) { fileSay(fname + ' has no sources in it.', true); return; }
+    pendingLoad = { res: res, fname: fname, handle: handle || null };
+    if (!saved.length) { applyLoad('replace'); return; }
+    $('mergeText').textContent = fname + ' holds ' + res.items.length + (res.items.length === 1 ? ' source' : ' sources') + '. The list here has ' + saved.length + '.';
+    $('mergeAsk').hidden = false;
+  }
+  function applyLoad(how) {
+    var p = pendingLoad, n, added = 0, have = {};
+    pendingLoad = null; $('mergeAsk').hidden = true;
+    if (!p) return;
+    var items = p.res.items.map(withFlags);
+    n = items.length;
+    if (how === 'replace') {
+      saved = items; editingId = null;
+      if (p.res.name) { $('listName').value = p.res.name; store(K_NAME, p.res.name); }
+      linked = p.handle; fileName = p.fname; fileStatus = 'clean'; lastWrite = null;
+      store(K_LIST, saved);
+      fileSay('Opened ' + p.fname + ': ' + n + (n === 1 ? ' source.' : ' sources.'));
+    } else {
+      saved.forEach(function (x) { have[x.id] = 1; });
+      items.forEach(function (x) { if (!have[x.id]) { saved.push(x); added++; } });
+      if (added) listChanged();
+      fileSay('Added ' + added + ' from ' + p.fname + (added < n ? '; ' + (n - added) + ' were already in the list.' : '.'));
+    }
+    renderSaved(); render();
+  }
+  function openListFile() {
+    if (fsOK) {
+      var p;
+      try { p = window.showOpenFilePicker({ types: FS_TYPES, multiple: false }); } catch (e) { fsOK = false; $('pickFile').click(); return; }
+      p.then(function (hs) {
+        var h = hs && hs[0];
+        if (!h) return;
+        return h.getFile().then(function (f) { return f.text().then(function (t) { offerLoad(t, f.name, h); }); });
+      }, function (e) { if (e && e.name === 'AbortError') return; fsOK = false; $('pickFile').click(); });
+      return;
+    }
+    $('pickFile').click();
+  }
+  $('pickFile').addEventListener('change', function () {
+    var input = $('pickFile'), f = input.files && input.files[0], r;
+    if (!f) return;
+    r = new FileReader();
+    r.onload = function () { input.value = ''; offerLoad(String(r.result), f.name, null); };
+    r.onerror = function () { input.value = ''; fileSay('That file could not be read.', true); };
+    r.readAsText(f);
+  });
+  $('saveFile').addEventListener('click', saveListFile);
+  $('openFile').addEventListener('click', openListFile);
+  $('mergeAdd').addEventListener('click', function () { applyLoad('add'); });
+  $('mergeReplace').addEventListener('click', function () { applyLoad('replace'); });
+  $('mergeCancel').addEventListener('click', function () { pendingLoad = null; $('mergeAsk').hidden = true; });
+  $('expDocx').addEventListener('click', function () { exportAs('docx'); });
+  $('expMd').addEventListener('click', function () { exportAs('md'); });
+  $('expCsv').addEventListener('click', function () { exportAs('csv'); });
+  $('listName').addEventListener('input', function () { store(K_NAME, $('listName').value); });
+  $('listName').addEventListener('change', function () {
+    if (!saved.length) return;
+    if (linked) writeLinked(false); else if (fileStatus === 'clean') { fileStatus = 'changed'; paintFile(); }
+  });
+  dlReady.then(function (d) { if (inViewer && !d) { noSave = true; paintFile(); } });
+
+  // boot
+  var nm = load(K_NAME); if (typeof nm === 'string') $('listName').value = nm;
+  var ital = load(K_ITAL); if (ital === 'u') $('italU').checked = true;
+  var list = load(K_LIST); if (Array.isArray(list)) saved = list.filter(function (x) { return x && x.st && TYPES[x.st.type]; });
+  var draft = load(K_DRAFT);
+  if (draft && draft.st && TYPES[draft.st.type]) { usingExample = !!draft.usingExample; write(draft.st); }
+  else { usingExample = true; write(sampleState('news')); }
+  dressType(); render(); renderSaved();
+})();
+</script>
+</body>
+</html>
