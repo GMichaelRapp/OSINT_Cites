@@ -67,7 +67,7 @@ eq(md(blank('quotes', { authors: 'Yuan Zheng', title: '美国对华科技政策�
   `Yuan Zheng, "美国对华科技政策的演变" ["The Evolution of US Technology Policy Toward China"], *American Studies Quarterly* [Peer-Reviewed Article; Vol. 38, No. 2; original in Chinese; B2] (2024): pp. 44–61.`, 'translated title and original language');
 eq(md(blank('quotes', { lead: 'Quoted in', authors: 'Armin Krishnan', title: 'Fifth Generation Warfare, Hybrid Warfare, and Gray Zone Conflict: A Comparison', location: 'Journal of Strategic Security', descType: 'Peer-Reviewed Article', descDetails: 'Vol. 15, No. 4', date: '2022', locator: 'p. 17' })),
   `Quoted in Armin Krishnan, "Fifth Generation Warfare, Hybrid Warfare, and Gray Zone Conflict: A Comparison," *Journal of Strategic Security* [Peer-Reviewed Article; Vol. 15, No. 4] (2022): p. 17.`, 'secondary citation lead-in');
-eq(md(blank('italics', { authors: 'A One\nB Two\nC Three\nD Four', contribs: 'E Five', title: 'A Handbook', descType: 'Edited Volume', publisher: 'A Press', date: '2022', locator: '55-70' })),
+eq(md(blank('italics', { authors: 'A One\nB Two\nC Three\nD Four', editors: 'E Five', title: 'A Handbook', descType: 'Edited Volume', publisher: 'A Press', date: '2022', locator: '55-70' })),
   `A One, B Two, C Three, et al.; E Five (ed.), *A Handbook* [Edited Volume] (A Press: 2022): pp. 55–70.`, 'four authors become three and et al.; editor credited');
 eq(md(blank('italics', { authors: 'A One\nB Two\nC Three', title: 'A Yearbook', location: 'IISS', descType: 'Military Reference Yearbook', rating: 'A2', publisher: 'IISS', date: '2025' })),
   `A One, B Two, and C Three, *A Yearbook*, *IISS* [Military Reference Yearbook; A2] (2025).`, 'publisher that repeats the location is dropped');
@@ -187,6 +187,40 @@ eq(audit.rows.some((x) => /^Sources 1 and 3 cite the same link/.test(x.msg)), tr
 audit = O.auditList([state('book'), state('book', { title: 'Unrivaled: A Second Book', publisher: 'Another Press' })]);
 eq(audit.rows.some((x) => /^Sources 1 and 2 share the short form/.test(x.msg)), true, 'audit: two sources with the same short form');
 eq(O.auditList([]).total, 0, 'audit: empty list');
+
+// ---- 8. Editors, translators, contributors ----
+const BOOK = { title: 'A Novel', descType: 'Novel', publisher: 'A Press', date: '1990' };
+eq(md(blank('italics', Object.assign({ authors: 'A One', editors: 'E One\nE Two', translators: 'T One', contributors: 'C One' }, BOOK))),
+  'A One; E One (ed.), E Two (ed.), T One (trans.), and C One (contr.), *A Novel* [Novel] (A Press: 1990).', 'roles: all three on one source, editors then translators then contributors');
+eq(md(blank('italics', Object.assign({ authors: 'A One', translators: 'T One\nT Two' }, BOOK))),
+  'A One; T One (trans.) and T Two (trans.), *A Novel* [Novel] (A Press: 1990).', 'roles: two translators');
+eq(md(blank('italics', Object.assign({ translators: 'T One' }, BOOK))), 'T One (trans.), *A Novel* [Novel] (A Press: 1990).', 'roles: translator with no author');
+eq(md(blank('italics', Object.assign({ authors: 'A One', editors: 'E One (ed.)', contributors: 'C One (contr.)' }, BOOK))),
+  'A One; E One (ed.) and C One (contr.), *A Novel* [Novel] (A Press: 1990).', 'roles: a tag typed by hand is not doubled');
+// Sources saved before 3.1 kept all three roles in one box with a default role.
+const OLD = Object.assign({ authors: 'A One', contribs: 'T One (trans.)\nE One\nC One (contr.)', contribRole: 'ed' }, BOOK);
+eq(md(blank('italics', OLD)), 'A One; E One (ed.), T One (trans.), and C One (contr.), *A Novel* [Novel] (A Press: 1990).', 'roles: a source saved before 3.1 still reads correctly');
+const UP = O.upgradeState(blank('italics', OLD));
+eq([UP.editors, UP.translators, UP.contributors, 'contribs' in UP, UP.langMode].join('|'), 'E One|T One|C One|false|en', 'roles: an older source is moved into the three fields');
+const oldFile = JSON.stringify({ app: 'OSINT Citation Generator', format: 1, name: 'Old', sources: [{ id: 'o1', fields: Object.assign({ type: 'book', titleStyle: 'italics' }, OLD) }] });
+const opened = O.parseListFile(oldFile, TYPE_NAMES, TEXT_KEYS).items[0].st;
+eq([opened.editors, opened.translators, opened.contributors, md(opened)].join('|'), 'E One|T One|C One|A One; E One (ed.), T One (trans.), and C One (contr.), *A Novel* [Novel] (A Press: 1990).', 'roles: a list file saved before 3.1 opens into the three fields');
+eq(O.csvText([blank('italics', OLD)], {}).split('\r\n')[0].includes('Authors,Editors,Translators,Contributors,Title'), true, 'roles: spreadsheet export has a column for each');
+eq(JSON.parse(O.listFile('x', [{ id: 'a', st: state('book') }])).format, 2, 'list file: format number is 2');
+
+// ---- 9. Language of the source ----
+const RU = { authors: 'A One', title: 'Zapiski', transTitle: 'Notes', origLang: 'Russian', location: 'A Journal', descType: 'Peer-Reviewed Article', date: '2020' };
+eq(md(blank('quotes', Object.assign({ langMode: 'foreign' }, RU))), 'A One, "Zapiski" ["Notes"], *A Journal* [Peer-Reviewed Article; original in Russian] (2020).', 'language: another language, read in the original');
+eq(md(blank('quotes', Object.assign({ langMode: 'foreign', transBy: 'own' }, RU))), 'A One, "Zapiski" ["Notes"], *A Journal* [Peer-Reviewed Article; original in Russian; translation by author] (2020).', 'language: own translation');
+eq(md(blank('quotes', Object.assign({ langMode: 'foreign', transBy: 'machine' }, RU))), 'A One, "Zapiski" ["Notes"], *A Journal* [Peer-Reviewed Article; machine translation; original in Russian] (2020).', 'language: machine translation');
+eq(md(blank('quotes', Object.assign({ langMode: 'en', transBy: 'machine' }, RU))), 'A One, "Zapiski," *A Journal* [Peer-Reviewed Article] (2020).', 'language: switched back to English, the translation details drop out');
+eq(md(blank('italics', Object.assign({ langMode: 'published', authors: 'A One', translators: 'T One', origLang: 'Russian', transTitle: 'ignored', transBy: 'machine' }, BOOK))),
+  'A One; T One (trans.), *A Novel* [Novel; translated from Russian] (A Press: 1990).', 'language: a published translation');
+eq(md(blank('quotes', RU)), 'A One, "Zapiski" ["Notes"], *A Journal* [Peer-Reviewed Article; original in Russian] (2020).', 'language: a source saved before 3.1 is read as another language');
+const msgs = (st) => O.build(st).checks.map((c) => c.level + ':' + c.msg.slice(0, 30)).join(' | ');
+eq(msgs(blank('quotes', Object.assign({}, RU, { langMode: 'foreign', origLang: '' }))).includes('check:This source is marked as not'), true, 'language: missing language flagged');
+eq(msgs(blank('quotes', Object.assign({}, RU, { langMode: 'foreign', transTitle: '' }))).includes('note:Add the title in English'), true, 'language: missing English title noted');
+eq(msgs(blank('italics', Object.assign({ langMode: 'published', authors: 'A One' }, BOOK))).includes('note:A published translation credit'), true, 'language: published translation with no translator noted');
 
 console.log(failed ? `\n${failed} failed, ${passed} passed` : `All ${passed} checks passed.`);
 process.exit(failed ? 1 : 0);
