@@ -181,6 +181,8 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
 .seg input:checked + span { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
 .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: -2px; }
 .optline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+.masttop { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.langpanel { border: 1px solid var(--line); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 
 .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .checks li { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 13.5px; }
@@ -215,9 +217,23 @@ a.btn { text-decoration: none; display: inline-block; }
 </style>
 </head>
 <body>
+<script id="theme-early">
+(function () { try { var r = document.documentElement, t = JSON.parse(localStorage.getItem('osint-cite-theme-v1')); window.__osintHostTheme = r.getAttribute('data-theme') || ''; if (t === 'light' || t === 'dark') r.setAttribute('data-theme', t); } catch (e) {} })();
+</script>
+
 <div class="wrap">
   <header class="mast">
-    <h1>OSINT Citation Generator <span class="ver">v3.0</span></h1>
+    <div class="masttop">
+      <h1>OSINT Citation Generator <span class="ver">v3.1</span></h1>
+      <div class="optline">
+        <span id="themeLabel">Theme</span>
+        <span class="seg" role="radiogroup" aria-labelledby="themeLabel">
+          <label><input type="radio" name="theme" id="themeAuto" value="auto" checked><span>Auto</span></label>
+          <label><input type="radio" name="theme" id="themeLight" value="light"><span>Light</span></label>
+          <label><input type="radio" name="theme" id="themeDark" value="dark"><span>Dark</span></label>
+        </span>
+      </div>
+    </div>
     <p>Pick a source type and fill the eight slots. The footnote assembles in house order with its punctuation, and slots that do not apply drop out along with theirs.</p>
     <div class="pattern" aria-label="The citation pattern">Author, "Title," <i>Location</i> [Description] (Publisher: Date) URL/DOI: Locator.</div>
   </header>
@@ -248,22 +264,26 @@ a.btn { text-decoration: none; display: inline-block; }
 
       <div class="slot" role="group" aria-labelledby="h-author">
         <h2 id="h-author"><span class="num">1</span> Author</h2>
+        <div class="field">
+          <label for="authors" id="authorsLabel">Authors</label>
+          <textarea id="authors" rows="3" placeholder="One per line"></textarea>
+          <p class="hint" id="authorsHint"></p>
+        </div>
         <div class="row">
           <div class="field">
-            <label for="authors" id="authorsLabel">Authors</label>
-            <textarea id="authors" rows="3" placeholder="One per line"></textarea>
-            <p class="hint" id="authorsHint"></p>
+            <label for="editors">Editors</label>
+            <textarea id="editors" rows="2" placeholder="One per line"></textarea>
           </div>
           <div class="field">
-            <label for="contribs">Editors, translators, contributors</label>
-            <textarea id="contribs" rows="3" placeholder="One per line"></textarea>
-            <select id="contribRole" aria-label="Role for names without one">
-              <option value="ed">Mark as (ed.)</option>
-              <option value="trans">Mark as (trans.)</option>
-              <option value="contr">Mark as (contr.)</option>
-            </select>
+            <label for="translators">Translators</label>
+            <textarea id="translators" rows="2" placeholder="One per line"></textarea>
+          </div>
+          <div class="field">
+            <label for="contributors">Contributors</label>
+            <textarea id="contributors" rows="2" placeholder="One per line"></textarea>
           </div>
         </div>
+        <p class="hint">Fill any or all three. They follow the authors after a semicolon, each name tagged with its role: (ed.), (trans.), or (contr.).</p>
         <div class="field" style="max-width:260px">
           <label for="lead">Opens with</label>
           <select id="lead">
@@ -279,7 +299,7 @@ a.btn { text-decoration: none; display: inline-block; }
         <h2 id="h-title"><span class="num">2</span> Title</h2>
         <div class="row">
           <div class="field" style="grid-column: span 2; min-width: 0">
-            <label for="title">Title</label>
+            <label for="title" id="titleLabel">Title</label>
             <input type="text" id="title" placeholder="As the source gives it">
             <p class="hint">Keep the source's own capitalization. Reproduce an error and follow it with [sic].</p>
           </div>
@@ -292,31 +312,40 @@ a.btn { text-decoration: none; display: inline-block; }
             </select>
           </div>
         </div>
-        <details class="more" id="transBox">
-          <summary>Non-English or translated source</summary>
-          <div class="inner">
+        <div class="field">
+          <span class="label" id="langLabel">Language of the source</span>
+          <fieldset class="types" id="langBox" aria-labelledby="langLabel">
+            <label class="chip"><input type="radio" name="langMode" value="en" id="lang-en" checked><span>English</span></label>
+            <label class="chip"><input type="radio" name="langMode" value="foreign" id="lang-foreign"><span>Another language</span></label>
+            <label class="chip"><input type="radio" name="langMode" value="published" id="lang-published"><span>A published English translation</span></label>
+          </fieldset>
+        </div>
+        <div class="langpanel" id="langPanel" hidden>
+          <div class="row">
             <div class="field">
-              <label for="transTitle">English translation of the title</label>
-              <input type="text" id="transTitle" placeholder="The Evolution of US Technology Policy Toward China">
-              <p class="hint">Put the original-language title in the Title field. The translation follows it in brackets.</p>
+              <label for="origLang" id="origLangLabel">Which language</label>
+              <input type="text" id="origLang" list="langList" placeholder="Chinese" autocomplete="off">
+              <datalist id="langList"></datalist>
             </div>
-            <div class="row">
-              <div class="field">
-                <label for="origLang">Original language</label>
-                <input type="text" id="origLang" placeholder="Chinese">
-              </div>
-              <div class="field">
-                <label for="transBy">Translated by</label>
-                <select id="transBy">
-                  <option value="">Not stated, or a published translator</option>
-                  <option value="own">Me</option>
-                  <option value="machine">Machine translation</option>
-                </select>
-              </div>
+            <div class="field" id="transByWrap">
+              <label for="transBy">How you read it</label>
+              <select id="transBy">
+                <option value="">In the original</option>
+                <option value="own">Through my own translation</option>
+                <option value="machine">Through machine translation</option>
+              </select>
             </div>
-            <p class="hint">Credit a published translator in the contributors box with (trans.).</p>
           </div>
-        </details>
+          <div class="field" id="transTitleWrap">
+            <label for="transTitle">Title in English</label>
+            <input type="text" id="transTitle" placeholder="The Evolution of US Technology Policy Toward China">
+          </div>
+          <p class="hint" id="langHint"></p>
+          <p class="hint" id="langAdds"></p>
+          <div class="formbar" id="goTranslatorsRow" hidden>
+            <button type="button" class="btn small" id="goTranslators">Go to Translators</button>
+          </div>
+        </div>
       </div>
 
       <div class="slot" role="group" aria-labelledby="h-loc">
@@ -558,7 +587,7 @@ a.btn { text-decoration: none; display: inline-block; }
     </aside>
   </div>
 
-  <p class="foot">Version 3.0. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">Version 3.1. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
   <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere, with one exception: the archive buttons open the archive site you choose and hand it the link you entered. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
   <p class="foot">&copy; 2026 G. Michael Rapp. The software is under the MIT License. The guide content it carries (citation rules, description library, qualifier and access lists) is under Creative Commons Attribution 4.0 International.</p>
 </div>
@@ -591,8 +620,35 @@ var OSINT = (function () {
     return a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1];
   }
   function authorBlock(a) { return a.length >= 4 ? a.slice(0, 3).join(', ') + ', et al.' : listJoin(a); }
-  function contribList(raw, role) {
-    return lines(raw).map(function (n) { return /\((eds?|trans|contr)\.\)$/i.test(n) ? n : n + ' (' + (role || 'ed') + '.)'; });
+  var ROLE_TAG = /\s*\((eds?|trans|contr)\.\)$/i;
+  // Editors, translators and contributors each have their own field. Lists saved before 3.1 kept
+  // all three in one box (st.contribs), tagged by hand or given one default role; those still read correctly.
+  function splitPeople(st) {
+    var out = { ed: lines(st.editors), trans: lines(st.translators), contr: lines(st.contributors) };
+    lines(st.contribs).forEach(function (n) {
+      var m = n.match(ROLE_TAG), role = m ? m[1].toLowerCase().replace('eds', 'ed') : (st.contribRole || 'ed');
+      (out[role] || out.ed).push(n);
+    });
+    function tidy(a) { return a.map(function (n) { return n.replace(ROLE_TAG, ''); }).filter(Boolean); }
+    return { ed: tidy(out.ed), trans: tidy(out.trans), contr: tidy(out.contr) };
+  }
+  function roleList(st) {
+    var p = splitPeople(st);
+    return p.ed.map(function (n) { return n + ' (ed.)'; })
+      .concat(p.trans.map(function (n) { return n + ' (trans.)'; }), p.contr.map(function (n) { return n + ' (contr.)'; }));
+  }
+  // 'en': in English. 'foreign': in another language. 'published': an English translation someone published.
+  function langModeOf(st) {
+    if (st.langMode === 'en' || st.langMode === 'foreign' || st.langMode === 'published') return st.langMode;
+    return (clean(st.transTitle) || clean(st.origLang) || st.transBy) ? 'foreign' : 'en';
+  }
+  // Bring a source saved by an earlier version up to the current fields.
+  function upgradeState(st) {
+    var out = {}, k, p = splitPeople(st);
+    for (k in st) if (Object.prototype.hasOwnProperty.call(st, k) && k !== 'contribs' && k !== 'contribRole') out[k] = st[k];
+    out.editors = p.ed.join('\n'); out.translators = p.trans.join('\n'); out.contributors = p.contr.join('\n');
+    out.langMode = langModeOf(st);
+    return out;
   }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function monthIndex(name) {
@@ -701,10 +757,10 @@ var OSINT = (function () {
     function add(level, msg) { checks.push({ level: level, msg: msg }); }
 
     var style = st.titleStyle || 'quotes';
-    var authors = lines(st.authors), contribs = contribList(st.contribs, st.contribRole);
+    var authors = lines(st.authors), contribs = roleList(st), mode = langModeOf(st);
     var who = authorBlock(authors), cb = listJoin(contribs);
     if (who && cb) who += '; ' + cb; else if (cb) who = cb;
-    var title = cleanTitle(st.title, style), trans = cleanTitle(st.transTitle, style);
+    var title = cleanTitle(st.title, style), trans = mode === 'foreign' ? cleanTitle(st.transTitle, style) : '';
     var rawLoc = clean(st.location), loc = rawLoc, locSame = false;
     if (loc && title && loc.toLowerCase() === title.toLowerCase()) { loc = ''; locSame = true; }
 
@@ -713,9 +769,10 @@ var OSINT = (function () {
     lines(st.descDetails).forEach(function (x) { items.push(x); });
     var quals = Array.isArray(st.quals) ? st.quals.map(clean).filter(Boolean) : [];
     quals.forEach(function (q) { items.push(q); });
-    var lang = clean(st.origLang);
-    if (st.transBy === 'machine') { items.push('machine translation'); if (lang) items.push('original in ' + lang); }
-    else { if (lang) items.push('original in ' + lang); if (st.transBy === 'own') items.push('translation by author'); }
+    var lang = mode === 'en' ? '' : clean(st.origLang), transBy = mode === 'foreign' ? st.transBy : '';
+    if (mode === 'published') { if (lang) items.push('translated from ' + lang); }
+    else if (transBy === 'machine') { items.push('machine translation'); if (lang) items.push('original in ' + lang); }
+    else { if (lang) items.push('original in ' + lang); if (transBy === 'own') items.push('translation by author'); }
     var accessList = accessOf(st);
     accessList.forEach(function (a) { items.push(a); });
     var access = accessList.length > 0;
@@ -793,8 +850,10 @@ var OSINT = (function () {
     if (u.doi) add('note', 'DOI rewritten in resolvable form.');
     if (descWords > 10) add('note', 'Description runs ' + descWords + ' words against a target of ten. Archival detail and imagery metadata often need the room.');
     if (/^(cited|quoted) in$/i.test(lead)) add('note', 'A secondary citation inherits the weaker of the two ratings and is never stronger than the intermediary.');
-    if (trans && !lang) add('note', 'Translated title given without an original language. Add it so the bracket reads "original in …".');
-    if (st.transBy === 'machine') add('note', 'Check any quotation against the original before it is used as a quotation.');
+    if (mode === 'foreign' && !lang) add('check', 'This source is marked as not in English, but no language is given.');
+    if (mode === 'foreign' && title && !trans) add('note', 'Add the title in English so a reader can tell what the source is.');
+    if (mode === 'published' && !contribs.some(function (c) { return /\(trans\.\)$/.test(c); })) add('note', 'A published translation credits its translator. Add the name under Translators.');
+    if (transBy === 'machine') add('note', 'Check any quotation against the original before it is used as a quotation.');
     if (access) add('note', 'Access is restricted, so some readers cannot check this source. Where a free version exists, such as a preprint or an official release, cite that instead or alongside.');
     var tl = type.toLowerCase();
     if (/unverified|suspected synthetic|suspected inauthentic|manipulated media|ai-generated/.test(tl) || has(quals, 'provenance unverified') || has(quals, 'suspected synthetic') || has(quals, 'AI-generated') || has(quals, 'digitally altered')) add('check', 'Unverified or synthetic material. Say in the commentary what was checked, what was not, and why it is cited at all.');
@@ -907,11 +966,11 @@ var OSINT = (function () {
   }
   function csvCell(v) { v = String(v == null ? '' : v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function csvText(states, typeLabels) {
-    var rows = [['No.', 'Footnote', 'Short form', 'Source type', 'Authors', 'Editors, translators, contributors', 'Title', 'Title in English', 'Location', 'Kind of source', 'Details', 'Qualifiers', 'Original language', 'Access', 'Rating', 'Publisher', 'Date', 'Accessed', 'URL', 'Archive link', 'Archive captured', 'Locator', 'Commentary']];
+    var rows = [['No.', 'Footnote', 'Short form', 'Source type', 'Authors', 'Editors', 'Translators', 'Contributors', 'Title', 'Title in English', 'Location', 'Kind of source', 'Details', 'Qualifiers', 'Original language', 'Access', 'Rating', 'Publisher', 'Date', 'Accessed', 'URL', 'Archive link', 'Archive captured', 'Locator', 'Commentary']];
     states.forEach(function (st, n) {
-      var d = normDate(st.date);
+      var d = normDate(st.date), ppl = splitPeople(st);
       rows.push([n + 1, toPlain(build(st).seg), toPlain(shortForms(st).short), (typeLabels && typeLabels[st.type]) || st.type || '',
-        lines(st.authors).join('; '), contribList(st.contribs, st.contribRole).join('; '), cleanTitle(st.title, 'plain'), cleanTitle(st.transTitle, 'plain'),
+        lines(st.authors).join('; '), ppl.ed.join('; '), ppl.trans.join('; '), ppl.contr.join('; '), cleanTitle(st.title, 'plain'), cleanTitle(st.transTitle, 'plain'),
         clean(st.location), clean(st.descType), lines(st.descDetails).join('; '), (Array.isArray(st.quals) ? st.quals : []).join('; '), clean(st.origLang),
         accessOf(st).join('; '), /^[A-F][1-6]$/.test(st.rating || '') ? st.rating : '', clean(st.publisher),
         ((st.dateKind === 'updated' || st.dateKind === 'captured') && d.text ? st.dateKind + ' ' : '') + d.text, normDate(st.accessed).text,
@@ -921,7 +980,7 @@ var OSINT = (function () {
   }
   function listFile(name, items) {
     return JSON.stringify({
-      app: 'OSINT Citation Generator', format: 1, name: name || '', savedAt: new Date().toISOString(),
+      app: 'OSINT Citation Generator', format: 2, name: name || '', savedAt: new Date().toISOString(),
       sources: items.map(function (x) { return { id: x.id, footnote: toMarkdown(build(x.st).seg), fields: x.st }; })
     }, null, 2) + '\n';
   }
@@ -943,6 +1002,10 @@ var OSINT = (function () {
       st.type = typeNames.indexOf(f.type) !== -1 ? f.type : 'web';
       st.access = strArr(f.access); st.quals = strArr(f.quals);
       st.shortUseTitle = f.shortUseTitle !== false;
+      var up = upgradeState({ editors: st.editors, translators: st.translators, contributors: st.contributors,
+        contribs: typeof f.contribs === 'string' ? f.contribs.slice(0, 8000) : '', contribRole: typeof f.contribRole === 'string' ? f.contribRole : '',
+        transTitle: st.transTitle, origLang: st.origLang, transBy: st.transBy, langMode: f.langMode });
+      st.editors = up.editors; st.translators = up.translators; st.contributors = up.contributors; st.langMode = up.langMode;
       if (build(st).empty) return;
       var id = typeof x.id === 'string' && x.id && x.id.length <= 80 ? x.id : 'f' + n + '-' + Math.floor(Math.random() * 1e9);
       if (seen[id]) id += '-' + n;
@@ -1187,7 +1250,7 @@ var OSINT = (function () {
   var LIB_INDEX = {};
   function setLibrary(idx) { LIB_INDEX = idx || {}; }
 
-  return { build: build, shortForms: shortForms, setLibrary: setLibrary, accessOf: accessOf, toHTML: toHTML, toMarkdown: toMarkdown, toPlain: toPlain, joinSources: joinSources, docxBytes: docxBytes, mdText: mdText, csvText: csvText, listFile: listFile, parseListFile: parseListFile, readLink: readLink, auditList: auditList,
+  return { build: build, shortForms: shortForms, setLibrary: setLibrary, accessOf: accessOf, toHTML: toHTML, toMarkdown: toMarkdown, toPlain: toPlain, joinSources: joinSources, docxBytes: docxBytes, mdText: mdText, csvText: csvText, listFile: listFile, parseListFile: parseListFile, readLink: readLink, auditList: auditList, splitPeople: splitPeople, langModeOf: langModeOf, upgradeState: upgradeState,
     normDate: normDate, normLocator: normLocator, normUrl: normUrl, zoneOf: zoneOf, REL: REL, CRED: CRED, ZNAME: ZNAME, MONTHS: MONTHS, esc: esc };
 })();
 </script>
@@ -1247,7 +1310,7 @@ var OSINT = (function () {
   var NEIGHBORS = [[["Preprint Paper", "Working Paper"], "Preprint: posted publicly before peer review. Working Paper: issued in an institution's own series, and may never reach a journal. An accepted manuscript is a Peer-Reviewed Article with the qualifier \"accepted manuscript\"."], [["Dissertation", "Thesis", "Undergraduate Thesis"], "Dissertation, Thesis, Undergraduate Thesis: doctoral, master's, and bachelor's work, in that order (US usage; British usage reverses the first two)."], [["Monograph", "Trade Book", "Textbook"], "Monograph: a scholarly book making one sustained argument, usually from a university press. Trade Book: written for general readers. Textbook: written to teach a field, not to argue a thesis."], [["Peer-Reviewed Article", "Professional Journal Article", "Law Review Article", "Trade Journal Article"], "Peer-Reviewed: refereed by outside scholars. Professional Journal: reviewed by the journal's own editors. Law Review: edited by law students, usually without peer review. Trade Journal: published by industry press. Check the journal's own statement."], [["Literature Review", "Review Article", "Systematic Review", "Meta-Analysis"], "Literature Review: a narrative survey of scholarship. Review Article: a journal article synthesizing a field. Systematic Review: follows a stated, repeatable search method. Meta-Analysis: pools results statistically."], [["Book Review", "Review Essay"], "Book Review: assesses one book. Review Essay: uses several works to make a wider argument."], [["Whitepaper", "Industry Whitepaper", "Government White Paper", "Defense White Paper"], "Whitepaper: any organization's position paper. Industry Whitepaper: a vendor's or trade body's, with a commercial interest. Government White Paper: a formal policy proposal. Defense White Paper: a state's periodic statement of defense policy."], [["News Article", "News Analysis", "Feature Article", "Explainer"], "News Article: reports events. News Analysis: a reporter's interpretation of them. Feature Article: a longer narrative not tied to the day's news. Explainer: background on an issue, with no new reporting."], [["Editorial / Op-Ed", "Column", "Expert Commentary"], "Editorial / Op-Ed: the outlet's own voice, or an outside contributor's opinion. Column: a regular writer's recurring signed piece. Expert Commentary: a specialist's short analysis published by their own institution."], [["State Media Report", "State Media Commentary"], "State Media when a government or ruling party owns or directs the outlet. Evidence of official messaging first, of fact second."], [["Legal Opinion", "Court Opinion", "Judgment", "Court Order"], "Legal Opinion: advice from counsel or a law officer. Court Opinion: a court's written reasons. Judgment: the outcome the court entered. Court Order: a direction issued during a case."], [["Public Law / Statute", "Regulation", "Executive Order", "Decree"], "Statute: passed by a legislature. Regulation: issued by an agency under a statute. Executive Order: a head of government's direction to the executive branch. Decree: an executive act carrying the force of law, where the system allows it."], [["Testimony Transcript", "Prepared Testimony", "Hearing", "Deposition"], "Testimony Transcript: what the witness said, as recorded. Prepared Testimony: the written statement submitted beforehand, which can differ. Hearing: the whole proceeding. Deposition: sworn out-of-court testimony taken in litigation."], [["Treaty", "Convention", "Protocol", "Executive Agreement", "Memorandum of Understanding"], "Treaty: a binding international agreement. Convention: a multilateral treaty open to many states. Protocol: adds to or amends a treaty. Executive Agreement: binding, concluded by the US executive without Senate consent. Memorandum of Understanding: usually a non-binding statement of intent."], [["Leaked Document", "Internal Document", "Declassified Document", "FOIA-Released Document"], "Leaked: disclosed without authorization. Internal: not written for publication, but obtained legitimately. Declassified: formerly classified, released by the government's own decision. FOIA-Released: released on request under an information law, often redacted."], [["Personal Interview", "Recorded Interview", "Published Interview", "Oral History", "Personal Communication"], "Personal Interview: conducted by the author. Recorded Interview: a recording exists. Published Interview: appeared in an outlet. Oral History: recorded testimony held in a collection. Personal Communication: an informal exchange with the author."], [["Commercial Satellite Imagery", "Annotated Satellite Imagery", "Geolocation Analysis"], "Commercial Satellite Imagery: the provider's image. Annotated Satellite Imagery: the image with someone's markings added, so cite the annotator. Geolocation Analysis: a third party's worked conclusion about where something is."], [["Social Media Post", "Channel Post", "Reposted Content"], "Social Media Post: on an account's public feed. Channel Post: sent to a broadcast channel, as on Telegram. Reposted Content: material the account did not originate."]];
   var ACCESS = [["paywalled", "Paywalled"], ["metered paywall", "Metered paywall"], ["free registration required", "Free registration required"], ["institutional access", "Institutional access"], ["region-restricted", "Region-restricted"], ["app only", "App only"], ["other", "Something else"]];
 
-  var TEXT_KEYS = ['lead', 'authors', 'contribs', 'contribRole', 'title', 'titleStyle', 'transTitle', 'origLang', 'transBy', 'location', 'descType', 'descDetails', 'accessNote', 'rating', 'publisher', 'date', 'dateKind', 'accessed', 'url', 'archiveUrl', 'archiveDate', 'locator', 'note', 'shortName', 'shortTitle'];
+  var TEXT_KEYS = ['lead', 'authors', 'editors', 'translators', 'contributors', 'title', 'titleStyle', 'transTitle', 'origLang', 'transBy', 'location', 'descType', 'descDetails', 'accessNote', 'rating', 'publisher', 'date', 'dateKind', 'accessed', 'url', 'archiveUrl', 'archiveDate', 'locator', 'note', 'shortName', 'shortTitle'];
   var SLOT_NAMES = [['author', 'Author'], ['title', 'Title'], ['location', 'Location'], ['description', 'Description'], ['publisher', 'Publisher'], ['date', 'Date'], ['url', 'URL/DOI'], ['locator', 'Locator']];
   var SLOT_MARK = { filled: '✓', dropped: '–', missing: '!', nd: 'n.d.' };
   var SLOT_WORD = { filled: 'filled', dropped: 'dropped', missing: 'missing', nd: 'no date' };
@@ -1273,28 +1336,29 @@ var OSINT = (function () {
     TEXT_KEYS.forEach(function (k) { st[k] = $(k).value; });
     st.access = checkedValues('access');
     st.quals = checkedValues('qual');
+    st.langMode = checkedValues('langMode')[0] || 'en';
     st.shortUseTitle = $('shortUseTitle').checked;
     var t = TYPES[st.type];
     st.volatile = !!t.volatile; st.live = !!t.live; st.dayDate = !!t.dayDate; st.ai = !!t.ai;
     return st;
   }
   function write(st) {
+    st = C.upgradeState(st);
     var r = $('type-' + (TYPES[st.type] ? st.type : 'news'));
     if (r) r.checked = true;
     TEXT_KEYS.forEach(function (k) { $(k).value = st[k] == null ? '' : st[k]; });
     setChecked('access', st.access);
     setChecked('qual', st.quals);
     $('qualBox').open = Array.isArray(st.quals) && st.quals.length > 0;
-    if (!$('contribRole').value) $('contribRole').value = 'ed';
     if (!$('titleStyle').value) $('titleStyle').value = TYPES[currentType()].style;
     $('shortUseTitle').checked = st.shortUseTitle !== false;
-    $('transBox').open = !!(st.transTitle || st.origLang || st.transBy);
+    $('lang-' + st.langMode).checked = true;
   }
   function blank(type) {
     var st = { type: type, shortUseTitle: true };
     TEXT_KEYS.forEach(function (k) { st[k] = ''; });
     st.access = []; st.quals = [];
-    st.contribRole = 'ed'; st.titleStyle = TYPES[type].style;
+    st.langMode = 'en'; st.titleStyle = TYPES[type].style;
     return st;
   }
   function sampleState(type) {
@@ -1376,6 +1440,7 @@ var OSINT = (function () {
     $('qualCount').textContent = st.quals.length ? st.quals.length + ' ticked' : 'optional';
     describeType(st.descType);
     paintArchive(st);
+    paintLang(st);
 
     var strip = $('strip'); strip.textContent = '';
     SLOT_NAMES.forEach(function (s) {
@@ -1607,6 +1672,46 @@ var OSINT = (function () {
     if (!clearArmed) { clearArmed = true; b.textContent = 'Click again to empty the list'; setTimeout(function () { clearArmed = false; b.textContent = 'Empty the list'; }, 4000); return; }
     clearArmed = false; b.textContent = 'Empty the list'; var left = releaseFile(); saved = []; editingId = null; listChanged(); renderSaved(); render();
     if (left) fileSay('List emptied. ' + left + ' was left as it was and is no longer linked.');
+  });
+
+  // ---- language of the source ----
+  var LANGS = ['Arabic', 'Armenian', 'Azerbaijani', 'Belarusian', 'Bengali', 'Burmese', 'Chinese', 'Czech', 'Dari', 'Dutch', 'Finnish', 'French', 'Georgian', 'German', 'Greek', 'Hausa', 'Hebrew', 'Hindi', 'Hungarian', 'Indonesian', 'Italian', 'Japanese', 'Kazakh', 'Korean', 'Kurdish', 'Malay', 'Pashto', 'Persian', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Serbian', 'Somali', 'Spanish', 'Swahili', 'Swedish', 'Tagalog', 'Thai', 'Turkish', 'Ukrainian', 'Urdu', 'Uzbek', 'Vietnamese'];
+  LANGS.forEach(function (x) { var o = document.createElement('option'); o.value = x; $('langList').appendChild(o); });
+  var ROMAN = [[/chinese|mandarin|cantonese/i, 'Romanize names in pinyin without tone marks.'], [/russian|ukrainian|belarusian|bulgarian|serbian|kazakh|kyrgyz|macedonian|mongolian|tajik/i, 'Romanize Cyrillic names by BGN/PCGN.'], [/japanese/i, 'Romanize names by Hepburn.'], [/korean/i, 'Romanize names by Revised Romanization.']];
+  function paintLang(st) {
+    var mode = st.langMode, foreign = mode === 'foreign', pub = mode === 'published', lang = st.origLang.trim(), hint = '', adds = '', bits = [], parts = [], i;
+    $('langPanel').hidden = mode === 'en';
+    $('transByWrap').hidden = !foreign; $('transTitleWrap').hidden = !foreign; $('goTranslatorsRow').hidden = !pub;
+    $('origLangLabel').textContent = pub ? 'Translated from' : 'Which language';
+    $('titleLabel').textContent = foreign ? 'Title in the original language' : (pub ? 'Title of the English translation' : 'Title');
+    if (foreign) {
+      for (i = 0; i < ROMAN.length; i++) if (ROMAN[i][0].test(lang)) { hint = ROMAN[i][1] + ' '; break; }
+      if (/ukrainian/i.test(lang)) hint += 'Ukrainian place names take their Ukrainian forms (Kyiv, Odesa, Kharkiv) unless you are quoting. ';
+      hint += 'Where a person or organization has its own English spelling, use that.';
+      if (st.transBy === 'machine') bits.push('machine translation');
+      if (lang) bits.push('original in ' + lang);
+      if (st.transBy === 'own') bits.push('translation by author');
+      if (st.transTitle.trim()) parts.push('the English title in brackets after the original title');
+      if (bits.length) parts.push('"' + bits.join('; ') + '" inside the description bracket');
+      adds = parts.length ? 'This adds ' + parts.join(', and ') + '.' : 'Give the language and the title in English, and both appear in the footnote.';
+    } else if (pub) {
+      hint = 'Give the title as the translation prints it, and credit the translator under Translators in slot 1.';
+      adds = lang ? 'This adds "translated from ' + lang + '" inside the description bracket.' : 'Naming the original language adds "translated from …" inside the description bracket.';
+    }
+    $('langHint').textContent = hint; $('langAdds').textContent = adds;
+  }
+  $('goTranslators').addEventListener('click', function () { $('translators').focus(); });
+
+  // ---- theme ----
+  var K_THEME = 'osint-cite-theme-v1', rootEl = document.documentElement;
+  var hostTheme = typeof window.__osintHostTheme === 'string' ? window.__osintHostTheme : (rootEl.getAttribute('data-theme') || '');
+  function applyTheme(v) {
+    if (v === 'light' || v === 'dark') rootEl.setAttribute('data-theme', v);
+    else if (hostTheme) rootEl.setAttribute('data-theme', hostTheme);
+    else rootEl.removeAttribute('data-theme');
+  }
+  ['themeAuto', 'themeLight', 'themeDark'].forEach(function (id) {
+    $(id).addEventListener('change', function () { if (!$(id).checked) return; store(K_THEME, $(id).value); applyTheme($(id).value); });
   });
 
   // ---- start from a link, archive helper, list audit ----
@@ -1893,7 +1998,8 @@ var OSINT = (function () {
   // boot
   var nm = load(K_NAME); if (typeof nm === 'string') $('listName').value = nm;
   var ital = load(K_ITAL); if (ital === 'u') $('italU').checked = true;
-  var list = load(K_LIST); if (Array.isArray(list)) saved = list.filter(function (x) { return x && x.st && TYPES[x.st.type]; });
+  var th = load(K_THEME); if (th === 'light' || th === 'dark') { $(th === 'light' ? 'themeLight' : 'themeDark').checked = true; applyTheme(th); }
+  var list = load(K_LIST); if (Array.isArray(list)) saved = list.filter(function (x) { return x && x.st && TYPES[x.st.type]; }).map(function (x) { x.st = C.upgradeState(x.st); return x; });
   var draft = load(K_DRAFT);
   if (draft && draft.st && TYPES[draft.st.type]) { usingExample = !!draft.usingExample; write(draft.st); }
   else { usingExample = true; write(sampleState('news')); }

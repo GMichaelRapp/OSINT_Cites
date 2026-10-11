@@ -62,6 +62,26 @@ Share and tracking parameters are removed from the link. Fields you have already
 
 Under the link field, **Wayback Machine** and **archive.today** open that archive in a new tab and hand it the link, so you can make a copy at the moment you cite. **Look for existing copies** opens the Wayback Machine's list for the link. When you paste the archive's address back, the capture date fills in: from the address if it carries one, otherwise today.
 
+### Editors, translators, and contributors
+
+Each role has its own field under Authors, so a source can carry all three. They follow the authors after a semicolon, with every name tagged: `Author; Editor (ed.), Translator (trans.), and Contributor (contr.)`.
+
+### Sources not in English
+
+Under the title, **Language of the source** has three settings:
+
+| Setting | What you enter | What the footnote gets |
+|---|---|---|
+| English | Nothing more | Nothing more |
+| Another language | The language, the title in English, and how you read it: in the original, through your own translation, or through machine translation | The English title in brackets after the original title, and wording such as `original in Chinese` or `machine translation; original in Russian` in the description bracket |
+| A published English translation | The language it was translated from, and the translator under Translators | `translated from Russian` in the description bracket, and the translator credited with `(trans.)` |
+
+A line under the fields says what the setting adds. For Chinese, Cyrillic-script languages, Japanese, and Korean it also names the romanization standard the guide uses for names.
+
+### Light and dark
+
+The Theme switch at the top right offers Auto, Light, and Dark. Auto follows your device. Your choice is remembered in that browser.
+
 ## Your data
 
 The page runs entirely in your browser and makes no network requests of its own. What you type is kept in that browser's local storage on your device, so it is still there when you come back.
@@ -93,7 +113,7 @@ You can also export the footnotes as:
 ```json
 {
   "app": "OSINT Citation Generator",
-  "format": 1,
+  "format": 2,
   "name": "Name of the piece",
   "savedAt": "2026-10-10T23:10:00.000Z",
   "sources": [
@@ -106,7 +126,7 @@ You can also export the footnotes as:
 }
 ```
 
-`footnote` is there so the file can be read without the tool. Only `fields` is used when a file is opened, and the footnote is rebuilt from it.
+`footnote` is there so the file can be read without the tool. Only `fields` is used when a file is opened, and the footnote is rebuilt from it. Files saved by earlier versions still open; names from the old combined editors, translators, and contributors box are moved into the three separate fields.
 
 ## Examples in the tool
 
@@ -114,9 +134,9 @@ Each source type loads an example. Some are real, checkable sources. Those that 
 
 ## Status
 
-This is version 3.0 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
+This is version 3.1 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
 
-Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool. The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
+Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool. So is `translated from …` for a published translation. The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
 
 ## License
 
@@ -159,7 +179,7 @@ The version number appears in two places in `index.html`: the label beside the p
 node Tests/run.js
 ```
 
-This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, and the list audit. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
+This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, the list audit, the three roles, and the language settings. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
 
 ### Hosting
 
