@@ -222,5 +222,63 @@ eq(msgs(blank('quotes', Object.assign({}, RU, { langMode: 'foreign', origLang: '
 eq(msgs(blank('quotes', Object.assign({}, RU, { langMode: 'foreign', transTitle: '' }))).includes('note:Add the title in English'), true, 'language: missing English title noted');
 eq(msgs(blank('italics', Object.assign({ langMode: 'published', authors: 'A One' }, BOOK))).includes('note:A published translation credit'), true, 'language: published translation with no translator noted');
 
+// ---- 10. The description library, the search words, and the tips ----
+const LIB = JSON.parse(ui.match(/var LIB = (\[.*\]);\n/)[1]);
+const ALL_TERMS = LIB.flatMap((c) => c.g.flatMap((g) => g.i));
+const TERMS = new Set(ALL_TERMS);
+eq(ALL_TERMS.length, 771, 'library: 771 descriptions');
+eq(TERMS.size, ALL_TERMS.length, 'library: no description is listed twice');
+eq(LIB.length, 16, 'library: 16 categories');
+// The guide's own chapter example uses a description that the draft library does not list yet.
+const GUIDE_ONLY = ['Long-Form Publication by Think Tank'];
+const known = (x) => TERMS.has(x) || GUIDE_ONLY.includes(x);
+eq(TYPE_NAMES.flatMap((k) => TYPES[k].picks.filter((x) => !known(x))).join(', '), '', 'library: every suggested description is in it');
+eq(TYPE_NAMES.filter((k) => !known(TYPES[k].sample.descType)).join(', '), '', 'library: every example uses a description from it');
+const ALIASES = JSON.parse(ui.match(/var ALIASES = (\{.*\});\n/)[1]);
+eq(Object.values(ALIASES).flat().filter((x) => !TERMS.has(x)).join(', '), '', 'search: every everyday word points at a library description');
+eq(Object.keys(ALIASES).filter((k) => k !== k.toLowerCase()).join(', '), '', 'search: everyday words are stored in lower case');
+const TIPS = JSON.parse(ui.match(/var TIPS = (\[[\s\S]*?\n {2}\]);/)[1]);
+const markup = html.slice(0, html.indexOf('<script id="core">'));
+const orphan = TIPS.filter(([sel]) => {
+  const id = sel.match(/^#([\w-]+)/), f = sel.match(/for="([\w-]+)"/);
+  return !(id ? markup.includes('id="' + id[1] + '"') : f && markup.includes('for="' + f[1] + '"'));
+}).map((t) => t[0]);
+eq(orphan.join(', '), '', 'tips: every tip belongs to a part of the page');
+eq(TIPS.filter((t) => t[1].length < 40 || !/[.)]$/.test(t[1])).map((t) => t[0]).join(', '), '', 'tips: every tip is a full sentence or more');
+eq(new Set(TIPS.map((t) => t[0])).size, TIPS.length, 'tips: no part has two');
+const SLOT_HEADS = ['h-author', 'h-title', 'h-loc', 'h-desc', 'h-pub', 'h-date', 'h-url', 'h-locator'];
+eq(SLOT_HEADS.filter((h) => !TIPS.some((t) => t[0] === '#' + h)).join(', '), '', 'tips: each of the eight slots has one');
+
+// ---- 11. Journal review status, book kinds, social post titles ----
+const flagged = (st, level, start) => O.build(st).checks.some((c) => c.level === level && c.msg.startsWith(start));
+const JR = { authors: 'A One', title: 'An Article', location: 'A Journal', date: '2020' };
+const jr = (kind, quals) => blank('quotes', Object.assign({}, JR, { descType: kind, quals: quals || [] }));
+eq(md(jr('Journal Article', ['review status unclear'])), 'A One, "An Article," *A Journal* [Journal Article; review status unclear] (2020).', 'journal: review status that could not be established');
+eq(md(jr('Journal Article', ['student-edited'])), 'A One, "An Article," *A Journal* [Journal Article; student-edited] (2020).', 'journal: student-edited');
+eq(flagged(jr('Journal Article'), 'check', 'Journal Article says nothing about review'), true, 'journal: Journal Article with no review status is flagged');
+eq(flagged(jr('Journal Article', ['editor-reviewed']), 'check', 'Journal Article says nothing about review'), false, 'journal: and not once the status is given');
+eq(flagged(jr('Peer-Reviewed Article'), 'check', 'Journal Article says nothing about review'), false, 'journal: Peer-Reviewed Article needs no qualifier');
+eq(flagged(jr('Peer-Reviewed Article', ['not peer-reviewed']), 'check', 'The description says peer-reviewed and a qualifier says otherwise'), true, 'journal: description and qualifier that disagree are flagged');
+eq(flagged(jr('Journal Article', ['peer-reviewed', 'student-edited']), 'check', 'More than one review status is ticked'), true, 'journal: two review statuses are flagged');
+eq(flagged(jr('Peer-Reviewed Article', ['peer-reviewed']), 'note', 'Peer-Reviewed Article already says it'), true, 'journal: a repeated peer-reviewed qualifier is noted');
+eq(flagged(jr('Journal Article', ['review status unclear']), 'note', 'Review status not established'), true, 'journal: unclear status carries a reminder');
+const other = Object.assign(jr('Journal Article', ['review status unclear']), { authors: 'B Two', title: 'Another Article' });
+eq(O.auditList([jr('Journal Article'), other]).attention, 1, 'journal: the list audit catches the one with no status');
+
+const bk = (kind, pub) => blank('italics', { authors: 'A One', title: 'A Book', descType: kind, publisher: pub, date: '2018' });
+eq(flagged(bk('Trade Book', 'Cornell University Press'), 'note', 'Trade Book from a university press'), true, 'book: Trade Book from a university press is noted');
+eq(flagged(bk('Monograph', 'Penguin Press'), 'note', 'Monograph from a commercial publisher'), true, 'book: Monograph from a trade house is noted');
+eq(flagged(bk('Monograph', 'Cornell University Press'), 'note', 'Monograph from'), false, 'book: Monograph from a university press passes');
+eq(flagged(bk('Trade Book', 'Penguin Press'), 'note', 'Trade Book from'), false, 'book: Trade Book from a trade house passes');
+eq(flagged(bk('Monograph', 'Palgrave Macmillan'), 'note', 'Monograph from'), false, 'book: an academic commercial press is left alone');
+
+const LONG_POST = 'BREAKING: Multiple explosions reported near the port tonight, air defense active over the city, residents told to stay in shelters until further notice #Odesa';
+const CUT_POST = 'BREAKING: Multiple explosions reported near the port tonight, air defense active over…';
+eq(flagged(state('social', { title: LONG_POST }), 'note', 'The post title runs 24 words'), true, 'social: a long post title is noted');
+eq(flagged(state('social', { title: CUT_POST }), 'note', 'The post title runs'), false, 'social: a dozen opening words pass');
+eq(flagged(state('social', { title: LONG_POST, titleStyle: 'plain' }), 'note', 'The post title runs'), false, 'social: a plain description is left alone');
+eq(flagged(state('news', { title: LONG_POST }), 'note', 'The post title runs'), false, 'social: long titles elsewhere are left alone');
+eq(md(state('social', { title: CUT_POST })).startsWith('ExampleMonitor, "' + CUT_POST + '," *X* [Social Media Post; C3]'), true, 'social: a cut title keeps its ellipsis inside the quotation marks');
+
 console.log(failed ? `\n${failed} failed, ${passed} passed` : `All ${passed} checks passed.`);
 process.exit(failed ? 1 : 0);
