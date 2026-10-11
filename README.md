@@ -97,6 +97,24 @@ This is version 2.1 of the tool. It follows version 1.4 of the OSINT Style Guide
 
 Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool.
 
+## License
+
+© 2026 G. Michael Rapp. Two licenses apply.
+
+| What | License | Full terms |
+|---|---|---|
+| The software: the page's markup, styles, and scripts, and the test script | MIT | `LICENSE-MIT` |
+| The guide content the page carries: the citation rules, the description library, the qualifier and access lists, and the written guidance | [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0) | `LICENSE-CC-BY-4.0` |
+
+In short:
+
+- You may use, change, and redistribute the code for any purpose, as long as the copyright and license notice stay with it.
+- You may copy and adapt the guide content, including commercially, as long as you give credit, link to the license, and say whether you made changes.
+
+A suitable credit line for the guide content:
+
+> OSINT Citation Generator by G. Michael Rapp, https://github.com/gmichaelrapp/OSINT_Cites, licensed under CC BY 4.0.
+
 ## Suggesting a change
 
 Open an issue if a description is missing from the library, a rule is applied wrongly, or a source type you cite often has no good fit. Say what you were citing and what you expected the footnote to look like.
@@ -117,10 +135,10 @@ The version number appears in two places in `index.html`: the label beside the p
 ### Tests
 
 ```
-node tests/run.js
+node Tests/run.js
 ```
 
-This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, and the three exports. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `tests/run.js` to match.
+This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, and the three exports. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
 
 ### Hosting
 
