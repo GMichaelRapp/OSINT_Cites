@@ -156,6 +156,14 @@ A suitable credit line for the guide content:
 
 > OSINT Citation Generator by G. Michael Rapp, https://github.com/gmichaelrapp/OSINT_Cites, licensed under CC BY 4.0.
 
+## For AI assistants
+
+`osint-citation-spec.md` is the citation form written out as instructions an AI assistant can follow. Give your assistant the file, or its address, and ask it to cite that way:
+
+https://gmichaelrapp.github.io/OSINT_Cites/osint-citation-spec.md
+
+The file tells the assistant to cite only sources it actually opened, never to guess a missing detail, and not to assign ratings. It also describes how to hand sources to this tool as a list file, so that the tool does the formatting and a person runs the audit and checks each link. Every example footnote in the file was produced by the tool.
+
 ## Suggesting a change
 
 Open an issue if a description is missing from the library, a rule is applied wrongly, or a source type you cite often has no good fit. Say what you were citing and what you expected the footnote to look like.
