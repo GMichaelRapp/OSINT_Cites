@@ -43,7 +43,38 @@ The tool does a few things for you:
 - A publisher that repeats the location is dropped.
 - It writes the short form and `Ibid.` for later citations of the same source.
 
-The kind-of-source field searches a library of 770 descriptions in 16 categories. You can also type your own.
+Every part of the page has a **?** beside it. Point at it, tap it, or press F1 while you are in a field, and it explains what that part is for and what to put there.
+
+### Choosing the kind of source
+
+The kind-of-source field opens a list of all 771 descriptions in 16 categories.
+
+- **Browse** shows the descriptions most used for the source type you picked, then the whole library by category. Click a category to open it.
+- Typing searches the library. Everyday words work as well as the library's own terms: `tweet` finds Social Media Post, `study` finds Peer-Reviewed Article and Journal Article, `telegram` finds Channel Post.
+- Pointing at a description, or moving to it with the arrow keys, shows its category and how it differs from its neighbors.
+- If nothing fits, keep your own wording in ten words or fewer.
+
+### Journal articles and review status
+
+For a journal article the tool asks for the **review status of the journal**, so the bracket tells the reader whether anyone refereed the work.
+
+| Status you choose | What the bracket says |
+|---|---|
+| Peer-reviewed | `[Peer-Reviewed Article]` |
+| Editor-reviewed | `[Journal Article; editor-reviewed]` |
+| Student-edited | `[Journal Article; student-edited]` |
+| Not peer-reviewed | `[Journal Article; not peer-reviewed]` |
+| Could not establish | `[Journal Article; review status unclear]` |
+
+Check the journal's own statement, usually under About or For Authors. A Journal Article with no status is flagged by the checks and by the list audit. Other journal descriptions, such as Review Article or Law Review Article, keep their name and take the status as a qualifier.
+
+### Books: Monograph or Trade Book
+
+Look at the publisher and the back of the book. A university or academic press, with notes and a bibliography, written for specialists, is a Monograph. A commercial house, written for general readers, is a Trade Book, even when a scholar wrote it. If you cannot tell, use Trade Book. The checks leave a note when the description and the publisher point different ways, such as a Trade Book from a university press.
+
+### Social media posts
+
+A post has no headline. Use its opening words exactly as written, about a dozen, and end with an ellipsis if you stop short. When a title runs past fifteen words, **Cut to the opening words** does this for you. If the post has no text, describe it in a few plain words and set the title as Plain.
 
 ### Starting from a link
 
@@ -134,9 +165,17 @@ Each source type loads an example. Some are real, checkable sources. Those that 
 
 ## Status
 
-This is version 3.1 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
+This is version 3.2 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
 
-Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool. So is `translated from …` for a published translation. The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
+Some conventions were introduced with this tool and are not yet in the published guide:
+
+- access notes in the bracket, such as `paywalled`
+- `translated from …` for a published translation
+- the description Journal Article, used with a review-status qualifier when a journal is not peer-reviewed or its review could not be established
+- the default of Trade Book when a book could be either a Monograph or a Trade Book
+- the opening words of a social media post as its title
+
+The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
 
 ## License
 
@@ -174,10 +213,12 @@ Everything is in `index.html`: markup, styles, and two scripts.
 
 - `<script id="core">` holds the formatter. It has no dependence on the page, which is what lets the tests run it directly. `build()` assembles the footnote and the checks. `readLink()` reads a pasted link, using the `SITES` table of known hosts, and `auditList()` checks a whole list. The file formats (`listFile`, `parseListFile`, `docxBytes`, `csvText`, `mdText`) are here too.
 - The second script is the page itself. Near its top are the tables you are most likely to edit:
-  - `TYPES`: the source types, their default title style, suggested descriptions, placeholder text, and built-in example
+  - `TYPES`: the source types, their default title style, suggested descriptions, placeholder text, and built-in example. A type can also carry `advice` (shown under the kind-of-source field) and `titleHint` (shown under the title).
   - `LIB`: the description library, grouped by category
   - `QUALIFIERS` and `ACCESS`: the tick-box vocabularies
   - `NEIGHBORS`: the notes that tell similar descriptions apart
+  - `ALIASES`: the everyday words that the search understands, each pointing at one or more library descriptions
+  - `TIPS`: the text behind each **?**, paired with the part of the page it belongs to
 
 The version number appears in two places in `index.html`: the label beside the page title and the footer.
 
@@ -187,7 +228,7 @@ The version number appears in two places in `index.html`: the label beside the p
 node Tests/run.js
 ```
 
-This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, the list audit, the three roles, and the language settings. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
+This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, the list audit, the three roles, the language settings, and the checks for journals, books, and social posts. It also confirms that every suggested description and every search word points at a real library entry, and that every tip belongs to a part of the page. Run it after any change to the formatter, an example, or one of the tables. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match. If you add or remove a library description, update the count in `Tests/run.js` and in the page footer.
 
 ### Hosting
 

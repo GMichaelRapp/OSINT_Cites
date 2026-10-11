@@ -2,7 +2,7 @@
 
 This file tells an AI assistant how to cite sources in the form set out by the OSINT Style Guide. Give it to your assistant, or point the assistant at this address, and ask it to cite this way.
 
-It matches version 3.1 of the OSINT Citation Generator: https://gmichaelrapp.github.io/OSINT_Cites/
+It matches version 3.2 of the OSINT Citation Generator: https://gmichaelrapp.github.io/OSINT_Cites/
 
 The point of the form is that a reader can find every source and judge it before trusting it. A citation that cannot be followed, or that hides what kind of thing it points to, has failed even if it is formatted correctly.
 
@@ -81,14 +81,14 @@ Example: `[Peer-Reviewed Article; Vol. 38, No. 2; original in Chinese; instituti
 
 ## What goes in the description bracket
 
-**Kind of source.** Use the most specific term that fits. The full library has 770 terms and can be browsed in the generator. These are the ones most often needed:
+**Kind of source.** Use the most specific term that fits. The full library has 771 terms and can be browsed in the generator. These are the ones most often needed:
 
 - News and analysis: News Article, Wire Service Report, News Analysis, Investigative Report, Magazine Article, Editorial / Op-Ed, State Media Report, Fact-Check
 - Social and web: Social Media Post, Channel Post, Thread, Video Post, Short-Form Video, Forum Post, Blog Post, Web Page, Deleted Post (Archived), Screenshot (Provenance Unverified)
 - Video and audio: Video, Podcast, Recorded Interview, Broadcast Transcript, Combat Footage, Drone Footage
 - Government and legal: Government Report, Government Press Release, Government Web Page, CRS Report, GAO Report, National Strategy Document, Defense White Paper, Executive Order, Public Law / Statute, Court Filing, Indictment, Sanctions List, Declassified Document, FOIA-Released Document
 - Books: Monograph, Trade Book, Edited Volume, Book Section, Textbook, Memoir, Biography, Novel
-- Research: Peer-Reviewed Article, Preprint Paper, Working Paper, Conference Paper, Dissertation, Think Tank Report, Policy Brief, Policy Analysis, Defense Analysis Article
+- Research: Peer-Reviewed Article, Journal Article, Preprint Paper, Working Paper, Conference Paper, Dissertation, Think Tank Report, Policy Brief, Policy Analysis, Defense Analysis Article
 - Imagery and tracking: Commercial Satellite Imagery, Annotated Satellite Imagery, Geolocation Analysis, Flight Tracking Data, Ship Tracking (AIS), Interactive Map
 - Other: Archival Material, Primary Source, Leaked Document, Corporate Press Release, Annual Report, Threat Intelligence Report, Human Rights Report, Open-Source Investigation, AI Model Output
 
@@ -97,8 +97,12 @@ If nothing fits, write a plain description of ten words or fewer.
 Three choices come up often:
 
 - A post that is mainly a video is a Video Post, or a Short-Form Video on TikTok, Reels, or Shorts. A text or image post is a Social Media Post, or a Channel Post when it was sent to a broadcast channel such as a Telegram channel.
-- Call a journal article a Peer-Reviewed Article only when you know the journal is refereed. When you do not know, write Journal Article and add the qualifier `review status unclear`.
-- A Monograph is a scholarly book making one sustained argument. A Trade Book is written for general readers. When you cannot tell, use Trade Book.
+- Call a journal article a Peer-Reviewed Article only when you know the journal sends its articles to outside referees. Where the journal reviews some other way, write Journal Article and add the qualifier that fits: `editor-reviewed`, `student-edited`, or `not peer-reviewed`. When you do not know, write Journal Article and add `review status unclear`. Never leave Journal Article without one of these four.
+- A Monograph is a scholarly book making one sustained argument for specialists, usually from a university or academic press. A Trade Book is written for general readers, usually from a commercial house, even when a scholar wrote it. When you cannot tell, use Trade Book.
+
+A journal article whose review status you could not establish (a placeholder source, to show the form):
+
+Jane Doe, "Port Capacity and Naval Logistics in the Eastern Mediterranean," *Example Journal of Maritime Studies* [Journal Article; Vol. 12, No. 3; review status unclear] (2024): pp. 45–67.
 
 **Qualifiers.** These describe this copy of the source, not its kind. Use only the ones that apply. The format qualifiers are for a source you have in an unexpected form, such as a speech you are citing from its transcript; a Video Post does not also need `video`.
 

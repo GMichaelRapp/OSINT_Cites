@@ -117,16 +117,12 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 [hidden] { display: none !important; }
 .chip.box input:checked + span::before { content: '\2713\00a0'; }
 .ver { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 3px; padding: 2px 7px; vertical-align: middle; margin-left: 4px; }
-.lib { display: flex; flex-direction: column; }
-.lib details.cat { border-top: 1px solid var(--line); padding: 6px 0; }
-.lib details.cat > summary { cursor: pointer; font-size: 13.5px; font-weight: 500; }
-.lib .cnt, .qg .cnt { color: var(--muted); font-weight: 400; font-family: var(--font-mono); font-size: 11.5px; margin-left: 6px; }
-.lib .g, .qg { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; padding: 6px 0; align-items: start; }
-.lib .gn, .qg .gn { font-size: 12.5px; color: var(--muted); padding-top: 4px; }
+.qg { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; padding: 6px 0; align-items: start; }
+.qg .gn { font-size: 12.5px; color: var(--muted); padding-top: 4px; }
 .qgroups { display: flex; flex-direction: column; }
 .qg { border-top: 1px solid var(--line); }
 .qg:first-child { border-top: 0; }
-@media (max-width: 600px) { .lib .g, .qg { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+@media (max-width: 600px) { .qg { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
 
 .btn { font: inherit; font-size: 13.5px; font-weight: 500; padding: 7px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; white-space: nowrap; }
 .btn:hover { border-color: var(--accent); }
@@ -213,6 +209,36 @@ a.btn { text-decoration: none; display: inline-block; }
 .audit .who { font: inherit; font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); background: none; border: 0; padding: 0; margin-right: 6px; cursor: pointer; text-decoration: underline; }
 #fallbackBox { font-family: var(--font-mono); font-size: 12px; }
 .foot { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 72ch; }
+
+/* kind of source: a list that opens under the field */
+.combo { position: relative; min-width: 0; }
+.menu { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30; background: var(--surface); border: 1px solid var(--accent); border-radius: 5px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); display: flex; flex-direction: column; max-height: 520px; overflow: hidden; }
+.menuhead, .menunote { flex: 0 0 auto; }
+.menuhead { margin: 0; font-size: 12px; color: var(--muted); padding: 7px 10px; border-bottom: 1px solid var(--line); }
+.menulist { position: relative; overflow-y: auto; overscroll-behavior: contain; padding: 4px 0; flex: 1 1 auto; min-height: 0; }
+.menulist .sec { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 9px 10px 3px; }
+.menulist .grp { font-size: 12px; color: var(--muted); padding: 7px 10px 2px 24px; }
+.menulist .none { font-size: 13px; color: var(--muted); padding: 10px; }
+.opt { display: flex; gap: 10px; align-items: baseline; justify-content: space-between; padding: 5px 10px; font-size: 13.5px; cursor: pointer; }
+.opt.in { padding-left: 24px; }
+.opt .where { font-size: 11.5px; color: var(--muted); text-align: right; flex: 0 1 auto; }
+.opt.cat { font-weight: 500; }
+.opt.cat .where { font-family: var(--font-mono); }
+.opt.active { background: var(--accent-soft); color: var(--accent); }
+.opt.current .nm::after { content: ' \2713'; }
+.menunote { margin: 0; font-size: 12.5px; color: var(--muted); padding: 8px 10px; border-top: 1px solid var(--line); background: var(--bg); height: calc(5.8em + 16px); overflow-y: auto; }
+@media (hover: none) { .menunote { height: auto; max-height: calc(4.35em + 16px); } }
+.advice { font-size: 12.5px; margin: 0; padding: 8px 10px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 4px 4px 0; }
+
+/* tips */
+.labrow { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.labrow > label, .labrow > .label { font-size: 13px; font-weight: 500; }
+.eyebrow .labrow { gap: 7px; }
+.tip { position: relative; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 16px; width: 16px; height: 16px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--muted); font: 500 10.5px/1 var(--font-mono); letter-spacing: 0; text-transform: none; cursor: help; }
+.tip::after { content: ''; position: absolute; inset: -6px; }
+.tip:hover, .tip[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+summary .tip { margin-left: 6px; vertical-align: middle; }
+.tipbox { position: fixed; z-index: 60; left: 0; top: 0; width: max-content; max-width: min(320px, calc(100vw - 24px)); background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.45; padding: 9px 11px; border-radius: 5px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) { .btn, .mc, .pick { transition: border-color 120ms ease, filter 120ms ease; } }
 </style>
 </head>
@@ -224,7 +250,7 @@ a.btn { text-decoration: none; display: inline-block; }
 <div class="wrap">
   <header class="mast">
     <div class="masttop">
-      <h1>OSINT Citation Generator <span class="ver">v3.1</span></h1>
+      <h1>OSINT Citation Generator <span class="ver">v3.2</span></h1>
       <div class="optline">
         <span id="themeLabel">Theme</span>
         <span class="seg" role="radiogroup" aria-labelledby="themeLabel">
@@ -234,7 +260,7 @@ a.btn { text-decoration: none; display: inline-block; }
         </span>
       </div>
     </div>
-    <p>Pick a source type and fill the eight slots. The footnote assembles in house order with its punctuation, and slots that do not apply drop out along with theirs.</p>
+    <p>Pick a source type and fill the eight slots. The footnote assembles in house order with its punctuation, and slots that do not apply drop out along with theirs. A ? beside each part explains it, and F1 in any field shows the same tip.</p>
     <div class="pattern" aria-label="The citation pattern">Author, "Title," <i>Location</i> [Description] (Publisher: Date) URL/DOI: Locator.</div>
   </header>
 
@@ -254,7 +280,7 @@ a.btn { text-decoration: none; display: inline-block; }
       </div>
 
       <div class="slot">
-        <h2>Source type</h2>
+        <h2 id="h-type">Source type</h2>
         <fieldset class="types" id="types"><legend class="hint" style="padding:0;margin-bottom:8px">Sets the title style, the usual description, and which rules get checked.</legend></fieldset>
         <div class="formbar">
           <button type="button" class="btn small" id="clearBtn">Clear the form</button>
@@ -301,7 +327,11 @@ a.btn { text-decoration: none; display: inline-block; }
           <div class="field" style="grid-column: span 2; min-width: 0">
             <label for="title" id="titleLabel">Title</label>
             <input type="text" id="title" placeholder="As the source gives it">
-            <p class="hint">Keep the source's own capitalization. Reproduce an error and follow it with [sic].</p>
+            <p class="hint" id="titleHint"></p>
+            <div class="formbar" id="trimRow" hidden>
+              <button type="button" class="btn small" id="trimTitle">Cut to the opening words</button>
+              <span class="hint" id="trimNote"></span>
+            </div>
           </div>
           <div class="field">
             <label for="titleStyle">Set as</label>
@@ -361,19 +391,33 @@ a.btn { text-decoration: none; display: inline-block; }
         <h2 id="h-desc"><span class="num">4</span> Description <span class="aside">the bracket, never dropped</span></h2>
         <div class="field">
           <label for="descType">Kind of source</label>
-          <input type="text" id="descType" list="descList" placeholder="Start typing to search the library, or browse it below">
-          <datalist id="descList"></datalist>
+          <div class="combo" id="descCombo">
+            <div class="withbtn">
+              <input type="text" id="descType" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="descMenu" autocomplete="off" placeholder="Type to search, or browse the list">
+              <button type="button" class="btn" id="descOpen" tabindex="-1" aria-label="Browse all descriptions" aria-expanded="false" aria-controls="descMenu">Browse <span aria-hidden="true">&#9662;</span></button>
+            </div>
+            <div class="menu" id="descMenuWrap" hidden>
+              <p class="menuhead" id="descMenuHead"></p>
+              <div class="menulist" id="descMenu" role="listbox" aria-label="Descriptions"></div>
+              <p class="menunote" id="descMenuNote"></p>
+            </div>
+          </div>
           <div class="picks" id="picks" aria-label="Common descriptions for this source type"></div>
+          <p class="advice" id="descAdvice" hidden></p>
           <p class="hint" id="descHint"></p>
         </div>
-        <details class="more" id="libBox">
-          <summary>Browse the library <span class="aside" id="libCount"></span></summary>
-          <div class="inner">
-            <input type="text" id="libFilter" placeholder="Filter: treaty, poll, footage, leak …" aria-label="Filter the library" autocomplete="off">
-            <div class="lib" id="lib"></div>
-            <p class="hint">Pick the most specific description that fits. If nothing fits, write a plain description of ten words or fewer and send a note so it can be added.</p>
-          </div>
-        </details>
+        <div class="field" id="reviewWrap" hidden style="max-width:340px">
+          <label for="reviewStatus">Review status of the journal</label>
+          <select id="reviewStatus">
+            <option value="">Not set</option>
+            <option value="peer-reviewed">Peer-reviewed</option>
+            <option value="editor-reviewed">Editor-reviewed</option>
+            <option value="student-edited">Student-edited</option>
+            <option value="not peer-reviewed">Not peer-reviewed</option>
+            <option value="review status unclear">Could not establish</option>
+          </select>
+          <p class="hint" id="reviewHint"></p>
+        </div>
         <div class="field">
           <label for="descDetails">Details</label>
           <input type="text" id="descDetails">
@@ -462,7 +506,7 @@ a.btn { text-decoration: none; display: inline-block; }
           </div>
         </div>
         <div class="exportrow" id="archRow">
-          <span>Make a copy at</span>
+          <span id="lab-arch">Make a copy at</span>
           <a class="btn small" id="archWayback" target="_blank" rel="noopener noreferrer" aria-disabled="true">Wayback Machine</a>
           <a class="btn small" id="archToday" target="_blank" rel="noopener noreferrer" aria-disabled="true">archive.today</a>
           <a class="btn quiet small" id="archFind" target="_blank" rel="noopener noreferrer" aria-disabled="true">Look for existing copies</a>
@@ -503,7 +547,7 @@ a.btn { text-decoration: none; display: inline-block; }
 
     <aside class="out" aria-label="Assembled footnote">
       <div class="sheet">
-        <p class="eyebrow"><span>Footnote</span><span class="exchip" id="exChip" hidden>Example</span></p>
+        <p class="eyebrow"><span id="lab-foot">Footnote</span><span class="exchip" id="exChip" hidden>Example</span></p>
         <ul class="strip" id="strip" aria-label="Slot status"></ul>
         <p class="preview" id="preview" aria-live="polite"></p>
         <div class="actions">
@@ -522,13 +566,13 @@ a.btn { text-decoration: none; display: inline-block; }
         <textarea id="fallbackBox" rows="4" readonly hidden aria-label="Text to copy by hand"></textarea>
 
         <div class="block">
-          <p class="eyebrow"><span>Checks against the guide</span></p>
+          <p class="eyebrow"><span id="lab-checks">Checks against the guide</span></p>
           <ul class="checks" id="checks"></ul>
           <p class="allclear" id="allclear" hidden>Nothing to fix.</p>
         </div>
 
         <div class="block">
-          <p class="eyebrow"><span>Later citations of this source</span>
+          <p class="eyebrow"><span id="lab-later">Later citations of this source</span>
             <label style="font-weight:400;letter-spacing:0;text-transform:none;font-size:12.5px;display:flex;gap:5px;align-items:center"><input type="checkbox" id="shortUseTitle" checked> short title</label>
           </p>
           <div class="subline"><span class="txt" id="shortOut"></span><button type="button" class="btn small" id="copyShort">Copy</button></div>
@@ -537,7 +581,7 @@ a.btn { text-decoration: none; display: inline-block; }
         </div>
 
         <div class="block">
-          <p class="eyebrow"><span>Source list <span id="savedCount"></span></span>
+          <p class="eyebrow"><span id="lab-list">Source list <span id="savedCount"></span></span>
             <button type="button" class="btn small primary" id="addBtn" style="letter-spacing:0;text-transform:none">Add this source</button>
           </p>
           <ul class="saved" id="saved"></ul>
@@ -556,7 +600,7 @@ a.btn { text-decoration: none; display: inline-block; }
         </div>
 
         <div class="block" id="fileBlock">
-          <p class="eyebrow"><span>List file</span></p>
+          <p class="eyebrow"><span id="lab-file">List file</span></p>
           <div class="field">
             <label for="listName">List name</label>
             <input type="text" id="listName" placeholder="The piece these sources belong to" autocomplete="off">
@@ -587,7 +631,7 @@ a.btn { text-decoration: none; display: inline-block; }
     </aside>
   </div>
 
-  <p class="foot">Version 3.1. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">Version 3.2. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (771 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
   <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere, with one exception: the archive buttons open the archive site you choose and hand it the link you entered. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
   <p class="foot">&copy; 2026 G. Michael Rapp. The software is under the MIT License. The guide content it carries (citation rules, description library, qualifier and access lists) is under Creative Commons Attribution 4.0 International.</p>
 </div>
@@ -748,6 +792,9 @@ var OSINT = (function () {
     return out;
   }
   function has(list, x) { return list.indexOf(x) !== -1; }
+  var REVIEW_Q = ['peer-reviewed', 'editor-reviewed', 'student-edited', 'not peer-reviewed', 'review status unclear'];
+  var UNI_PRESS = /\buniversity press\b/i;
+  var TRADE_HOUSE = /\b(penguin|random house|harpercollins|simon (&|and) schuster|hachette|knopf|doubleday|farrar, straus|norton|basic books|publicaffairs|little, brown|viking|scribner|st\. martin's|henry holt)\b/i;
 
   function build(st) {
     var seg = [], checks = [], slots = {};
@@ -861,6 +908,16 @@ var OSINT = (function () {
     if (/state media|party newspaper/.test(tl)) add('note', 'State or party media: evidence of official messaging first, of fact second.');
     if (/^leaked|captured document|leak site|hacktivist/.test(tl) || has(quals, 'leaked') || has(quals, 'captured')) add('note', 'Leaked or captured material. Say how its authenticity was established, and rate the information on its own merits.');
     if (/^(preprint paper|working paper)$/.test(tl) || has(quals, 'preprint') || has(quals, 'not peer-reviewed')) add('note', 'Not peer-reviewed. Say so in the text wherever the claim is load-bearing.');
+    var rq = quals.filter(function (q) { return has(REVIEW_Q, q); });
+    if (rq.length > 1) add('check', 'More than one review status is ticked (' + rq.join(', ') + '). Keep the one that fits.');
+    if (tl === 'journal article' && !rq.length) add('check', 'Journal Article says nothing about review. Set the review status, or mark it review status unclear if the journal does not say.');
+    if (tl === 'peer-reviewed article' && rq.some(function (q) { return q !== 'peer-reviewed'; })) add('check', 'The description says peer-reviewed and a qualifier says otherwise. Use Journal Article with the qualifier.');
+    if (tl === 'peer-reviewed article' && rq.length === 1 && rq[0] === 'peer-reviewed') add('note', 'Peer-Reviewed Article already says it, so the peer-reviewed qualifier can go.');
+    if (has(quals, 'review status unclear')) add('note', 'Review status not established. Treat the article as unreviewed until the journal\'s own statement says otherwise.');
+    var rawPub = clean(st.publisher);
+    if (tl === 'trade book' && UNI_PRESS.test(rawPub)) add('note', 'Trade Book from a university press. University presses publish both kinds. If it argues one thesis for specialists, with notes and a bibliography, Monograph fits better.');
+    if (tl === 'monograph' && TRADE_HOUSE.test(rawPub)) add('note', 'Monograph from a commercial publisher. Books from trade houses are usually Trade Books, even when a scholar wrote them. Keep Monograph only if it is written for specialists.');
+    if (st.type === 'social' && style !== 'plain' && words(title) > 15) add('note', 'The post title runs ' + words(title) + ' words. The opening words, about a dozen, are enough to identify the post. End with an ellipsis where you stop.');
     if (type && !LIB_INDEX[tl]) add('note', 'That description is not in the library. Fine if it fits in ten words; send a note so it can be added.');
     if (st.ai) add('note', 'Keep the prompt and transcript on file, and disclose the use in the piece itself as well as here.');
     if (!rating && !st.ai) add('note', 'No rating. Optional, but expected on any source a reader might question.');
@@ -1261,12 +1318,15 @@ var OSINT = (function () {
   var C = OSINT;
   function $(id) { return document.getElementById(id); }
 
+  var DEFAULT_TITLE_HINT = 'Keep the source\'s own capitalization. Reproduce an error and follow it with [sic].';
   var DEFAULT_AUTH_HINT = 'First name then surname. Keep surname-first order where it is the person\'s own (Xi Jinping). No named author: use the organization, or the outlet plus Staff.';
   var TYPES = {
     book: { label: 'Book', style: 'italics', picks: ["Monograph", "Trade Book", "Edited Volume", "Textbook", "Memoir", "Official History"], loc: 'Series, if the book belongs to one',
+      advice: { when: ['', 'monograph', 'trade book'], lead: 'Monograph or Trade Book?', text: 'Look at the publisher and the back of the book. A university or academic press, with notes and a bibliography, written for specialists: Monograph. A commercial house, written for general readers: Trade Book, even when a scholar wrote it. If you cannot tell, use Trade Book.' },
       ph: { location: 'Usually blank for a book', publisher: 'Cornell University Press', descDetails: '', locator: '25-27' },
       sample: { authors: 'Michael Beckley', title: "Unrivaled: Why America Will Remain the World's Sole Superpower", descType: 'Monograph', publisher: 'Cornell University Press', date: '2018', locator: '25-27' } },
-    journal: { label: 'Journal article', style: 'quotes', start: 'A for peer-reviewed research', picks: ["Peer-Reviewed Article", "Review Article", "Law Review Article", "Preprint Paper", "Working Paper", "Conference Paper"], loc: 'Journal',
+    journal: { label: 'Journal article', style: 'quotes', start: 'A for peer-reviewed research', picks: ["Peer-Reviewed Article", "Journal Article", "Review Article", "Law Review Article", "Preprint Paper", "Working Paper", "Conference Paper"], loc: 'Journal',
+      advice: { when: ['', 'journal article'], lead: 'Not sure it was refereed?', text: 'Use Journal Article and set the review status below. Peer-Reviewed Article is for journals you know send work to outside referees.' },
       ph: { location: 'Journal of Strategic Studies', publisher: 'Leave blank', descDetails: 'Vol. 45, No. 2', locator: '201-225' },
       sample: { authors: 'Sebastian Rosato', title: 'The Flawed Logic of Democratic Peace Theory', location: 'The American Political Science Review', descType: 'Peer-Reviewed Article', descDetails: 'Vol. 97, No. 4', date: '2003', locator: '585-602' } },
     news: { label: 'News or magazine', style: 'quotes', dayDate: true, start: 'B for major outlets, B–C for local and regional media', picks: ["News Article", "News Analysis", "Feature Article", "Wire Service Report", "Investigative Report", "Magazine Article", "Editorial / Op-Ed", "Explainer", "State Media Report"], loc: 'Outlet',
@@ -1283,6 +1343,7 @@ var OSINT = (function () {
       sample: { authors: 'The White House', title: 'National Security Strategy of the United States of America', location: 'White House Government Website', descType: 'National Strategy Document', rating: 'A1', publisher: 'US Government', date: 'Nov 2025', url: 'https://www.whitehouse.gov/wp-content/uploads/2025/12/2025-National-Security-Strategy.pdf' } },
     social: { label: 'Social media post', style: 'quotes', dayDate: true, volatile: true, start: 'C for accounts with a track record, D–F for anonymous channels', picks: ["Social Media Post", "Thread", "Channel Post", "Video Post", "Short-Form Video", "Forum Post", "Deleted Post (Archived)", "Screenshot (Provenance Unverified)"], loc: 'Platform', pub: 'Publisher (account, if different from the author)',
       authHint: 'The person, or the account as it appears.',
+      titleHint: 'A post has no headline. Use its opening words exactly as written, about a dozen, and end with an ellipsis (…) if you stop short. Keep its spelling, capitals, and hashtags. If the post has no text, describe it in a few plain words and set it as Plain.',
       ph: { location: 'X', publisher: 'Account name', descDetails: 'deleted by 16 February 2026', locator: '' },
       sample: { authors: 'ExampleMonitor', title: 'Drone Footage Near the River Crossing', location: 'X', descType: 'Social Media Post', rating: 'C3', date: '14 February 2026', url: 'https://x.com/example_monitor/status/1234567890', archiveUrl: 'https://archive.ph/example', archiveDate: '14 February 2026' } },
     video: { label: 'Video or podcast', style: 'quotes', dayDate: true, start: 'C for channels with a track record', picks: ["Video", "Podcast", "Recorded Interview", "Lecture (Recorded)", "Combat Footage", "Livestream Archive"], loc: 'Platform', pub: 'Publisher (channel or show)',
@@ -1303,12 +1364,66 @@ var OSINT = (function () {
       ph: { location: 'Claude.ai', publisher: 'Anthropic', descDetails: 'prompt and full transcript on file', locator: '' },
       sample: { authors: 'Claude Opus 4.5', title: 'Summary of open-source reporting on PLA joint logistics', location: 'Claude.ai', descType: 'AI Model Output', descDetails: 'prompt and full transcript on file', rating: 'F6', publisher: 'Anthropic', date: '12 March 2026' } }
   };
-  var LIB = [{"c": "Government and Legal", "g": [{"n": "Legislative", "i": ["Congressional Report", "CRS Report", "Parliamentary Report", "Public Law / Statute", "Testimony Transcript", "Hearing", "Bill", "Resolution", "Committee Report", "Conference Report", "Committee Print", "Prepared Testimony", "Legislative Debate Record", "Parliamentary Question", "Roll-Call Vote Record", "Legislative History", "Constitution", "Constitutional Amendment", "Local Ordinance"]}, {"n": "Executive and regulatory", "i": ["Government Report", "Ministry Publication", "Defense White Paper", "Executive Order", "Regulatory Filing", "Government Press Release", "Public Safety Announcement", "Presidential Proclamation", "Presidential Memorandum", "National Security Directive", "Signing Statement", "Decree", "Regulation", "Proposed Rule", "Final Rule", "Federal Register Notice", "Official Gazette Notice", "Agency Guidance", "Public Comment", "Government Fact Sheet", "National Strategy Document", "Government White Paper", "Consultation Paper", "Official Speech", "Official Statement", "Press Briefing Transcript", "Government Web Page", "Government Circular", "Travel Advisory", "Export Control List", "Commission Report", "Public Inquiry Report", "Environmental Impact Statement", "Official Biography"]}, {"n": "Party-state systems", "i": ["Party Document", "Party Congress Report", "Party Regulation", "State Planning Document"]}, {"n": "Courts and legal practice", "i": ["Court Record", "Legal Opinion", "Indictment", "Deposition", "Arbitration Ruling", "Court Opinion", "Dissenting Opinion", "Judgment", "Court Order", "Court Filing", "Legal Brief", "Amicus Brief", "Complaint", "Plea Agreement", "Sentencing Memorandum", "Affidavit", "Sworn Declaration", "Search Warrant", "Trial Transcript", "Trial Exhibit", "Oral Argument", "Docket Sheet", "Consent Decree", "Settlement Agreement", "Administrative Ruling", "Court-Martial Record", "Contract", "Legal Treatise"]}, {"n": "Budget, procurement, and oversight", "i": ["Budget Document", "Procurement Record", "Public Tender / Contract", "Inspector General Report", "Central Bank Report", "Budget Justification", "Contract Award Notice", "Grant Award Record", "Spending Database Record", "Audit Report", "GAO Report", "CBO Cost Estimate"]}, {"n": "Registries and public records", "i": ["Patent Filing", "Trademark Database", "Sanctions List", "Police Report", "Sanctions Designation Notice", "Land / Property Record", "Vital Record", "Professional License Record", "Accident Investigation Report", "Wanted Notice"]}, {"n": "Elections, lobbying, and disclosure", "i": ["Election Results", "Campaign Finance Filing", "Lobbying Disclosure", "Foreign Agent Registration", "Financial Disclosure", "Party Platform", "Campaign Material", "Ballot Measure"]}, {"n": "Intelligence and released records", "i": ["Intelligence Assessment", "FOIA-Released Document", "Declassified Document", "National Intelligence Estimate", "Threat Assessment", "MDR-Released Document"]}]}, {"c": "International Organizations and Diplomacy", "g": [{"n": "UN system", "i": ["UN Report", "UN Resolution", "Peacekeeping Report", "Secretary-General Report", "Panel of Experts Report", "Special Rapporteur Report", "Commission of Inquiry Report", "UN Meeting Record", "UN Voting Record", "Treaty Body Observations", "IAEA Report", "Inspection Report"]}, {"n": "Treaties and agreements", "i": ["Treaty", "Executive Agreement", "Convention", "Protocol", "Memorandum of Understanding", "Status of Forces Agreement", "Arms Control Agreement", "Peace Agreement", "Ceasefire Agreement", "Trade Agreement", "Treaty Reservation", "Negotiating Record"]}, {"n": "Diplomatic practice", "i": ["Diplomatic Cable", "Diplomatic Note", "Joint Statement", "Joint Communiqué", "Summit Declaration", "Foreign Ministry Briefing", "Official Readout"]}, {"n": "Alliances and regional bodies", "i": ["NATO Publication", "Regional Org Publication", "NATO Standardization Agreement", "EU Legal Act", "Council Conclusions"]}, {"n": "International finance and development", "i": ["World Bank Dataset", "IMF Report", "WHO Health Data", "WTO Trade Data", "OECD Report", "World Bank Report", "Development Bank Report", "IMF Country Report", "WTO Dispute Ruling"]}, {"n": "International courts and monitoring", "i": ["International Court Ruling", "Election Monitoring Report", "Advisory Opinion", "International Court Filing", "Arrest Warrant"]}]}, {"c": "Academic and Research", "g": [{"n": "Books", "i": ["Monograph", "Trade Book", "Edited Volume", "Book Section", "Textbook", "Open Textbook", "Handbook Chapter", "Scholarly Edition", "Anthology", "Collected Works", "Multivolume Work", "Memoir", "Autobiography", "Biography", "Published Diary", "Published Correspondence", "Published Document Collection", "Official History", "Self-Published Book", "Foreword or Introduction", "Exhibition Catalog", "Pamphlet"]}, {"n": "Journal literature", "i": ["Peer-Reviewed Article", "Literature Review", "Meta-Analysis", "Review Article", "Systematic Review", "Book Review", "Review Essay", "Research Note", "Scholarly Commentary", "Reply or Rejoinder", "Journal Editorial", "Special Issue Introduction", "Forum Contribution", "Case Study", "Replication Study", "Registered Report", "Data Paper", "Law Review Article", "Student Note", "Professional Journal Article", "Abstract", "Erratum", "Retraction Notice"]}, {"n": "Research papers and reports", "i": ["Working Paper", "Whitepaper", "Preprint Paper", "Research Report", "Field Research Report", "Technical Report", "Occasional Paper", "Discussion Paper", "Research Brief", "Pre-Registration", "Research Protocol", "Grant Proposal"]}, {"n": "Degrees and student work", "i": ["Dissertation", "Thesis", "Undergraduate Thesis", "Capstone Project", "Student Paper"]}, {"n": "Conferences and talks", "i": ["Conference Paper", "Lecture (Recorded)", "Conference Proceedings", "Conference Abstract", "Conference Poster", "Conference Presentation", "Keynote Address", "Panel Discussion", "Webinar", "Workshop Report"]}, {"n": "Unpublished and in progress", "i": ["Unpublished Manuscript", "Forthcoming Work", "Unpublished Data"]}]}, {"c": "Reference, Data, and Statistics", "g": [{"n": "Reference entries", "i": ["Reference Work Entry", "Encyclopedia Article", "Dictionary Entry", "Biographical Entry", "Wiki Article", "Country Profile"]}, {"n": "Reference volumes", "i": ["Statistical Yearbook", "Factbook", "Handbook", "Almanac", "Atlas", "Gazetteer", "Bibliography", "Annotated Bibliography", "Chronology", "Glossary", "Directory", "Style Manual", "Field Guide", "Library Catalog Record"]}, {"n": "Datasets", "i": ["Census Data", "Government Dataset", "Academic Dataset", "Index Dataset", "Data Aggregator", "Replication Data", "Event Dataset", "Time-Series Data", "Trade Statistics", "Database Record", "Codebook"]}, {"n": "Polling and surveys", "i": ["Public Opinion Poll", "Poll Crosstabs", "Survey Data", "Survey Instrument", "Expert Survey"]}, {"n": "Statistical products", "i": ["Statistical Release", "Data Dashboard", "Interactive Data Tool", "Forecast or Model Output", "Prediction Market Data"]}, {"n": "Charts and figures", "i": ["Reproduced Figure", "Data Visualization", "Infographic"]}]}, {"c": "Think Tank, Industry, and Finance", "g": [{"n": "Think tanks and policy shops", "i": ["Think Tank Report", "Policy Brief", "Policy Analysis", "Strategic Report", "Issue Brief", "Backgrounder", "Expert Commentary", "Task Force Report", "Scenario Study", "Event Transcript", "Interactive Tracker", "Sponsored Research Report", "Advocacy Group Report", "Consultancy Report"]}, {"n": "Corporate disclosure", "i": ["Quarterly Report", "Annual Report", "Investor Presentation", "SEC Filing", "Earnings Call Transcript", "Corporate Press Release", "M&A Filing", "Bankruptcy Record", "Stock Exchange Filing", "Prospectus", "Proxy Statement", "Financial Statement", "Auditor Report", "Sustainability Report", "Shareholder Letter", "Corporate Blog Post", "Company Web Page", "Job Posting"]}, {"n": "Markets and finance", "i": ["Credit Rating Report", "Market Research Report", "Analyst Note", "Market Data", "Commodity Price Data"]}, {"n": "Trade and industry", "i": ["Industry Whitepaper", "Trade Journal Article", "Professional Association Report", "Technical Standard", "Product Datasheet", "Product Brochure", "Product Catalog", "Trade Show Material", "User Manual", "Safety Data Sheet", "Business Survey"]}, {"n": "Ownership and commercial records", "i": ["Business Registry Record", "Ownership Database", "Beneficial Ownership Record", "Customs Record", "Bill of Lading", "Vessel Registry Record", "Aircraft Registry Record", "Insurance Record"]}]}, {"c": "News and Media", "g": [{"n": "Reporting", "i": ["News Article", "News Report", "Wire Service Report", "Investigative Report", "Magazine Article", "Newsletter Article", "Journalist Newsletter", "Fact-Check", "Conflict Reporting Platform", "Feature Article", "Live Blog", "News Brief", "Explainer", "Published Interview", "Profile", "Obituary", "Local News Report", "Student Newspaper Article", "Historical Newspaper Article", "Press Pool Report", "Aggregated News Report"]}, {"n": "Opinion and analysis", "i": ["News Analysis", "Editorial / Op-Ed", "Column", "Letter to the Editor", "Editorial Cartoon", "Satire", "Sponsored Content"]}, {"n": "Broadcast, audio, and video", "i": ["Broadcast Transcript", "TV Broadcast", "Radio Broadcast", "Live-Streamed Broadcast", "Podcast", "Video", "Broadcast Interview", "Press Conference", "Video Essay", "Newsreel"]}, {"n": "State and party media", "i": ["State Media Report", "State Media Commentary", "Party Newspaper Editorial"]}, {"n": "Monitoring and translation", "i": ["Media Monitoring Translation", "Press Digest"]}, {"n": "Visual and data journalism", "i": ["News Photograph", "Photo Essay", "Data Journalism Article", "Interactive Feature"]}]}, {"c": "Social, Web, and User-Generated", "g": [{"n": "Posts", "i": ["Social Media Post", "Video Post", "Reposted Content", "Blog Post", "Comment Section", "Thread", "Reply", "Quote Post", "Story Post", "Short-Form Video", "Livestream", "Livestream Chat Log", "Comment", "Meme"]}, {"n": "Messaging and channels", "i": ["Channel Post", "Group Chat Message", "Direct Message", "Voice Message", "Forwarded Message", "Chat Log Export"]}, {"n": "Accounts and platform features", "i": ["Account Profile", "Account Metadata", "Professional Profile", "Community Note", "Social Network Data"]}, {"n": "Forums and community", "i": ["Forum Post", "Forum Discussion", "Crowdsourced Investigation", "Q&A Site Answer", "Wiki Edit History", "User Review", "Mailing List Post", "Petition", "Crowdfunding Page", "Marketplace Listing", "Memorial Page"]}, {"n": "Web pages", "i": ["Archived Web Content", "Web Page", "Personal Website", "About Page", "FAQ Page"]}, {"n": "Capture and provenance", "i": ["Screenshot (Provenance Verified)", "Screenshot (Provenance Unverified)", "Deleted Post (Archived)", "Edited Post (Archived)", "Screen Recording"]}, {"n": "Synthetic and inauthentic", "i": ["AI-Generated Image", "AI-Generated Video", "AI-Generated Audio", "Suspected Synthetic Media", "Manipulated Media", "Suspected Inauthentic Account Post"]}]}, {"c": "Imagery, Geospatial, and Tracking", "g": [{"n": "Overhead imagery", "i": ["Commercial Satellite Imagery", "Government Satellite Release", "Satellite Time-Series", "Remote Sensing Dataset", "Synthetic Aperture Radar Imagery", "Multispectral Imagery", "Thermal / Infrared Imagery", "Nighttime Lights Data", "Active Fire Data", "Aerial Photograph", "Historical Aerial Photograph", "Declassified Reconnaissance Imagery", "Annotated Satellite Imagery"]}, {"n": "Ground-level imagery and footage", "i": ["Geotagged Photo", "Drone Footage", "Photograph (Verified)", "Video Footage (Verified)", "Audio Recording", "Livestream Archive", "Photograph (Unverified)", "Video Footage (Unverified)", "Street-Level Imagery", "CCTV Footage", "Dashcam Footage", "Body-Camera Footage", "Helmet-Camera Footage", "Webcam Feed"]}, {"n": "Maps and geodata", "i": ["GIS Dataset", "OpenStreetMap Data", "Terrain / Elevation Model", "Maritime Tracking Map", "Map", "Topographic Map", "Nautical Chart", "Historical Map", "Control-of-Terrain Map", "Interactive Map", "Crowdsourced Map", "3D Reconstruction", "Administrative Boundary Data"]}, {"n": "Movement tracking", "i": ["Flight Tracking Data", "Ship Tracking (AIS)", "Rail Tracking Data", "Port Authority Log", "Vehicle Tracking Data", "Aviation Accident Database", "Port Call Record", "Satellite Orbit Data", "Launch Notification", "Fitness Tracker Data", "Commercial Location Data", "Vehicle Registration Record"]}, {"n": "Notices, signals, and sensors", "i": ["NOTAM", "Navigational Warning", "GPS Interference Data", "Scanner Audio", "Seismic Data", "Weather Data"]}, {"n": "Verification products", "i": ["Geolocation Analysis", "Chronolocation Analysis", "File Metadata", "Reverse Image Search Result", "Visual Forensic Analysis"]}]}, {"c": "Military and Defense", "g": [{"n": "Doctrine and manuals", "i": ["Military Doctrine Publication", "Training Manual (Public)", "Training Manual (Leaked)", "Field Manual", "Joint Publication", "Technical Manual", "Law of War Manual", "Rules of Engagement", "Service Strategy Document", "Posture Statement", "Operating Concept"]}, {"n": "Operational records", "i": ["After-Action Report", "Operations Order", "Situation Report", "War Diary", "Unit History", "Lessons-Learned Report", "Staff Study", "Captured Document", "Intercepted Communication", "Service Record", "Award Citation", "Casualty List"]}, {"n": "Assessments and estimates", "i": ["Defense Analysis Article", "Order of Battle Assessment", "Casualty Estimate", "Wargame or Simulation", "Net Assessment", "Campaign Assessment", "Daily Intelligence Update", "Equipment Loss Tally", "Exercise Report", "War College Paper"]}, {"n": "Force data and equipment", "i": ["Defense Procurement Database", "Arms Transfer Database", "Conflict Incident Database", "Military Reference Yearbook", "Table of Organization and Equipment", "Equipment Recognition Guide", "Weapons System Fact Sheet", "Selected Acquisition Report", "Arms Catalog", "End-User Certificate", "Arms Export License Record", "Weapons Tracing Report"]}, {"n": "Official messaging", "i": ["Defense Ministry Briefing", "Military Press Release", "Operational Update", "Exercise Announcement", "Recruitment Material"]}, {"n": "Personal and frontline accounts", "i": ["Veteran / Soldier Account", "Military Blogger Post", "POW Statement", "Combat Footage"]}, {"n": "Armed group and propaganda material", "i": ["Armed Group Statement", "Claim of Responsibility", "Propaganda Video", "Propaganda Magazine", "Propaganda Leaflet", "Manifesto", "Religious Ruling", "Leader Message"]}]}, {"c": "Cyber and Technical", "g": [{"n": "Threat reporting", "i": ["Threat Intelligence Report", "Malware Analysis", "Security Blog Post", "Dark Web Monitoring Report", "Data Breach Disclosure", "Security Advisory", "Security Incident Report", "Threat Actor Profile", "Indicators of Compromise", "Sandbox Analysis Report", "Detection Rule", "Takedown Report", "Platform Transparency Report"]}, {"n": "Vulnerabilities", "i": ["CVE / NVD Entry", "Vulnerability Disclosure", "Proof-of-Concept Code", "Bug Bounty Report"]}, {"n": "Infrastructure and network data", "i": ["Network Scanning Data", "Sensor Network Data", "Smart Device Metadata", "Blockchain Transaction Record", "WHOIS Record", "DNS Record", "Passive DNS Data", "Certificate Transparency Log", "BGP Routing Data", "Internet Outage Data", "IP Geolocation Data", "Packet Capture", "Log File", "Smart Contract"]}, {"n": "Code and software", "i": ["Code Repository", "Technical Documentation", "Software", "Code Commit", "Issue Tracker Entry", "Release Notes", "API Documentation", "Technical Specification", "Request for Comments", "Mobile App", "App Store Listing"]}, {"n": "Leaks and illicit markets", "i": ["Leaked Dataset", "Leaked Document", "Internal Document", "Leak Database Entry", "Leak Site Post", "Dark Web Forum Post", "Dark Web Marketplace Listing", "Ransom Note", "Hacktivist Claim", "Paste Site Post"]}, {"n": "AI systems", "i": ["AI Model Output", "Model Card", "Dataset Card", "Benchmark Result"]}, {"n": "Platform rules", "i": ["Terms of Service", "Privacy Policy", "Community Guidelines"]}]}, {"c": "Science, Health, and Environment", "g": [{"n": "Clinical and public health", "i": ["Clinical Trial Registration", "Clinical Trial Results", "Clinical Practice Guideline", "Case Report", "Epidemiological Bulletin", "Disease Outbreak Notice", "Drug or Device Approval Record"]}, {"n": "Science and environment", "i": ["Scientific Assessment Report", "Environmental Monitoring Data", "Laboratory Protocol"]}, {"n": "Specimens and sites", "i": ["Museum Specimen Record", "Taxonomic Description", "Archaeological Site Report"]}]}, {"c": "NGO, Humanitarian, and Civil Society", "g": [{"n": "Reports and investigations", "i": ["Human Rights Report", "Transparency Org Report", "Anti-Corruption Report", "Field Investigation Report", "Open-Source Investigation", "Shadow Report", "Press Freedom Report"]}, {"n": "Humanitarian operations", "i": ["Crisis / Relief Update", "NGO Data", "Humanitarian Situation Report", "Needs Assessment", "Casualty Recording Database", "Witness Testimony"]}, {"n": "Statements and filings", "i": ["Public Statement", "Open Letter", "Charity Filing", "Foundation Grant Record"]}]}, {"c": "Archival and Primary Sources", "g": [{"n": "Archival records", "i": ["Archival Material", "Primary Source", "Historical Document", "Manuscript", "Archival Collection", "Personal Papers", "Finding Aid", "Meeting Minutes", "Telegram", "Ledger", "Logbook", "Colonial Administrative Record", "Mission Record", "Church Record", "Genealogical Record", "Will or Probate Record", "Passenger List"]}, {"n": "Personal writing and testimony", "i": ["Letter", "Memo", "Diary Entry", "Field Notes", "Oral History", "Oral Tradition"]}, {"n": "Printed and recorded ephemera", "i": ["Broadside", "Leaflet", "Ephemera", "Newspaper Clipping", "Archival Photograph", "Archival Audio Recording"]}]}, {"c": "Interviews, Communications, and Author's Own Work", "g": [{"n": "Interviews", "i": ["Personal Interview", "Recorded Interview", "Anonymized Interview", "Background Briefing", "Focus Group", "Survey Response"]}, {"n": "Communications", "i": ["Personal Communication", "E-mail", "Phone Call", "Text Message", "Video Call", "Q&A Remarks"]}, {"n": "Fieldwork", "i": ["Field Observation", "Site Visit Notes"]}, {"n": "Author's own work", "i": ["Author's Calculation", "Author's Compilation", "Author's Translation", "Author's Photograph", "Author's Dataset", "Author's Figure"]}]}, {"c": "Literary, Artistic, and Creative Works", "g": [{"n": "Literature", "i": ["Novel", "Short Story", "Poem", "Play", "Essay", "Graphic Novel", "Comic"]}, {"n": "Classical and sacred texts", "i": ["Classical Text", "Sacred Text", "Chronicle"]}, {"n": "Film, television, and music", "i": ["Film", "Documentary Film", "Short Film", "Television Episode", "Television Series", "Screenplay", "Music Recording", "Song", "Music Video", "Musical Score"]}, {"n": "Art, objects, and performance", "i": ["Artwork", "Poster", "Museum Object", "Exhibition", "Monument or Inscription", "Live Performance"]}, {"n": "Games", "i": ["Video Game", "Tabletop Game", "Game Rulebook", "Game Scenario"]}]}, {"c": "Education, Institutional, and General", "g": [{"n": "Teaching materials", "i": ["Syllabus", "Lecture Notes", "Lecture Slides", "Course Reader", "Online Course Module", "Study Guide", "Lesson Plan", "Curriculum Standard", "Standardized Test Material"]}, {"n": "Institutional documents", "i": ["Course Catalog", "Accreditation Report", "Institutional Research Report", "Program Review", "Institutional Policy", "Strategic Plan", "Charter or Bylaws", "Code of Conduct", "Organization Chart", "Standard Operating Procedure", "Organizational Newsletter", "Résumé / CV"]}, {"n": "General", "i": ["Advertisement", "Presentation", "Speech", "Sermon", "Press Kit", "Flyer", "Sign or Signage", "Label or Packaging", "Receipt or Invoice", "Event Program", "Form or Questionnaire"]}]}];
+  var LIB = [{"c": "Government and Legal", "g": [{"n": "Legislative", "i": ["Congressional Report", "CRS Report", "Parliamentary Report", "Public Law / Statute", "Testimony Transcript", "Hearing", "Bill", "Resolution", "Committee Report", "Conference Report", "Committee Print", "Prepared Testimony", "Legislative Debate Record", "Parliamentary Question", "Roll-Call Vote Record", "Legislative History", "Constitution", "Constitutional Amendment", "Local Ordinance"]}, {"n": "Executive and regulatory", "i": ["Government Report", "Ministry Publication", "Defense White Paper", "Executive Order", "Regulatory Filing", "Government Press Release", "Public Safety Announcement", "Presidential Proclamation", "Presidential Memorandum", "National Security Directive", "Signing Statement", "Decree", "Regulation", "Proposed Rule", "Final Rule", "Federal Register Notice", "Official Gazette Notice", "Agency Guidance", "Public Comment", "Government Fact Sheet", "National Strategy Document", "Government White Paper", "Consultation Paper", "Official Speech", "Official Statement", "Press Briefing Transcript", "Government Web Page", "Government Circular", "Travel Advisory", "Export Control List", "Commission Report", "Public Inquiry Report", "Environmental Impact Statement", "Official Biography"]}, {"n": "Party-state systems", "i": ["Party Document", "Party Congress Report", "Party Regulation", "State Planning Document"]}, {"n": "Courts and legal practice", "i": ["Court Record", "Legal Opinion", "Indictment", "Deposition", "Arbitration Ruling", "Court Opinion", "Dissenting Opinion", "Judgment", "Court Order", "Court Filing", "Legal Brief", "Amicus Brief", "Complaint", "Plea Agreement", "Sentencing Memorandum", "Affidavit", "Sworn Declaration", "Search Warrant", "Trial Transcript", "Trial Exhibit", "Oral Argument", "Docket Sheet", "Consent Decree", "Settlement Agreement", "Administrative Ruling", "Court-Martial Record", "Contract", "Legal Treatise"]}, {"n": "Budget, procurement, and oversight", "i": ["Budget Document", "Procurement Record", "Public Tender / Contract", "Inspector General Report", "Central Bank Report", "Budget Justification", "Contract Award Notice", "Grant Award Record", "Spending Database Record", "Audit Report", "GAO Report", "CBO Cost Estimate"]}, {"n": "Registries and public records", "i": ["Patent Filing", "Trademark Database", "Sanctions List", "Police Report", "Sanctions Designation Notice", "Land / Property Record", "Vital Record", "Professional License Record", "Accident Investigation Report", "Wanted Notice"]}, {"n": "Elections, lobbying, and disclosure", "i": ["Election Results", "Campaign Finance Filing", "Lobbying Disclosure", "Foreign Agent Registration", "Financial Disclosure", "Party Platform", "Campaign Material", "Ballot Measure"]}, {"n": "Intelligence and released records", "i": ["Intelligence Assessment", "FOIA-Released Document", "Declassified Document", "National Intelligence Estimate", "Threat Assessment", "MDR-Released Document"]}]}, {"c": "International Organizations and Diplomacy", "g": [{"n": "UN system", "i": ["UN Report", "UN Resolution", "Peacekeeping Report", "Secretary-General Report", "Panel of Experts Report", "Special Rapporteur Report", "Commission of Inquiry Report", "UN Meeting Record", "UN Voting Record", "Treaty Body Observations", "IAEA Report", "Inspection Report"]}, {"n": "Treaties and agreements", "i": ["Treaty", "Executive Agreement", "Convention", "Protocol", "Memorandum of Understanding", "Status of Forces Agreement", "Arms Control Agreement", "Peace Agreement", "Ceasefire Agreement", "Trade Agreement", "Treaty Reservation", "Negotiating Record"]}, {"n": "Diplomatic practice", "i": ["Diplomatic Cable", "Diplomatic Note", "Joint Statement", "Joint Communiqué", "Summit Declaration", "Foreign Ministry Briefing", "Official Readout"]}, {"n": "Alliances and regional bodies", "i": ["NATO Publication", "Regional Org Publication", "NATO Standardization Agreement", "EU Legal Act", "Council Conclusions"]}, {"n": "International finance and development", "i": ["World Bank Dataset", "IMF Report", "WHO Health Data", "WTO Trade Data", "OECD Report", "World Bank Report", "Development Bank Report", "IMF Country Report", "WTO Dispute Ruling"]}, {"n": "International courts and monitoring", "i": ["International Court Ruling", "Election Monitoring Report", "Advisory Opinion", "International Court Filing", "Arrest Warrant"]}]}, {"c": "Academic and Research", "g": [{"n": "Books", "i": ["Monograph", "Trade Book", "Edited Volume", "Book Section", "Textbook", "Open Textbook", "Handbook Chapter", "Scholarly Edition", "Anthology", "Collected Works", "Multivolume Work", "Memoir", "Autobiography", "Biography", "Published Diary", "Published Correspondence", "Published Document Collection", "Official History", "Self-Published Book", "Foreword or Introduction", "Exhibition Catalog", "Pamphlet"]}, {"n": "Journal literature", "i": ["Peer-Reviewed Article", "Journal Article", "Literature Review", "Meta-Analysis", "Review Article", "Systematic Review", "Book Review", "Review Essay", "Research Note", "Scholarly Commentary", "Reply or Rejoinder", "Journal Editorial", "Special Issue Introduction", "Forum Contribution", "Case Study", "Replication Study", "Registered Report", "Data Paper", "Law Review Article", "Student Note", "Professional Journal Article", "Abstract", "Erratum", "Retraction Notice"]}, {"n": "Research papers and reports", "i": ["Working Paper", "Whitepaper", "Preprint Paper", "Research Report", "Field Research Report", "Technical Report", "Occasional Paper", "Discussion Paper", "Research Brief", "Pre-Registration", "Research Protocol", "Grant Proposal"]}, {"n": "Degrees and student work", "i": ["Dissertation", "Thesis", "Undergraduate Thesis", "Capstone Project", "Student Paper"]}, {"n": "Conferences and talks", "i": ["Conference Paper", "Lecture (Recorded)", "Conference Proceedings", "Conference Abstract", "Conference Poster", "Conference Presentation", "Keynote Address", "Panel Discussion", "Webinar", "Workshop Report"]}, {"n": "Unpublished and in progress", "i": ["Unpublished Manuscript", "Forthcoming Work", "Unpublished Data"]}]}, {"c": "Reference, Data, and Statistics", "g": [{"n": "Reference entries", "i": ["Reference Work Entry", "Encyclopedia Article", "Dictionary Entry", "Biographical Entry", "Wiki Article", "Country Profile"]}, {"n": "Reference volumes", "i": ["Statistical Yearbook", "Factbook", "Handbook", "Almanac", "Atlas", "Gazetteer", "Bibliography", "Annotated Bibliography", "Chronology", "Glossary", "Directory", "Style Manual", "Field Guide", "Library Catalog Record"]}, {"n": "Datasets", "i": ["Census Data", "Government Dataset", "Academic Dataset", "Index Dataset", "Data Aggregator", "Replication Data", "Event Dataset", "Time-Series Data", "Trade Statistics", "Database Record", "Codebook"]}, {"n": "Polling and surveys", "i": ["Public Opinion Poll", "Poll Crosstabs", "Survey Data", "Survey Instrument", "Expert Survey"]}, {"n": "Statistical products", "i": ["Statistical Release", "Data Dashboard", "Interactive Data Tool", "Forecast or Model Output", "Prediction Market Data"]}, {"n": "Charts and figures", "i": ["Reproduced Figure", "Data Visualization", "Infographic"]}]}, {"c": "Think Tank, Industry, and Finance", "g": [{"n": "Think tanks and policy shops", "i": ["Think Tank Report", "Policy Brief", "Policy Analysis", "Strategic Report", "Issue Brief", "Backgrounder", "Expert Commentary", "Task Force Report", "Scenario Study", "Event Transcript", "Interactive Tracker", "Sponsored Research Report", "Advocacy Group Report", "Consultancy Report"]}, {"n": "Corporate disclosure", "i": ["Quarterly Report", "Annual Report", "Investor Presentation", "SEC Filing", "Earnings Call Transcript", "Corporate Press Release", "M&A Filing", "Bankruptcy Record", "Stock Exchange Filing", "Prospectus", "Proxy Statement", "Financial Statement", "Auditor Report", "Sustainability Report", "Shareholder Letter", "Corporate Blog Post", "Company Web Page", "Job Posting"]}, {"n": "Markets and finance", "i": ["Credit Rating Report", "Market Research Report", "Analyst Note", "Market Data", "Commodity Price Data"]}, {"n": "Trade and industry", "i": ["Industry Whitepaper", "Trade Journal Article", "Professional Association Report", "Technical Standard", "Product Datasheet", "Product Brochure", "Product Catalog", "Trade Show Material", "User Manual", "Safety Data Sheet", "Business Survey"]}, {"n": "Ownership and commercial records", "i": ["Business Registry Record", "Ownership Database", "Beneficial Ownership Record", "Customs Record", "Bill of Lading", "Vessel Registry Record", "Aircraft Registry Record", "Insurance Record"]}]}, {"c": "News and Media", "g": [{"n": "Reporting", "i": ["News Article", "News Report", "Wire Service Report", "Investigative Report", "Magazine Article", "Newsletter Article", "Journalist Newsletter", "Fact-Check", "Conflict Reporting Platform", "Feature Article", "Live Blog", "News Brief", "Explainer", "Published Interview", "Profile", "Obituary", "Local News Report", "Student Newspaper Article", "Historical Newspaper Article", "Press Pool Report", "Aggregated News Report"]}, {"n": "Opinion and analysis", "i": ["News Analysis", "Editorial / Op-Ed", "Column", "Letter to the Editor", "Editorial Cartoon", "Satire", "Sponsored Content"]}, {"n": "Broadcast, audio, and video", "i": ["Broadcast Transcript", "TV Broadcast", "Radio Broadcast", "Live-Streamed Broadcast", "Podcast", "Video", "Broadcast Interview", "Press Conference", "Video Essay", "Newsreel"]}, {"n": "State and party media", "i": ["State Media Report", "State Media Commentary", "Party Newspaper Editorial"]}, {"n": "Monitoring and translation", "i": ["Media Monitoring Translation", "Press Digest"]}, {"n": "Visual and data journalism", "i": ["News Photograph", "Photo Essay", "Data Journalism Article", "Interactive Feature"]}]}, {"c": "Social, Web, and User-Generated", "g": [{"n": "Posts", "i": ["Social Media Post", "Video Post", "Reposted Content", "Blog Post", "Comment Section", "Thread", "Reply", "Quote Post", "Story Post", "Short-Form Video", "Livestream", "Livestream Chat Log", "Comment", "Meme"]}, {"n": "Messaging and channels", "i": ["Channel Post", "Group Chat Message", "Direct Message", "Voice Message", "Forwarded Message", "Chat Log Export"]}, {"n": "Accounts and platform features", "i": ["Account Profile", "Account Metadata", "Professional Profile", "Community Note", "Social Network Data"]}, {"n": "Forums and community", "i": ["Forum Post", "Forum Discussion", "Crowdsourced Investigation", "Q&A Site Answer", "Wiki Edit History", "User Review", "Mailing List Post", "Petition", "Crowdfunding Page", "Marketplace Listing", "Memorial Page"]}, {"n": "Web pages", "i": ["Archived Web Content", "Web Page", "Personal Website", "About Page", "FAQ Page"]}, {"n": "Capture and provenance", "i": ["Screenshot (Provenance Verified)", "Screenshot (Provenance Unverified)", "Deleted Post (Archived)", "Edited Post (Archived)", "Screen Recording"]}, {"n": "Synthetic and inauthentic", "i": ["AI-Generated Image", "AI-Generated Video", "AI-Generated Audio", "Suspected Synthetic Media", "Manipulated Media", "Suspected Inauthentic Account Post"]}]}, {"c": "Imagery, Geospatial, and Tracking", "g": [{"n": "Overhead imagery", "i": ["Commercial Satellite Imagery", "Government Satellite Release", "Satellite Time-Series", "Remote Sensing Dataset", "Synthetic Aperture Radar Imagery", "Multispectral Imagery", "Thermal / Infrared Imagery", "Nighttime Lights Data", "Active Fire Data", "Aerial Photograph", "Historical Aerial Photograph", "Declassified Reconnaissance Imagery", "Annotated Satellite Imagery"]}, {"n": "Ground-level imagery and footage", "i": ["Geotagged Photo", "Drone Footage", "Photograph (Verified)", "Video Footage (Verified)", "Audio Recording", "Livestream Archive", "Photograph (Unverified)", "Video Footage (Unverified)", "Street-Level Imagery", "CCTV Footage", "Dashcam Footage", "Body-Camera Footage", "Helmet-Camera Footage", "Webcam Feed"]}, {"n": "Maps and geodata", "i": ["GIS Dataset", "OpenStreetMap Data", "Terrain / Elevation Model", "Maritime Tracking Map", "Map", "Topographic Map", "Nautical Chart", "Historical Map", "Control-of-Terrain Map", "Interactive Map", "Crowdsourced Map", "3D Reconstruction", "Administrative Boundary Data"]}, {"n": "Movement tracking", "i": ["Flight Tracking Data", "Ship Tracking (AIS)", "Rail Tracking Data", "Port Authority Log", "Vehicle Tracking Data", "Aviation Accident Database", "Port Call Record", "Satellite Orbit Data", "Launch Notification", "Fitness Tracker Data", "Commercial Location Data", "Vehicle Registration Record"]}, {"n": "Notices, signals, and sensors", "i": ["NOTAM", "Navigational Warning", "GPS Interference Data", "Scanner Audio", "Seismic Data", "Weather Data"]}, {"n": "Verification products", "i": ["Geolocation Analysis", "Chronolocation Analysis", "File Metadata", "Reverse Image Search Result", "Visual Forensic Analysis"]}]}, {"c": "Military and Defense", "g": [{"n": "Doctrine and manuals", "i": ["Military Doctrine Publication", "Training Manual (Public)", "Training Manual (Leaked)", "Field Manual", "Joint Publication", "Technical Manual", "Law of War Manual", "Rules of Engagement", "Service Strategy Document", "Posture Statement", "Operating Concept"]}, {"n": "Operational records", "i": ["After-Action Report", "Operations Order", "Situation Report", "War Diary", "Unit History", "Lessons-Learned Report", "Staff Study", "Captured Document", "Intercepted Communication", "Service Record", "Award Citation", "Casualty List"]}, {"n": "Assessments and estimates", "i": ["Defense Analysis Article", "Order of Battle Assessment", "Casualty Estimate", "Wargame or Simulation", "Net Assessment", "Campaign Assessment", "Daily Intelligence Update", "Equipment Loss Tally", "Exercise Report", "War College Paper"]}, {"n": "Force data and equipment", "i": ["Defense Procurement Database", "Arms Transfer Database", "Conflict Incident Database", "Military Reference Yearbook", "Table of Organization and Equipment", "Equipment Recognition Guide", "Weapons System Fact Sheet", "Selected Acquisition Report", "Arms Catalog", "End-User Certificate", "Arms Export License Record", "Weapons Tracing Report"]}, {"n": "Official messaging", "i": ["Defense Ministry Briefing", "Military Press Release", "Operational Update", "Exercise Announcement", "Recruitment Material"]}, {"n": "Personal and frontline accounts", "i": ["Veteran / Soldier Account", "Military Blogger Post", "POW Statement", "Combat Footage"]}, {"n": "Armed group and propaganda material", "i": ["Armed Group Statement", "Claim of Responsibility", "Propaganda Video", "Propaganda Magazine", "Propaganda Leaflet", "Manifesto", "Religious Ruling", "Leader Message"]}]}, {"c": "Cyber and Technical", "g": [{"n": "Threat reporting", "i": ["Threat Intelligence Report", "Malware Analysis", "Security Blog Post", "Dark Web Monitoring Report", "Data Breach Disclosure", "Security Advisory", "Security Incident Report", "Threat Actor Profile", "Indicators of Compromise", "Sandbox Analysis Report", "Detection Rule", "Takedown Report", "Platform Transparency Report"]}, {"n": "Vulnerabilities", "i": ["CVE / NVD Entry", "Vulnerability Disclosure", "Proof-of-Concept Code", "Bug Bounty Report"]}, {"n": "Infrastructure and network data", "i": ["Network Scanning Data", "Sensor Network Data", "Smart Device Metadata", "Blockchain Transaction Record", "WHOIS Record", "DNS Record", "Passive DNS Data", "Certificate Transparency Log", "BGP Routing Data", "Internet Outage Data", "IP Geolocation Data", "Packet Capture", "Log File", "Smart Contract"]}, {"n": "Code and software", "i": ["Code Repository", "Technical Documentation", "Software", "Code Commit", "Issue Tracker Entry", "Release Notes", "API Documentation", "Technical Specification", "Request for Comments", "Mobile App", "App Store Listing"]}, {"n": "Leaks and illicit markets", "i": ["Leaked Dataset", "Leaked Document", "Internal Document", "Leak Database Entry", "Leak Site Post", "Dark Web Forum Post", "Dark Web Marketplace Listing", "Ransom Note", "Hacktivist Claim", "Paste Site Post"]}, {"n": "AI systems", "i": ["AI Model Output", "Model Card", "Dataset Card", "Benchmark Result"]}, {"n": "Platform rules", "i": ["Terms of Service", "Privacy Policy", "Community Guidelines"]}]}, {"c": "Science, Health, and Environment", "g": [{"n": "Clinical and public health", "i": ["Clinical Trial Registration", "Clinical Trial Results", "Clinical Practice Guideline", "Case Report", "Epidemiological Bulletin", "Disease Outbreak Notice", "Drug or Device Approval Record"]}, {"n": "Science and environment", "i": ["Scientific Assessment Report", "Environmental Monitoring Data", "Laboratory Protocol"]}, {"n": "Specimens and sites", "i": ["Museum Specimen Record", "Taxonomic Description", "Archaeological Site Report"]}]}, {"c": "NGO, Humanitarian, and Civil Society", "g": [{"n": "Reports and investigations", "i": ["Human Rights Report", "Transparency Org Report", "Anti-Corruption Report", "Field Investigation Report", "Open-Source Investigation", "Shadow Report", "Press Freedom Report"]}, {"n": "Humanitarian operations", "i": ["Crisis / Relief Update", "NGO Data", "Humanitarian Situation Report", "Needs Assessment", "Casualty Recording Database", "Witness Testimony"]}, {"n": "Statements and filings", "i": ["Public Statement", "Open Letter", "Charity Filing", "Foundation Grant Record"]}]}, {"c": "Archival and Primary Sources", "g": [{"n": "Archival records", "i": ["Archival Material", "Primary Source", "Historical Document", "Manuscript", "Archival Collection", "Personal Papers", "Finding Aid", "Meeting Minutes", "Telegram", "Ledger", "Logbook", "Colonial Administrative Record", "Mission Record", "Church Record", "Genealogical Record", "Will or Probate Record", "Passenger List"]}, {"n": "Personal writing and testimony", "i": ["Letter", "Memo", "Diary Entry", "Field Notes", "Oral History", "Oral Tradition"]}, {"n": "Printed and recorded ephemera", "i": ["Broadside", "Leaflet", "Ephemera", "Newspaper Clipping", "Archival Photograph", "Archival Audio Recording"]}]}, {"c": "Interviews, Communications, and Author's Own Work", "g": [{"n": "Interviews", "i": ["Personal Interview", "Recorded Interview", "Anonymized Interview", "Background Briefing", "Focus Group", "Survey Response"]}, {"n": "Communications", "i": ["Personal Communication", "E-mail", "Phone Call", "Text Message", "Video Call", "Q&A Remarks"]}, {"n": "Fieldwork", "i": ["Field Observation", "Site Visit Notes"]}, {"n": "Author's own work", "i": ["Author's Calculation", "Author's Compilation", "Author's Translation", "Author's Photograph", "Author's Dataset", "Author's Figure"]}]}, {"c": "Literary, Artistic, and Creative Works", "g": [{"n": "Literature", "i": ["Novel", "Short Story", "Poem", "Play", "Essay", "Graphic Novel", "Comic"]}, {"n": "Classical and sacred texts", "i": ["Classical Text", "Sacred Text", "Chronicle"]}, {"n": "Film, television, and music", "i": ["Film", "Documentary Film", "Short Film", "Television Episode", "Television Series", "Screenplay", "Music Recording", "Song", "Music Video", "Musical Score"]}, {"n": "Art, objects, and performance", "i": ["Artwork", "Poster", "Museum Object", "Exhibition", "Monument or Inscription", "Live Performance"]}, {"n": "Games", "i": ["Video Game", "Tabletop Game", "Game Rulebook", "Game Scenario"]}]}, {"c": "Education, Institutional, and General", "g": [{"n": "Teaching materials", "i": ["Syllabus", "Lecture Notes", "Lecture Slides", "Course Reader", "Online Course Module", "Study Guide", "Lesson Plan", "Curriculum Standard", "Standardized Test Material"]}, {"n": "Institutional documents", "i": ["Course Catalog", "Accreditation Report", "Institutional Research Report", "Program Review", "Institutional Policy", "Strategic Plan", "Charter or Bylaws", "Code of Conduct", "Organization Chart", "Standard Operating Procedure", "Organizational Newsletter", "Résumé / CV"]}, {"n": "General", "i": ["Advertisement", "Presentation", "Speech", "Sermon", "Press Kit", "Flyer", "Sign or Signage", "Label or Packaging", "Receipt or Invoice", "Event Program", "Form or Questionnaire"]}]}];
   var LIBRARY = [], LIB_INDEX = {};
-  LIB.forEach(function (c) { c.g.forEach(function (g) { g.i.forEach(function (x) { LIBRARY.push(x); LIB_INDEX[x.toLowerCase()] = { cat: c.c, group: g.n }; }); }); });
+  LIB.forEach(function (c, ci) { c.g.forEach(function (g) { g.i.forEach(function (x) { LIBRARY.push(x); LIB_INDEX[x.toLowerCase()] = { cat: c.c, group: g.n, ci: ci }; }); }); });
   var QUALIFIERS = [["Provenance", ["leaked", "declassified", "FOIA-released", "redacted", "captured", "official release", "provenance verified", "provenance unverified"]], ["Version", ["preprint", "accepted manuscript", "version of record", "advance online", "draft", "forthcoming", "revised", "corrected", "retracted", "superseded"]], ["Review status", ["peer-reviewed", "editor-reviewed", "student-edited", "not peer-reviewed", "review status unclear"]], ["Format", ["transcript", "video", "audio", "scan", "facsimile", "microfilm", "e-book", "audiobook", "abstract only", "excerpt"]], ["Capture status", ["archived", "edited after capture", "screenshot only", "reupload"]], ["Interest", ["industry-funded", "government-funded", "sponsored", "state-affiliated", "author affiliated with subject"]], ["Synthetic content", ["AI-generated", "AI-assisted", "suspected synthetic", "digitally altered"]]];
-  var NEIGHBORS = [[["Preprint Paper", "Working Paper"], "Preprint: posted publicly before peer review. Working Paper: issued in an institution's own series, and may never reach a journal. An accepted manuscript is a Peer-Reviewed Article with the qualifier \"accepted manuscript\"."], [["Dissertation", "Thesis", "Undergraduate Thesis"], "Dissertation, Thesis, Undergraduate Thesis: doctoral, master's, and bachelor's work, in that order (US usage; British usage reverses the first two)."], [["Monograph", "Trade Book", "Textbook"], "Monograph: a scholarly book making one sustained argument, usually from a university press. Trade Book: written for general readers. Textbook: written to teach a field, not to argue a thesis."], [["Peer-Reviewed Article", "Professional Journal Article", "Law Review Article", "Trade Journal Article"], "Peer-Reviewed: refereed by outside scholars. Professional Journal: reviewed by the journal's own editors. Law Review: edited by law students, usually without peer review. Trade Journal: published by industry press. Check the journal's own statement."], [["Literature Review", "Review Article", "Systematic Review", "Meta-Analysis"], "Literature Review: a narrative survey of scholarship. Review Article: a journal article synthesizing a field. Systematic Review: follows a stated, repeatable search method. Meta-Analysis: pools results statistically."], [["Book Review", "Review Essay"], "Book Review: assesses one book. Review Essay: uses several works to make a wider argument."], [["Whitepaper", "Industry Whitepaper", "Government White Paper", "Defense White Paper"], "Whitepaper: any organization's position paper. Industry Whitepaper: a vendor's or trade body's, with a commercial interest. Government White Paper: a formal policy proposal. Defense White Paper: a state's periodic statement of defense policy."], [["News Article", "News Analysis", "Feature Article", "Explainer"], "News Article: reports events. News Analysis: a reporter's interpretation of them. Feature Article: a longer narrative not tied to the day's news. Explainer: background on an issue, with no new reporting."], [["Editorial / Op-Ed", "Column", "Expert Commentary"], "Editorial / Op-Ed: the outlet's own voice, or an outside contributor's opinion. Column: a regular writer's recurring signed piece. Expert Commentary: a specialist's short analysis published by their own institution."], [["State Media Report", "State Media Commentary"], "State Media when a government or ruling party owns or directs the outlet. Evidence of official messaging first, of fact second."], [["Legal Opinion", "Court Opinion", "Judgment", "Court Order"], "Legal Opinion: advice from counsel or a law officer. Court Opinion: a court's written reasons. Judgment: the outcome the court entered. Court Order: a direction issued during a case."], [["Public Law / Statute", "Regulation", "Executive Order", "Decree"], "Statute: passed by a legislature. Regulation: issued by an agency under a statute. Executive Order: a head of government's direction to the executive branch. Decree: an executive act carrying the force of law, where the system allows it."], [["Testimony Transcript", "Prepared Testimony", "Hearing", "Deposition"], "Testimony Transcript: what the witness said, as recorded. Prepared Testimony: the written statement submitted beforehand, which can differ. Hearing: the whole proceeding. Deposition: sworn out-of-court testimony taken in litigation."], [["Treaty", "Convention", "Protocol", "Executive Agreement", "Memorandum of Understanding"], "Treaty: a binding international agreement. Convention: a multilateral treaty open to many states. Protocol: adds to or amends a treaty. Executive Agreement: binding, concluded by the US executive without Senate consent. Memorandum of Understanding: usually a non-binding statement of intent."], [["Leaked Document", "Internal Document", "Declassified Document", "FOIA-Released Document"], "Leaked: disclosed without authorization. Internal: not written for publication, but obtained legitimately. Declassified: formerly classified, released by the government's own decision. FOIA-Released: released on request under an information law, often redacted."], [["Personal Interview", "Recorded Interview", "Published Interview", "Oral History", "Personal Communication"], "Personal Interview: conducted by the author. Recorded Interview: a recording exists. Published Interview: appeared in an outlet. Oral History: recorded testimony held in a collection. Personal Communication: an informal exchange with the author."], [["Commercial Satellite Imagery", "Annotated Satellite Imagery", "Geolocation Analysis"], "Commercial Satellite Imagery: the provider's image. Annotated Satellite Imagery: the image with someone's markings added, so cite the annotator. Geolocation Analysis: a third party's worked conclusion about where something is."], [["Social Media Post", "Channel Post", "Reposted Content"], "Social Media Post: on an account's public feed. Channel Post: sent to a broadcast channel, as on Telegram. Reposted Content: material the account did not originate."]];
+  var NEIGHBORS = [[["Preprint Paper", "Working Paper"], "Preprint: posted publicly before peer review. Working Paper: issued in an institution's own series, and may never reach a journal. An accepted manuscript is a Peer-Reviewed Article with the qualifier \"accepted manuscript\"."], [["Dissertation", "Thesis", "Undergraduate Thesis"], "Dissertation, Thesis, Undergraduate Thesis: doctoral, master's, and bachelor's work, in that order (US usage; British usage reverses the first two)."], [["Monograph", "Trade Book", "Textbook"], "Monograph: a scholarly book making one sustained argument for specialists, with notes and a bibliography, usually from a university or academic press. Trade Book: written for general readers, usually from a commercial house, even when a scholar wrote it. Textbook: written to teach a field, not to argue a thesis. When you cannot tell Monograph from Trade Book, use Trade Book."], [["Peer-Reviewed Article", "Journal Article", "Professional Journal Article", "Law Review Article", "Trade Journal Article"], "Peer-Reviewed: refereed by outside scholars. Journal Article: review is of another kind or could not be established, so it takes a review-status qualifier. Professional Journal: reviewed by the journal's own editors. Law Review: edited by law students, usually without peer review. Trade Journal: published by industry press. Check the journal's own statement."], [["Literature Review", "Review Article", "Systematic Review", "Meta-Analysis"], "Literature Review: a narrative survey of scholarship. Review Article: a journal article synthesizing a field. Systematic Review: follows a stated, repeatable search method. Meta-Analysis: pools results statistically."], [["Book Review", "Review Essay"], "Book Review: assesses one book. Review Essay: uses several works to make a wider argument."], [["Whitepaper", "Industry Whitepaper", "Government White Paper", "Defense White Paper"], "Whitepaper: any organization's position paper. Industry Whitepaper: a vendor's or trade body's, with a commercial interest. Government White Paper: a formal policy proposal. Defense White Paper: a state's periodic statement of defense policy."], [["News Article", "News Analysis", "Feature Article", "Explainer"], "News Article: reports events. News Analysis: a reporter's interpretation of them. Feature Article: a longer narrative not tied to the day's news. Explainer: background on an issue, with no new reporting."], [["Editorial / Op-Ed", "Column", "Expert Commentary"], "Editorial / Op-Ed: the outlet's own voice, or an outside contributor's opinion. Column: a regular writer's recurring signed piece. Expert Commentary: a specialist's short analysis published by their own institution."], [["State Media Report", "State Media Commentary"], "State Media when a government or ruling party owns or directs the outlet. Evidence of official messaging first, of fact second."], [["Legal Opinion", "Court Opinion", "Judgment", "Court Order"], "Legal Opinion: advice from counsel or a law officer. Court Opinion: a court's written reasons. Judgment: the outcome the court entered. Court Order: a direction issued during a case."], [["Public Law / Statute", "Regulation", "Executive Order", "Decree"], "Statute: passed by a legislature. Regulation: issued by an agency under a statute. Executive Order: a head of government's direction to the executive branch. Decree: an executive act carrying the force of law, where the system allows it."], [["Testimony Transcript", "Prepared Testimony", "Hearing", "Deposition"], "Testimony Transcript: what the witness said, as recorded. Prepared Testimony: the written statement submitted beforehand, which can differ. Hearing: the whole proceeding. Deposition: sworn out-of-court testimony taken in litigation."], [["Treaty", "Convention", "Protocol", "Executive Agreement", "Memorandum of Understanding"], "Treaty: a binding international agreement. Convention: a multilateral treaty open to many states. Protocol: adds to or amends a treaty. Executive Agreement: binding, concluded by the US executive without Senate consent. Memorandum of Understanding: usually a non-binding statement of intent."], [["Leaked Document", "Internal Document", "Declassified Document", "FOIA-Released Document"], "Leaked: disclosed without authorization. Internal: not written for publication, but obtained legitimately. Declassified: formerly classified, released by the government's own decision. FOIA-Released: released on request under an information law, often redacted."], [["Personal Interview", "Recorded Interview", "Published Interview", "Oral History", "Personal Communication"], "Personal Interview: conducted by the author. Recorded Interview: a recording exists. Published Interview: appeared in an outlet. Oral History: recorded testimony held in a collection. Personal Communication: an informal exchange with the author."], [["Commercial Satellite Imagery", "Annotated Satellite Imagery", "Geolocation Analysis"], "Commercial Satellite Imagery: the provider's image. Annotated Satellite Imagery: the image with someone's markings added, so cite the annotator. Geolocation Analysis: a third party's worked conclusion about where something is."], [["Social Media Post", "Channel Post", "Reposted Content"], "Social Media Post: on an account's public feed. Channel Post: sent to a broadcast channel, as on Telegram. Reposted Content: material the account did not originate."]];
   var ACCESS = [["paywalled", "Paywalled"], ["metered paywall", "Metered paywall"], ["free registration required", "Free registration required"], ["institutional access", "Institutional access"], ["region-restricted", "Region-restricted"], ["app only", "App only"], ["other", "Something else"]];
+
+  // Everyday words that find a description when the library's own term is not the one people type.
+  var ALIASES = {"tweet": ["Social Media Post", "Thread", "Quote Post", "Reply"], "x post": ["Social Media Post", "Thread", "Quote Post"], "retweet": ["Reposted Content", "Quote Post"], "repost": ["Reposted Content", "Quote Post"], "telegram": ["Channel Post", "Forwarded Message", "Group Chat Message"], "whatsapp": ["Group Chat Message", "Direct Message", "Voice Message", "Chat Log Export"], "discord": ["Group Chat Message", "Chat Log Export"], "dm": ["Direct Message"], "reddit": ["Forum Post", "Forum Discussion", "Comment"], "facebook": ["Social Media Post", "Account Profile", "Comment"], "instagram": ["Social Media Post", "Story Post", "Short-Form Video"], "tiktok": ["Short-Form Video", "Video Post"], "reel": ["Short-Form Video"], "youtube": ["Video", "Video Essay", "Livestream Archive"], "linkedin": ["Professional Profile", "Social Media Post"], "bio": ["Account Profile", "Official Biography", "Biographical Entry"], "wikipedia": ["Wiki Article", "Wiki Edit History"], "oped": ["Editorial / Op-Ed"], "opinion": ["Editorial / Op-Ed", "Column", "Expert Commentary"], "study": ["Peer-Reviewed Article", "Journal Article", "Research Report", "Working Paper", "Preprint Paper"], "paper": ["Peer-Reviewed Article", "Journal Article", "Working Paper", "Preprint Paper", "Conference Paper"], "journal": ["Peer-Reviewed Article", "Journal Article"], "scholarly": ["Peer-Reviewed Article", "Monograph"], "arxiv": ["Preprint Paper"], "ssrn": ["Preprint Paper", "Working Paper"], "phd": ["Dissertation"], "masters": ["Thesis"], "book": ["Monograph", "Trade Book", "Edited Volume", "Textbook", "Book Section"], "ebook": ["Trade Book", "Monograph"], "chapter": ["Book Section", "Handbook Chapter"], "law": ["Public Law / Statute", "Regulation", "Court Opinion", "Law Review Article"], "act": ["Public Law / Statute", "Bill"], "legislation": ["Public Law / Statute", "Bill"], "lawsuit": ["Complaint", "Court Filing", "Docket Sheet"], "ruling": ["Court Opinion", "Judgment"], "remarks": ["Official Speech", "Speech", "Q&A Remarks"], "hack": ["Data Breach Disclosure", "Hacktivist Claim", "Leaked Dataset"], "wikileaks": ["Leaked Document", "Diplomatic Cable", "Leak Database Entry"], "maxar": ["Commercial Satellite Imagery"], "planet": ["Commercial Satellite Imagery"], "google earth": ["Commercial Satellite Imagery"], "sentinel": ["Synthetic Aperture Radar Imagery", "Multispectral Imagery", "Remote Sensing Dataset"], "sar": ["Synthetic Aperture Radar Imagery"], "street view": ["Street-Level Imagery"], "firms": ["Active Fire Data"], "picture": ["Photograph (Verified)", "Photograph (Unverified)", "News Photograph", "Geotagged Photo"], "image": ["Photograph (Verified)", "Photograph (Unverified)", "Commercial Satellite Imagery", "AI-Generated Image"], "clip": ["Video Footage (Verified)", "Video Footage (Unverified)", "Short-Form Video", "Combat Footage"], "gopro": ["Helmet-Camera Footage"], "bodycam": ["Body-Camera Footage"], "adsb": ["Flight Tracking Data"], "flightradar": ["Flight Tracking Data"], "plane": ["Flight Tracking Data", "Aircraft Registry Record"], "marinetraffic": ["Ship Tracking (AIS)"], "vessel": ["Ship Tracking (AIS)", "Vessel Registry Record", "Port Call Record"], "company": ["Business Registry Record", "Annual Report", "Company Web Page", "Beneficial Ownership Record"], "10-k": ["SEC Filing", "Annual Report"], "edgar": ["SEC Filing"], "chatgpt": ["AI Model Output"], "chatbot": ["AI Model Output"], "llm": ["AI Model Output"], "deepfake": ["Suspected Synthetic Media", "Manipulated Media", "AI-Generated Video", "AI-Generated Image", "AI-Generated Audio"], "fake": ["Manipulated Media", "Suspected Synthetic Media", "Suspected Inauthentic Account Post"], "bot": ["Suspected Inauthentic Account Post"], "screengrab": ["Screenshot (Provenance Verified)", "Screenshot (Provenance Unverified)"], "website": ["Web Page", "Personal Website", "Government Web Page", "Company Web Page"], "newspaper": ["News Article", "Historical Newspaper Article", "Student Newspaper Article"], "substack": ["Journalist Newsletter", "Newsletter Article", "Blog Post"], "email": ["E-mail"], "coordinates": ["Geolocation Analysis", "Geotagged Photo"], "exif": ["File Metadata"], "domain": ["WHOIS Record", "DNS Record", "Passive DNS Data"], "github": ["Code Repository", "Code Commit", "Issue Tracker Entry"], "bitcoin": ["Blockchain Transaction Record"], "crypto": ["Blockchain Transaction Record"], "united nations": ["UN Report", "UN Resolution", "UN Meeting Record"], "milblogger": ["Military Blogger Post"], "ad": ["Advertisement"], "cv": ["Résumé / CV"], "powerpoint": ["Presentation", "Lecture Slides", "Investor Presentation"], "deck": ["Presentation", "Lecture Slides", "Investor Presentation"], "slides": ["Lecture Slides", "Presentation", "Investor Presentation"]};
+  var REVIEW = ['peer-reviewed', 'editor-reviewed', 'student-edited', 'not peer-reviewed', 'review status unclear'];
+  var REVIEW_SAY = {"": "Check the journal's own statement, usually under About or For Authors. If you cannot find one, choose Could not establish.", "peer-reviewed": "Outside scholars refereed it before it was published.", "editor-reviewed": "Reviewed by the journal's own editors, as at many professional and service journals.", "student-edited": "Selected and edited by students, as at most US law reviews.", "not peer-reviewed": "The journal does not referee. Say so in the text wherever the claim is load-bearing.", "review status unclear": "The bracket says so, which tells the reader you looked. Treat the article as unreviewed until you can confirm."};
+  // The ? tips. Each pair is the part of the page (a CSS selector) and what to say about it.
+  var TIPS = [
+    ["#themeLabel", "Auto follows your device setting. Light and Dark hold the page to one look. The choice is remembered in this browser."],
+    ["#h-link", "An optional shortcut. Paste the address of a post, video, article, or archived copy and choose Fill from link. The tool reads the address itself and never opens it, so nothing is sent anywhere. It can set the source type, platform, account, and date, and it strips share and tracking tags. A link never carries the title."],
+    ["#h-type", "The type sets the starting title style, the descriptions suggested first, the placeholder text, and which checks run. It is not printed in the footnote. Where a source fits two types, choose the one that matches how a reader would go looking for it."],
+    ["#h-author", "Slot 1. Whoever made the source. It opens the footnote and is followed by a comma. With no author, the footnote opens with the title."],
+    ["label[for=\"authors\"]", "One name per line, first name then surname. Keep surname-first order where that is the person's own usage, as in Xi Jinping. Four or more authors become the first three and et al. With no named person, use the organization, or the outlet plus Staff."],
+    ["label[for=\"editors\"]", "People who edited the work. Each name is tagged (ed.) and follows the authors after a semicolon. For a chapter, give the editors of the volume it sits in."],
+    ["label[for=\"translators\"]", "People who translated the work into the language you read it in. Each name is tagged (trans.). Use this together with A published English translation, under Language of the source."],
+    ["label[for=\"contributors\"]", "Anyone else the source credits for part of the work, where a reader would want to know. Each name is tagged (contr.)."],
+    ["label[for=\"lead\"]", "A word that opens the footnote. See points the reader to supporting material. Cited in and Quoted in mark a source you reached through another one; that footnote takes the weaker of the two ratings."],
+    ["#h-title", "Slot 2. Short works such as articles, posts, chapters, and videos go in quotation marks. Larger works such as books and reports go in italics. A source with no title takes a plain description with neither."],
+    ["label[for=\"title\"]", "Copy the title as the source prints it, with its own capitalization and spelling, and mark an error with [sic]. Leave off the outer quotation marks; they are added for you. A social media post has no headline, so use its opening words."],
+    ["label[for=\"titleStyle\"]", "Quotes for a short work that sits inside something larger. Italics for a work that stands alone. Plain for a description you wrote because the source has no title. The source type sets this for you; change it when the source is an exception."],
+    ["#langLabel", "English adds nothing. Another language adds the English title in brackets and says in the description how you read it. A published English translation adds \"translated from\" and the original language."],
+    ["label[for=\"origLang\"]", "The language the source was written in, by its common English name: Chinese, Russian, Persian."],
+    ["label[for=\"transBy\"]", "Tells the reader how far to trust a quotation. Machine translation is marked in the bracket, and anything quoted from it should be checked against the original first."],
+    ["label[for=\"transTitle\"]", "The title put into English, so a reader can tell what the source is. It follows the original title in square brackets."],
+    ["#h-loc", "Slot 3. Where the source lives: the journal, outlet, platform, site, series, or archive. Always italic, and ten words or fewer. It is dropped when it only repeats the title. A book usually has none."],
+    ["#h-desc", "Slot 4. The square bracket tells the reader what kind of thing they are about to open. Its order is fixed: kind of source; details; qualifiers; language; access; rating. It is the one slot that is never dropped."],
+    ["label[for=\"descType\"]", "The most specific description that fits. Browse opens the whole library by category. Typing searches it, and everyday words work too: tweet, study, leak, satellite. If nothing fits, write your own in ten words or fewer."],
+    ["label[for=\"reviewStatus\"]", "Whether the journal sends articles to outside referees before publishing. Look for its own statement, usually under About or For Authors. Peer-reviewed sets the description to Peer-Reviewed Article. Any other answer uses Journal Article and adds the status as a qualifier."],
+    ["label[for=\"descDetails\"]", "Whatever a reader needs to find this exact item: volume and issue, report number, episode, edition, or image resolution and coordinates. Separate items with semicolons."],
+    ["#qualBox > summary", "A qualifier describes this copy of the source, not its kind: leaked, preprint, scan, archived. Tick only what a reader needs in order to weigh the source. Qualifiers follow the details in the bracket."],
+    ["#accessLabel", "Tick whatever stands between a reader and the source, such as a paywall or a required login. Free to read needs no mark. Where a free version exists, cite that one instead or alongside."],
+    ["#ratingLabel", "Optional. The letter rates the source's track record, from A (Highly Reliable) to F (Unknown). The number rates this piece of information, from 1 (Confirmed) to 6 (Unknown). Judge each on its own evidence. The colors show how much weight the pair can carry."],
+    ["#h-pub", "Slot 5. Who issued the source, where the location does not already say. It opens the parenthesis and is followed by a colon. Leave it blank for journals, newspapers, magazines, and wire services."],
+    ["#h-date", "Slot 6. The date closes the parenthesis. Books and journal articles take the year alone. News, web pages, posts, and videos take the full date. With no date the footnote reads n.d."],
+    ["label[for=\"date\"]", "When the source was published. Type it any common way and it becomes DD Month YYYY. Slashes are read as month/day/year. A date filled from a post's link is in UTC."],
+    ["label[for=\"dateKind\"]", "Published is the default and adds nothing. Last updated suits pages and lists that change. Captured is for imagery: the day the image was taken, which may be earlier than its release."],
+    ["label[for=\"accessed\"]", "The day you looked. Needed only for sources that change without notice, such as trackers, registries, and live lists. Leave it blank for anything with a fixed publication date."],
+    ["#h-url", "Slot 7. The full, stable link or DOI. Prefer a DOI where the source has one. Never use a link shortener, and trim tracking tags."],
+    ["label[for=\"url\"]", "Paste the whole address. A bare DOI such as 10.1234/abc is rewritten as a https://doi.org/ link."],
+    ["label[for=\"archiveUrl\"]", "The address of a saved copy, so the citation still works if the original changes or disappears. Expected for social media posts and anything else likely to be deleted. It follows the footnote as Archived: link (captured date)."],
+    ["label[for=\"archiveDate\"]", "The day the archive copy was made. It is read from the archive address where the address carries one. Otherwise it is set to today when you paste the link; change it if the copy is older."],
+    ["#lab-arch", "Each button opens that archive's own site in a new tab and hands it the link above. This is the only time the page passes anything to another site, and only when you press the button."],
+    ["#h-locator", "Slot 8. The exact place in the source that supports your claim. It follows the link after a colon. Page numbers get p. or pp. Where there are no pages, name the section or give a timestamp. Never count paragraphs."],
+    ["#h-after", "Nothing here changes the citation itself. Commentary follows the footnote. The two short-form fields control how later citations of the same source read."],
+    ["label[for=\"note\"]", "A sentence or two after the citation: a caveat, how you established a date or place, or what you could not confirm. Your own geolocation or verification reasoning belongs here."],
+    ["label[for=\"shortName\"]", "The name used in later citations, normally the first author's surname. It is worked out for you. Correct it where the surname comes first, as in Xi Jinping, or where the author is an organization."],
+    ["label[for=\"shortTitle\"]", "A few words of the title for later citations, enough to tell this source from another by the same author. It is worked out for you and can be shortened further."],
+    ["#lab-foot", "The first, full citation of the source. The chips under it show each slot: ✓ filled, – left out, ! missing, n.d. no date. Copy with italics keeps the formatting in Word and Google Docs. Markdown marks italics with asterisks. Plain drops them."],
+    ["#italLabel", "Italics is the house style. Choose Underline where italics will not survive, such as a plain-text system or a typed manuscript."],
+    ["#lab-checks", "Fix means the footnote breaks a rule. Check means look again before you publish. Note is advice or a reminder and needs no action."],
+    ["#lab-later", "After the first full footnote, cite the same source in short form: surname, short title, and locator. Ibid. points to the footnote directly above and breaks if the notes are reordered."],
+    ["#lab-list", "Collect the sources for one piece. Copy them one per line, or joined into a single footnote with semicolons. Audit the list runs every check across all of them and also catches duplicate links and short forms that clash."],
+    ["#lab-file", "A list file (.json) holds every field of every source, so the list can be backed up, shared, and opened again for editing. The Word, Markdown, and spreadsheet exports hold the finished footnotes."],
+    ["label[for=\"listName\"]", "The piece these sources belong to. It names the saved file and heads the exports."]
+  ];
 
   var TEXT_KEYS = ['lead', 'authors', 'editors', 'translators', 'contributors', 'title', 'titleStyle', 'transTitle', 'origLang', 'transBy', 'location', 'descType', 'descDetails', 'accessNote', 'rating', 'publisher', 'date', 'dateKind', 'accessed', 'url', 'archiveUrl', 'archiveDate', 'locator', 'note', 'shortName', 'shortTitle'];
   var SLOT_NAMES = [['author', 'Author'], ['title', 'Title'], ['location', 'Location'], ['description', 'Description'], ['publisher', 'Publisher'], ['date', 'Date'], ['url', 'URL/DOI'], ['locator', 'Locator']];
@@ -1377,6 +1492,7 @@ var OSINT = (function () {
     $('publisher').placeholder = t.ph.publisher || '';
     $('descDetails').placeholder = t.ph.descDetails || '';
     $('locator').placeholder = t.ph.locator || 'Pages, a named section, or a timestamp';
+    $('titleHint').textContent = t.titleHint || DEFAULT_TITLE_HINT;
     $('startHint').textContent = t.start ? 'Typical starting point for this kind of source: ' + t.start + '. Grade the specific source on its record.' : 'Grade the specific source on its record, not its category.';
     var box = $('picks'); box.textContent = '';
     t.picks.forEach(function (p) {
@@ -1387,37 +1503,64 @@ var OSINT = (function () {
     });
   }
 
+  function neighborNote(term) {
+    var key = String(term).toLowerCase(), i, j;
+    for (i = 0; i < NEIGHBORS.length; i++) for (j = 0; j < NEIGHBORS[i][0].length; j++) if (NEIGHBORS[i][0][j].toLowerCase() === key) return NEIGHBORS[i][1];
+    return '';
+  }
   function describeType(raw) {
-    var t = String(raw || '').trim(), key = t.toLowerCase(), el = $('descHint'), parts = [];
+    var t = String(raw || '').trim(), el = $('descHint'), parts = [], nb;
     if (!t) { el.textContent = 'From the library, or a plain description of ten words or fewer.'; return; }
-    var hit = LIB_INDEX[key];
-    if (hit) parts.push(hit.cat + ' \u203a ' + hit.group + '.');
+    var hit = LIB_INDEX[t.toLowerCase()];
+    if (hit) parts.push(hit.cat + ' › ' + hit.group + '.');
     else parts.push('Not in the library.');
-    for (var i = 0; i < NEIGHBORS.length; i++) {
-      var terms = NEIGHBORS[i][0].map(function (x) { return x.toLowerCase(); });
-      if (terms.indexOf(key) !== -1) { parts.push(NEIGHBORS[i][1]); break; }
-    }
+    nb = neighborNote(t);
+    if (nb) parts.push(nb);
     el.textContent = parts.join(' ');
   }
 
-  function filterLibrary() {
-    var q = $('libFilter').value.trim().toLowerCase(), shown = 0;
-    Array.prototype.forEach.call(document.querySelectorAll('#lib details.cat'), function (cat) {
-      var catShown = 0;
-      Array.prototype.forEach.call(cat.querySelectorAll('.g'), function (g) {
-        var gShown = 0;
-        Array.prototype.forEach.call(g.querySelectorAll('.pick'), function (b) {
-          var ok = !q || b.textContent.toLowerCase().indexOf(q) !== -1 || g.dataset.name.indexOf(q) !== -1;
-          b.hidden = !ok; if (ok) gShown++;
-        });
-        g.hidden = gShown === 0; catShown += gShown;
-      });
-      cat.hidden = catShown === 0;
-      if (q) cat.open = true; else if (cat.dataset.wasOpen !== '1') cat.open = false;
-      cat.querySelector('.cnt').textContent = q ? catShown + ' of ' + cat.dataset.total : cat.dataset.total;
-      shown += catShown;
-    });
-    $('libCount').textContent = q ? shown + ' of ' + LIBRARY.length + ' match' : LIBRARY.length + ' descriptions in ' + LIB.length + ' categories';
+  // Advice that belongs to one source type: Monograph or Trade Book, refereed or not.
+  function paintAdvice(st) {
+    var a = TYPES[st.type].advice, el = $('descAdvice'), b;
+    if (!a || a.when.indexOf(st.descType.trim().toLowerCase()) === -1) { el.hidden = true; return; }
+    el.hidden = false; el.textContent = '';
+    b = document.createElement('b'); b.textContent = a.lead + ' ';
+    el.appendChild(b); el.appendChild(document.createTextNode(a.text));
+  }
+
+  // Review status is a view of two things already in the form: the description and the
+  // review-status qualifiers. Nothing extra is saved.
+  function reviewOf(st) {
+    var ticked = st.quals.filter(function (q) { return REVIEW.indexOf(q) !== -1; });
+    return { ticked: ticked, value: ticked[0] || (st.descType.trim().toLowerCase() === 'peer-reviewed article' ? 'peer-reviewed' : '') };
+  }
+  function paintReview(st) {
+    var kl = st.descType.trim().toLowerCase(), hit = LIB_INDEX[kl];
+    var show = hit ? hit.group === 'Journal literature' : st.type === 'journal';
+    $('reviewWrap').hidden = !show;
+    if (!show) return;
+    var r = reviewOf(st);
+    $('reviewStatus').value = r.value;
+    $('reviewHint').textContent = REVIEW_SAY[r.value] + (r.ticked.length ? ' The bracket carries "' + r.ticked[0] + '".' : (r.value ? ' The description says so itself.' : ''));
+  }
+  function applyReview(v) {
+    var kl = $('descType').value.trim().toLowerCase();
+    function box(q) { return document.querySelector('input[name="qual"][value="' + q + '"]'); }
+    REVIEW.forEach(function (q) { box(q).checked = false; });
+    if (v === 'peer-reviewed') {
+      if (!kl || kl === 'journal article') $('descType').value = 'Peer-Reviewed Article';
+      else if (kl !== 'peer-reviewed article') box(v).checked = true;
+    } else {
+      if (kl === 'peer-reviewed article' || (!kl && v)) $('descType').value = 'Journal Article';
+      if (v) box(v).checked = true;
+    }
+  }
+
+  function paintTitleHelp(st) {
+    var n = st.title.trim() ? st.title.trim().split(/\s+/).length : 0;
+    var long = st.type === 'social' && st.titleStyle !== 'plain' && n > 15;
+    $('trimRow').hidden = !long;
+    if (long) $('trimNote').textContent = n + ' words now. This keeps the first twelve and adds an ellipsis.';
   }
 
   function paintMatrix() {
@@ -1439,6 +1582,9 @@ var OSINT = (function () {
     $('accessNoteWrap').hidden = st.access.indexOf('other') === -1;
     $('qualCount').textContent = st.quals.length ? st.quals.length + ' ticked' : 'optional';
     describeType(st.descType);
+    paintAdvice(st);
+    paintReview(st);
+    paintTitleHelp(st);
     paintArchive(st);
     paintLang(st);
 
@@ -1566,33 +1712,6 @@ var OSINT = (function () {
         dressType(); render();
       });
     });
-    var dl = $('descList');
-    LIBRARY.forEach(function (x) { var o = document.createElement('option'); o.value = x; dl.appendChild(o); });
-
-    var lib = $('lib');
-    LIB.forEach(function (c) {
-      var cat = document.createElement('details'); cat.className = 'cat';
-      var total = 0;
-      var sum = document.createElement('summary'); sum.textContent = c.c;
-      var cnt = document.createElement('span'); cnt.className = 'cnt'; sum.appendChild(cnt); cat.appendChild(sum);
-      c.g.forEach(function (g) {
-        var row = document.createElement('div'); row.className = 'g'; row.dataset.name = g.n.toLowerCase();
-        var gn = document.createElement('span'); gn.className = 'gn'; gn.textContent = g.n;
-        var picks = document.createElement('div'); picks.className = 'picks';
-        g.i.forEach(function (x) {
-          var b = document.createElement('button'); b.type = 'button'; b.className = 'pick'; b.textContent = x;
-          b.addEventListener('click', function () { $('descType').value = x; touched(); render(); });
-          picks.appendChild(b); total++;
-        });
-        row.appendChild(gn); row.appendChild(picks); cat.appendChild(row);
-      });
-      cat.dataset.total = total; cnt.textContent = total;
-      cat.addEventListener('toggle', function () { if (!$('libFilter').value.trim()) cat.dataset.wasOpen = cat.open ? '1' : '0'; });
-      lib.appendChild(cat);
-    });
-    $('libFilter').addEventListener('input', filterLibrary);
-    filterLibrary();
-
     var qbox = $('quals');
     QUALIFIERS.forEach(function (grp) {
       var row = document.createElement('div'); row.className = 'qg';
@@ -1632,8 +1751,15 @@ var OSINT = (function () {
   })();
 
   // events
-  $('f').addEventListener('input', function (e) { if (e.target.id === 'libFilter' || e.target.id === 'linkIn') return; if (e.target.name !== 'type') touched(); render(); });
-  $('f').addEventListener('change', function (e) { if (e.target.id === 'libFilter' || e.target.id === 'linkIn') return; if (e.target.name !== 'type') { touched(); render(); } });
+  // The select reports 'input' before 'change', and the form redraws on both, so apply the choice on the first.
+  ['input', 'change'].forEach(function (ev) { $('reviewStatus').addEventListener(ev, function () { applyReview($('reviewStatus').value); }); });
+  $('trimTitle').addEventListener('click', function () {
+    var w = $('title').value.trim().split(/\s+/);
+    $('title').value = w.slice(0, 12).join(' ').replace(/[\s,;:.!?\u2026\u2013\u2014-]+$/, '') + '\u2026';
+    touched(); render(); $('title').focus();
+  });
+  $('f').addEventListener('input', function (e) { if (e.target.id === 'linkIn') return; if (e.target.name !== 'type') touched(); render(); });
+  $('f').addEventListener('change', function (e) { if (e.target.id === 'linkIn') return; if (e.target.name !== 'type') { touched(); render(); } });
   $('f').addEventListener('submit', function (e) { e.preventDefault(); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-today]'), function (b) {
     b.addEventListener('click', function () { $(b.dataset.today).value = today(); touched(); render(); });
@@ -1994,6 +2120,246 @@ var OSINT = (function () {
     if (linked) writeLinked(false); else if (fileStatus === 'clean') { fileStatus = 'changed'; paintFile(); }
   });
   dlReady.then(function (d) { if (inViewer && !d) { noSave = true; paintFile(); } });
+
+  // ---- kind of source: a list that opens, browses by category, and searches ----
+  function fold(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  var LIB_FLAT = [];
+  LIB.forEach(function (c) { c.g.forEach(function (g) { g.i.forEach(function (x) { LIB_FLAT.push({ t: x, f: fold(x), group: g.n, more: fold(g.n + ' ' + c.c) }); }); }); });
+  var menu = { open: false, q: '', cats: {}, items: [], active: -1 };
+
+  // Best matches first: an everyday word that names the description, then the description
+  // itself, then its opening, then any word in it, then anywhere in it, then its group.
+  function searchLibrary(raw) {
+    var q = fold(raw).replace(/\s+/g, ' ').trim(), toks = q.split(' '), alias = {}, out = [];
+    Object.keys(ALIASES).forEach(function (k) {
+      var whole = q === k || (' ' + q + ' ').indexOf(' ' + k + ' ') !== -1;
+      if (!whole && !(q.length >= 3 && k.indexOf(q) === 0)) return;
+      ALIASES[k].forEach(function (t, i) { if (!alias[t] || (whole && alias[t].s > 0)) alias[t] = { s: whole ? 0 : 3.5, i: i }; });
+    });
+    LIB_FLAT.forEach(function (e, n) {
+      var s = 9, a = alias[e.t], spaced = ' ' + e.f.replace(/[\/()\-]/g, ' ');
+      var all = toks.every(function (t) { return e.f.indexOf(t) !== -1; });
+      if (e.f === q) s = 1;
+      else if (e.f.indexOf(q) === 0) s = 2;
+      else if (all && toks.every(function (t) { return spaced.indexOf(' ' + t) !== -1; })) s = 3;
+      else if (all) s = 4;
+      else if (toks.every(function (t) { return e.f.indexOf(t) !== -1 || e.more.indexOf(t) !== -1; })) s = 5;
+      if (a && a.s < s) out.push({ e: e, s: a.s, n: a.i });
+      else if (s < 9) out.push({ e: e, s: s, n: n });
+    });
+    out.sort(function (x, y) { return x.s - y.s || x.n - y.n; });
+    return out;
+  }
+
+  function menuHead(list, text, cls) {
+    var d = document.createElement('div');
+    d.className = cls; d.setAttribute('role', 'presentation'); d.textContent = text;
+    list.appendChild(d);
+  }
+  function menuOpt(list, text, where, cls) {
+    var d = document.createElement('div'), nm = document.createElement('span'), w;
+    d.className = 'opt' + (cls ? ' ' + cls : ''); d.id = 'descOpt' + menu.items.length;
+    d.setAttribute('role', 'option'); d.setAttribute('aria-selected', 'false');
+    nm.className = 'nm'; nm.textContent = text; d.appendChild(nm);
+    if (where) { w = document.createElement('span'); w.className = 'where'; w.textContent = where; d.appendChild(w); }
+    list.appendChild(d); menu.items.push(d);
+    return d;
+  }
+  function paintMenu() {
+    var list = $('descMenu'), q = menu.q.trim(), cur = $('descType').value.trim().toLowerCase(), t = TYPES[currentType()], res;
+    function term(x, where, cls) { var d = menuOpt(list, x, where, cls); d.dataset.term = x; if (x.toLowerCase() === cur) d.classList.add('current'); }
+    list.textContent = ''; menu.items = []; menu.active = -1;
+    $('descType').removeAttribute('aria-activedescendant');
+    if (q) {
+      res = searchLibrary(q);
+      $('descMenuHead').textContent = res.length ? res.length + (res.length === 1 ? ' match' : ' matches') + ' in the library' : 'No match in the library';
+      res.forEach(function (r) { term(r.e.t, r.e.group, ''); });
+      if (!res.length) menuHead(list, 'You can keep your own wording: a plain description of ten words or fewer. Send a note so it can be added.', 'none');
+    } else {
+      $('descMenuHead').textContent = 'Browse by category, or type to search all ' + LIBRARY.length;
+      menuHead(list, 'Suggested for: ' + t.label, 'sec');
+      t.picks.forEach(function (p) { term(p, '', ''); });
+      menuHead(list, 'Whole library', 'sec');
+      LIB.forEach(function (c, ci) {
+        var open = !!menu.cats[ci], n = 0, d;
+        c.g.forEach(function (g) { n += g.i.length; });
+        d = menuOpt(list, (open ? '▾ ' : '▸ ') + c.c, String(n), 'cat');
+        d.dataset.cat = ci;
+        d.setAttribute('aria-label', c.c + ', ' + n + ' descriptions, ' + (open ? 'open' : 'closed'));
+        if (open) c.g.forEach(function (g) { menuHead(list, g.n, 'grp'); g.i.forEach(function (x) { term(x, '', 'in'); }); });
+      });
+    }
+    list.scrollTop = 0;
+    menuNote();
+  }
+  function menuNote() {
+    var el = $('descMenuNote'), a = menu.items[menu.active], hit, nb;
+    if (!a) {
+      el.textContent = menu.q.trim() ? 'Arrow keys move, Enter chooses, Esc closes. If nothing fits, keep your own wording, ten words or fewer.'
+        : 'Pick the most specific description that fits. Everyday words search too: tweet, study, leak, satellite.';
+      return;
+    }
+    if (a.dataset.cat != null) { el.textContent = 'Enter or click to ' + (menu.cats[a.dataset.cat] ? 'close' : 'open') + ' this category.'; return; }
+    hit = LIB_INDEX[a.dataset.term.toLowerCase()]; nb = neighborNote(a.dataset.term);
+    el.textContent = (hit ? hit.cat + ' › ' + hit.group + '.' : '') + (nb ? ' ' + nb : '');
+  }
+  function setActive(i, scroll) {
+    var list = $('descMenu'), old = menu.items[menu.active], a = menu.items[i];
+    if (old) { old.classList.remove('active'); old.setAttribute('aria-selected', 'false'); }
+    menu.active = a ? i : -1;
+    menuNote();
+    if (!a) { $('descType').removeAttribute('aria-activedescendant'); return; }
+    a.classList.add('active'); a.setAttribute('aria-selected', 'true');
+    $('descType').setAttribute('aria-activedescendant', a.id);
+    if (!scroll) return;
+    if (a.offsetTop < list.scrollTop) list.scrollTop = a.offsetTop;
+    else if (a.offsetTop + a.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = a.offsetTop + a.offsetHeight - list.clientHeight;
+  }
+  // Keep the open list inside the window: as tall as the room under the field allows,
+  // and if there is too little room, nudge the page up to make some.
+  function fitMenu() {
+    // On a phone the on-screen keyboard shrinks what can be seen, which visualViewport reports.
+    var vv = window.visualViewport, seen = vv ? vv.height : window.innerHeight, foot = vv ? vv.offsetTop + vv.height : window.innerHeight;
+    var room = foot - $('descType').getBoundingClientRect().bottom - 16, want = Math.min(300, seen - 120);
+    if (room < want) { window.scrollBy(0, want - room); room = foot - $('descType').getBoundingClientRect().bottom - 16; }
+    $('descMenuWrap').style.maxHeight = Math.max(200, Math.min(520, room)) + 'px';
+  }
+  function openMenu(q) {
+    var cur = LIB_INDEX[$('descType').value.trim().toLowerCase()], i, at = -1;
+    menu.q = q || ''; menu.open = true;
+    if (!menu.q.trim()) { menu.cats = {}; if (cur) menu.cats[cur.ci] = true; }
+    $('descMenuWrap').hidden = false;
+    $('descType').setAttribute('aria-expanded', 'true'); $('descOpen').setAttribute('aria-expanded', 'true');
+    fitMenu();
+    paintMenu();
+    if (!menu.q.trim() && cur) {
+      for (i = 0; i < menu.items.length; i++) if (menu.items[i].classList.contains('current')) at = i;
+      setActive(at, false);
+      if (menu.items[at]) $('descMenu').scrollTop = Math.max(0, menu.items[at].offsetTop - $('descMenu').clientHeight / 3);
+    }
+  }
+  function closeMenu() {
+    if (!menu.open) return;
+    menu.open = false; menu.active = -1;
+    $('descMenuWrap').hidden = true;
+    $('descType').setAttribute('aria-expanded', 'false'); $('descOpen').setAttribute('aria-expanded', 'false');
+    $('descType').removeAttribute('aria-activedescendant');
+  }
+  function openFromField() {
+    var v = $('descType').value.trim();
+    openMenu(v && !LIB_INDEX[v.toLowerCase()] ? v : '');
+  }
+  function toggleCat(ci) {
+    var i, list = $('descMenu');
+    menu.cats[ci] = !menu.cats[ci];
+    paintMenu();
+    for (i = 0; i < menu.items.length; i++) if (menu.items[i].dataset.cat === String(ci)) break;
+    setActive(i, true);
+    if (menu.cats[ci] && menu.items[i]) list.scrollTop = Math.max(0, menu.items[i].offsetTop - 4);
+  }
+  function chooseKind(term) { $('descType').value = term; touched(); closeMenu(); render(); }
+  function pickActive() {
+    var a = menu.items[menu.active];
+    if (!a) return false;
+    if (a.dataset.cat != null) toggleCat(+a.dataset.cat); else chooseKind(a.dataset.term);
+    return true;
+  }
+  $('descType').addEventListener('input', function () { openMenu($('descType').value); });
+  $('descType').addEventListener('click', function () { if (!menu.open) openFromField(); });
+  $('descType').addEventListener('keydown', function (e) {
+    var n = menu.items.length;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (!menu.open) { openFromField(); return; }
+      if (n) setActive(e.key === 'ArrowDown' ? (menu.active + 1) % n : (menu.active <= 0 ? n - 1 : menu.active - 1), true);
+    } else if (e.key === 'Enter') {
+      if (menu.open) { e.preventDefault(); if (!pickActive()) closeMenu(); }
+    } else if (e.key === 'Escape') {
+      if (menu.open) { e.preventDefault(); e.stopPropagation(); closeMenu(); }
+    } else if (e.key === 'Tab') closeMenu();
+  });
+  $('descOpen').addEventListener('click', function () { if (menu.open) closeMenu(); else openMenu(''); $('descType').focus(); });
+  $('descCombo').addEventListener('mousedown', function (e) { if (e.target !== $('descType')) e.preventDefault(); });
+  $('descCombo').addEventListener('focusout', function (e) { if (!$('descCombo').contains(e.relatedTarget)) closeMenu(); });
+  document.addEventListener('mousedown', function (e) { if (menu.open && !$('descCombo').contains(e.target)) closeMenu(); });
+  $('descMenu').addEventListener('click', function (e) {
+    var o = e.target.closest('.opt');
+    if (!o) return;
+    if (o.dataset.cat != null) toggleCat(+o.dataset.cat); else chooseKind(o.dataset.term);
+  });
+  $('descMenu').addEventListener('mousemove', function (e) {
+    var o = e.target.closest('.opt'), i = o ? menu.items.indexOf(o) : -1;
+    if (i !== -1 && i !== menu.active) setActive(i, false);
+  });
+
+  // ---- tips: a ? beside each part of the page ----
+  var tipBox = document.createElement('div'), tipFor = null, tipPinned = false;
+  tipBox.className = 'tipbox'; tipBox.id = 'tipBox'; tipBox.setAttribute('role', 'tooltip'); tipBox.hidden = true;
+  document.querySelector('.wrap').appendChild(tipBox);
+  function tipSubject(b) { return b.parentNode.classList.contains('labrow') ? b.previousElementSibling : b.parentNode; }
+  function tipName(el) {
+    var c = el.cloneNode(true);
+    Array.prototype.forEach.call(c.querySelectorAll('.aside, .num, .tip, [id]'), function (x) { if (x.parentNode) x.parentNode.removeChild(x); });
+    return c.textContent.replace(/\s+/g, ' ').trim();
+  }
+  TIPS.forEach(function (t) {
+    var el = document.querySelector(t[0]), b, row;
+    if (!el) return;
+    b = document.createElement('button');
+    b.type = 'button'; b.className = 'tip'; b.textContent = '?'; b.tabIndex = -1;
+    b.dataset.tip = t[1];
+    b.setAttribute('aria-expanded', 'false');
+    b.setAttribute('aria-label', 'About ' + tipName(el));
+    if (el.tagName === 'SUMMARY') { el.appendChild(b); return; }
+    row = document.createElement(/eyebrow|optline|exportrow/.test(el.parentNode.className) ? 'span' : 'div');
+    row.className = 'labrow';
+    el.parentNode.insertBefore(row, el); row.appendChild(el); row.appendChild(b);
+  });
+  function showTip(b, pin) {
+    if (tipFor && tipFor !== b) hideTip();
+    b.setAttribute('aria-label', 'About ' + tipName(tipSubject(b)));
+    tipBox.textContent = b.dataset.tip; tipBox.hidden = false;
+    tipFor = b; tipPinned = !!pin;
+    b.setAttribute('aria-expanded', 'true'); b.setAttribute('aria-describedby', 'tipBox');
+    placeTip();
+  }
+  function placeTip() {
+    if (!tipFor) return;
+    var r = tipFor.getBoundingClientRect(), w = tipBox.offsetWidth, h = tipBox.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight;
+    var top = r.top - h - 8;
+    if (r.bottom < 0 || r.top > vh || (!r.width && !r.height)) { hideTip(); return; }
+    // Above the ?, so the field it describes stays in view; below only when there is no room above.
+    if (top < 8) top = r.bottom + 8;
+    tipBox.style.left = Math.max(12, Math.min(r.left + r.width / 2 - w / 2, vw - w - 12)) + 'px';
+    tipBox.style.top = top + 'px';
+  }
+  function hideTip() {
+    if (!tipFor) return;
+    tipFor.setAttribute('aria-expanded', 'false'); tipFor.removeAttribute('aria-describedby');
+    tipFor = null; tipPinned = false; tipBox.hidden = true;
+  }
+  function tipOf(e) { return e.target && e.target.closest ? e.target.closest('.tip') : null; }
+  document.addEventListener('mouseover', function (e) { var b = tipOf(e); if (b && tipFor !== b) showTip(b, false); });
+  document.addEventListener('mouseout', function (e) { var b = tipOf(e); if (b && tipFor === b && !tipPinned) hideTip(); });
+  document.addEventListener('click', function (e) {
+    var b = tipOf(e);
+    if (!b) { hideTip(); return; }
+    e.preventDefault();
+    if (tipFor === b && tipPinned) hideTip(); else showTip(b, true);
+  });
+  // F1 in any field shows the tip for that field, so the ? buttons can stay out of the tab order.
+  document.addEventListener('keydown', function (e) {
+    var el = document.activeElement, b = null;
+    if (e.key === 'Escape') { hideTip(); return; }
+    if (e.key !== 'F1' || !el || !$('f').parentNode.contains(el)) return;
+    while (!b && el && el.parentNode && el.parentNode.querySelector && !el.classList.contains('layout')) { el = el.parentNode; b = el.querySelector('.tip'); }
+    if (!b) return;
+    e.preventDefault();
+    if (tipFor === b) hideTip(); else showTip(b, true);
+  });
+  document.addEventListener('focusin', function (e) { if (tipFor && e.target !== tipFor) hideTip(); });
+  window.addEventListener('scroll', placeTip, true);
+  window.addEventListener('resize', placeTip);
 
   // boot
   var nm = load(K_NAME); if (typeof nm === 'string') $('listName').value = nm;
