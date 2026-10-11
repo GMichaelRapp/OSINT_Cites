@@ -203,6 +203,12 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
 .filemsg:empty { display: none; }
 .ask { border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
 .exportrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12.5px; color: var(--muted); }
+a.btn { text-decoration: none; display: inline-block; }
+.btn[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+.audit { border-top: 1px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.auditsum { margin: 0; font-size: 13.5px; font-weight: 500; }
+.auditsum.ok { color: var(--ok); }
+.audit .who { font: inherit; font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); background: none; border: 0; padding: 0; margin-right: 6px; cursor: pointer; text-decoration: underline; }
 #fallbackBox { font-family: var(--font-mono); font-size: 12px; }
 .foot { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 72ch; }
 @media (prefers-reduced-motion: no-preference) { .btn, .mc, .pick { transition: border-color 120ms ease, filter 120ms ease; } }
@@ -211,13 +217,26 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
 <body>
 <div class="wrap">
   <header class="mast">
-    <h1>OSINT Citation Generator <span class="ver">v2.1</span></h1>
+    <h1>OSINT Citation Generator <span class="ver">v3.0</span></h1>
     <p>Pick a source type and fill the eight slots. The footnote assembles in house order with its punctuation, and slots that do not apply drop out along with theirs.</p>
     <div class="pattern" aria-label="The citation pattern">Author, "Title," <i>Location</i> [Description] (Publisher: Date) URL/DOI: Locator.</div>
   </header>
 
   <div class="layout">
     <form class="form" id="f" autocomplete="off" novalidate>
+      <div class="slot" role="group" aria-labelledby="h-link">
+        <h2 id="h-link">Start from a link <span class="aside">optional</span></h2>
+        <div class="field">
+          <label for="linkIn">Link to the source</label>
+          <div class="withbtn">
+            <input type="text" id="linkIn" placeholder="Paste a link to a post, video, article, or archived copy" inputmode="url" autocomplete="off">
+            <button type="button" class="btn" id="linkGo">Fill from link</button>
+          </div>
+          <p class="hint">This reads the address itself and sends nothing. It can set the source type, platform, account, and date. For posts on X, TikTok, Bluesky and Discord the date comes from the post's ID. A link does not carry the title, so that part stays with you.</p>
+          <p class="filemsg" id="linkMsg" role="status"></p>
+        </div>
+      </div>
+
       <div class="slot">
         <h2>Source type</h2>
         <fieldset class="types" id="types"><legend class="hint" style="padding:0;margin-bottom:8px">Sets the title style, the usual description, and which rules get checked.</legend></fieldset>
@@ -413,6 +432,14 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
             </div>
           </div>
         </div>
+        <div class="exportrow" id="archRow">
+          <span>Make a copy at</span>
+          <a class="btn small" id="archWayback" target="_blank" rel="noopener noreferrer" aria-disabled="true">Wayback Machine</a>
+          <a class="btn small" id="archToday" target="_blank" rel="noopener noreferrer" aria-disabled="true">archive.today</a>
+          <a class="btn quiet small" id="archFind" target="_blank" rel="noopener noreferrer" aria-disabled="true">Look for existing copies</a>
+        </div>
+        <p class="hint">Each opens the archive's site in a new tab and hands it the link above. When the copy is made, paste its address into Archive link and the capture date fills in.</p>
+        <p class="filemsg" id="archMsg" role="status"></p>
       </div>
 
       <div class="slot" role="group" aria-labelledby="h-locator">
@@ -489,7 +516,13 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
           <div class="actions" id="savedActions" hidden>
             <button type="button" class="btn small" id="copyAll">Copy all, one per line</button>
             <button type="button" class="btn small" id="copyJoined">Copy as one footnote</button>
+            <button type="button" class="btn small" id="auditBtn">Audit the list</button>
             <button type="button" class="btn quiet small" id="clearList">Empty the list</button>
+          </div>
+          <div class="audit" id="auditOut" hidden>
+            <p class="auditsum" id="auditSum" role="status"></p>
+            <ul class="checks" id="auditRows"></ul>
+            <p class="hint" id="auditNote"></p>
           </div>
         </div>
 
@@ -525,8 +558,8 @@ details.more .inner { display: flex; flex-direction: column; gap: 12px; }
     </aside>
   </div>
 
-  <p class="foot">Version 2.1. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
-  <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
+  <p class="foot">Version 3.0. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (770 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere, with one exception: the archive buttons open the archive site you choose and hand it the link you entered. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
   <p class="foot">&copy; 2026 G. Michael Rapp. The software is under the MIT License. The guide content it carries (citation rules, description library, qualifier and access lists) is under Creative Commons Attribution 4.0 International.</p>
 </div>
 
@@ -750,7 +783,7 @@ var OSINT = (function () {
     var z = zoneOf(rating);
     if (z && z !== 'G') add('check', rating + ' sits in the ' + ZNAME[z] + ' zone. ' + HANDLING[z]);
     if (rating === 'C1') add('note', 'C1 is the weakest of the Green blocks. Say so when leaning on it.');
-    if (words(rawLoc) > 10) add('check', 'Location runs ' + words(rawLoc) + ' words. The guide asks for ten or fewer.');
+    if (words(rawLoc) > 10 && st.type !== 'chapter') add('check', 'Location runs ' + words(rawLoc) + ' words. The guide asks for ten or fewer.');
     if (!who && title) add('note', 'No author, so the footnote opens with the title. Use the organization if there is one, or the outlet plus Staff.');
     if (authors.length >= 4) add('note', authors.length + ' authors: the first three are named, then et al.');
     if (locSame) add('note', 'Location repeats the title, so it is dropped.');
@@ -919,10 +952,242 @@ var OSINT = (function () {
     return { name: data && typeof data.name === 'string' ? data.name.slice(0, 200) : '', items: items };
   }
 
+  // ---- reading a link: what the address alone can tell us ----
+  // Each entry: host -> [source type, location, kind of source, extra fields].
+  var SITES = {
+    'nytimes.com': ['news', 'The New York Times', 'News Article'], 'washingtonpost.com': ['news', 'The Washington Post', 'News Article'],
+    'wsj.com': ['news', 'The Wall Street Journal', 'News Article'], 'ft.com': ['news', 'Financial Times', 'News Article'],
+    'reuters.com': ['news', 'Reuters', 'Wire Service Report'], 'apnews.com': ['news', 'AP News', 'Wire Service Report'],
+    'bbc.com': ['news', 'BBC News', 'News Article'], 'bbc.co.uk': ['news', 'BBC News', 'News Article'],
+    'theguardian.com': ['news', 'The Guardian', 'News Article'], 'economist.com': ['news', 'The Economist', 'Magazine Article'],
+    'bloomberg.com': ['news', 'Bloomberg', 'News Article'], 'politico.com': ['news', 'Politico', 'News Article'], 'politico.eu': ['news', 'Politico', 'News Article'],
+    'aljazeera.com': ['news', 'Al Jazeera', 'News Article'], 'cnn.com': ['news', 'CNN', 'News Article'], 'npr.org': ['news', 'NPR', 'News Article'],
+    'axios.com': ['news', 'Axios', 'News Article'], 'thehill.com': ['news', 'The Hill', 'News Article'], 'propublica.org': ['news', 'ProPublica', 'Investigative Report'],
+    'foreignpolicy.com': ['news', 'Foreign Policy', 'Magazine Article'], 'foreignaffairs.com': ['news', 'Foreign Affairs', 'Magazine Article'],
+    'theatlantic.com': ['news', 'The Atlantic', 'Magazine Article'], 'thediplomat.com': ['news', 'The Diplomat', 'Magazine Article'],
+    'defensenews.com': ['news', 'Defense News', 'News Article'], 'breakingdefense.com': ['news', 'Breaking Defense', 'News Article'],
+    'twz.com': ['news', 'The War Zone', 'News Article'], 'navalnews.com': ['news', 'Naval News', 'News Article'], 'news.usni.org': ['news', 'USNI News', 'News Article'],
+    'janes.com': ['news', 'Janes', 'News Article'], 'militarytimes.com': ['news', 'Military Times', 'News Article'], 'stripes.com': ['news', 'Stars and Stripes', 'News Article'],
+    'c4isrnet.com': ['news', 'C4ISRNET', 'News Article'], 'kyivindependent.com': ['news', 'The Kyiv Independent', 'News Article'], 'kyivpost.com': ['news', 'Kyiv Post', 'News Article'],
+    'meduza.io': ['news', 'Meduza', 'News Article'], 'themoscowtimes.com': ['news', 'The Moscow Times', 'News Article'], 'scmp.com': ['news', 'South China Morning Post', 'News Article'],
+    'japantimes.co.jp': ['news', 'The Japan Times', 'News Article'], 'asia.nikkei.com': ['news', 'Nikkei Asia', 'News Article'], 'timesofisrael.com': ['news', 'The Times of Israel', 'News Article'],
+    'haaretz.com': ['news', 'Haaretz', 'News Article'], 'dw.com': ['news', 'DW', 'News Article'], 'france24.com': ['news', 'France 24', 'News Article'],
+    'rferl.org': ['news', 'Radio Free Europe/Radio Liberty', 'News Article'],
+    'tass.com': ['news', 'TASS', 'State Media Report'], 'rt.com': ['news', 'RT', 'State Media Report'], 'sputnikglobe.com': ['news', 'Sputnik', 'State Media Report'],
+    'xinhuanet.com': ['news', 'Xinhua', 'State Media Report'], 'news.cn': ['news', 'Xinhua', 'State Media Report'], 'globaltimes.cn': ['news', 'Global Times', 'State Media Report'],
+    'chinadaily.com.cn': ['news', 'China Daily', 'State Media Report'], 'cgtn.com': ['news', 'CGTN', 'State Media Report'], 'presstv.ir': ['news', 'Press TV', 'State Media Report'],
+    'kcna.kp': ['news', 'KCNA', 'State Media Report'], 'irna.ir': ['news', 'IRNA', 'State Media Report'],
+    'warontherocks.com': ['web', 'War on the Rocks', 'Defense Analysis Article'], 'mwi.westpoint.edu': ['web', 'Modern War Institute', 'Defense Analysis Article'],
+    'csis.org': ['web', 'CSIS', 'Policy Analysis'], 'brookings.edu': ['web', 'Brookings', 'Policy Analysis'], 'carnegieendowment.org': ['web', 'Carnegie Endowment for International Peace', 'Policy Analysis'],
+    'atlanticcouncil.org': ['web', 'Atlantic Council', 'Policy Analysis'], 'cnas.org': ['web', 'CNAS', 'Policy Analysis'], 'iiss.org': ['web', 'IISS', 'Policy Analysis'],
+    'rusi.org': ['web', 'RUSI', 'Policy Analysis'], 'cfr.org': ['web', 'Council on Foreign Relations', 'Policy Analysis'], 'chathamhouse.org': ['web', 'Chatham House', 'Policy Analysis'],
+    'ecfr.eu': ['web', 'ECFR', 'Policy Analysis'], 'fpri.org': ['web', 'FPRI', 'Policy Analysis'], 'lowyinstitute.org': ['web', 'Lowy Institute', 'Policy Analysis'],
+    'stimson.org': ['web', 'Stimson Center', 'Policy Analysis'], '38north.org': ['web', '38 North', 'Policy Analysis'], 'jamestown.org': ['web', 'The Jamestown Foundation', 'Policy Analysis'],
+    'sipri.org': ['web', 'SIPRI', 'Policy Analysis'], 'rand.org': ['web', 'RAND', 'Think Tank Report'],
+    'understandingwar.org': ['web', 'Institute for the Study of War', 'Campaign Assessment'], 'criticalthreats.org': ['web', 'Critical Threats', 'Campaign Assessment'],
+    'bellingcat.com': ['web', 'Bellingcat', 'Open-Source Investigation'], 'lawfaremedia.org': ['web', 'Lawfare', 'Expert Commentary'], 'justsecurity.org': ['web', 'Just Security', 'Expert Commentary'],
+    'substack.com': ['web', 'Substack', 'Newsletter Article'], 'medium.com': ['web', 'Medium', 'Blog Post'], 'wikipedia.org': ['web', 'Wikipedia', 'Wiki Article'],
+    'ssrn.com': ['journal', 'SSRN', 'Preprint Paper'],
+    'whitehouse.gov': ['web', 'White House Government Website', 'Government Web Page', { publisher: 'US Government' }],
+    'defense.gov': ['web', 'Defense Department Website', 'Government Web Page', { publisher: 'US Government' }], 'war.gov': ['web', 'Defense Department Website', 'Government Web Page', { publisher: 'US Government' }],
+    'state.gov': ['web', 'State Department Website', 'Government Web Page', { publisher: 'US Government' }], 'justice.gov': ['web', 'US Dept. of Justice Website', 'Government Web Page', { publisher: 'US Government' }],
+    'treasury.gov': ['web', 'US Treasury Dept. Website', 'Government Web Page', { publisher: 'US Government' }],
+    'sanctionslist.ofac.treas.gov': ['live', 'US Treasury Dept. Website', 'Sanctions List', { publisher: 'US Government', authors: 'US Department of the Treasury' }],
+    'crsreports.congress.gov': ['report', 'CRS Reports Website', 'CRS Report', { publisher: 'US Congress', authors: 'Congressional Research Service' }],
+    'congress.gov': ['web', 'Congress.gov', 'Government Web Page', { publisher: 'US Congress' }], 'gao.gov': ['report', 'GAO Website', 'GAO Report', { publisher: 'GAO', authors: 'US Government Accountability Office' }],
+    'federalregister.gov': ['web', 'Federal Register', 'Federal Register Notice', { publisher: 'US Government' }], 'archives.gov': ['archival', 'US National Archives Website', 'Archival Material'],
+    'gov.uk': ['web', 'UK Government Website', 'Government Web Page', { publisher: 'UK Government' }], 'nato.int': ['web', 'NATO Website', 'NATO Publication', { publisher: 'NATO' }],
+    'un.org': ['web', 'UN Website', '', { publisher: 'UN' }], 'undocs.org': ['report', 'UN Website', '', { publisher: 'UN' }], 'iaea.org': ['web', 'IAEA Website', '', { publisher: 'IAEA' }],
+    'flightradar24.com': ['live', 'Flightradar24', 'Flight Tracking Data'], 'adsbexchange.com': ['live', 'ADS-B Exchange', 'Flight Tracking Data'],
+    'marinetraffic.com': ['live', 'MarineTraffic', 'Ship Tracking (AIS)'], 'vesselfinder.com': ['live', 'VesselFinder', 'Ship Tracking (AIS)'],
+    'liveuamap.com': ['live', 'Liveuamap', 'Interactive Map'], 'deepstatemap.live': ['live', 'DeepStateMAP', 'Control-of-Terrain Map'],
+    'facebook.com': ['social', 'Facebook', 'Social Media Post'], 'instagram.com': ['social', 'Instagram', 'Social Media Post'], 'threads.net': ['social', 'Threads', 'Social Media Post'],
+    'threads.com': ['social', 'Threads', 'Social Media Post'], 'linkedin.com': ['social', 'LinkedIn', 'Social Media Post'], 'reddit.com': ['social', 'Reddit', 'Forum Post'],
+    'vk.com': ['social', 'VK', 'Social Media Post'], 'weibo.com': ['social', 'Weibo', 'Social Media Post'], 'truthsocial.com': ['social', 'Truth Social', 'Social Media Post'],
+    'vimeo.com': ['video', 'Vimeo', 'Video'], 'rumble.com': ['video', 'Rumble', 'Video'], 'odysee.com': ['video', 'Odysee', 'Video']
+  };
+  var ARCHIVE_HOSTS = ['archive.ph', 'archive.today', 'archive.is', 'archive.md', 'archive.li', 'archive.vn', 'archive.fo'];
+  var TRACKERS = /^(utm_[a-z_]+|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|igsh|ref_src|ref_url|smid|smtyp|cmpid|ocid|ncid|taid|at_medium|at_campaign|__twitter_impression)$/i;
+  var B32 = '234567abcdefghijklmnopqrstuvwxyz';
+
+  function siteFor(host) {
+    var h = host, i;
+    while (h) { if (SITES[h]) return SITES[h]; i = h.indexOf('.'); if (i < 0) break; h = h.slice(i + 1); }
+    return null;
+  }
+  function utcDate(ms) { var d = new Date(ms); return pad2(d.getUTCDate()) + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); }
+  function shiftRight(idText, bits) {
+    if (typeof BigInt !== 'function') return NaN;
+    try { return Number(BigInt(idText) >> BigInt(bits)); } catch (e) { return NaN; }
+  }
+  function clockOf(t) {
+    var m = String(t).match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/), secs, h, mi, s;
+    if (!m || !(m[1] || m[2] || m[3])) return '';
+    secs = (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+    if (!secs) return '';
+    h = Math.floor(secs / 3600); mi = Math.floor((secs % 3600) / 60); s = secs % 60;
+    return (h ? h + ':' + pad2(mi) : String(mi)) + ':' + pad2(s);
+  }
+  function parseUrl(s) {
+    var u;
+    try { u = new URL(s); } catch (e) { return null; }
+    if (!/^https?:$/.test(u.protocol) || u.hostname.indexOf('.') < 0) return null;
+    return u;
+  }
+
+  function readLink(raw, nowMs, todayText) {
+    var now = nowMs || Date.now(), s = String(raw == null ? '' : raw).trim(), u, m, f = {}, notes = [], type = '', known = false;
+    if (!s || /\s/.test(s)) return null;
+    u = parseUrl(normUrl(s).url);
+    if (!u) return null;
+    var today = todayText || utcDate(now);
+    var host = u.hostname.toLowerCase().replace(/^(www|m|mobile)\./, '');
+
+    // An archive link: keep it as the archive, and read the original address and capture date out of it.
+    var orig = '';
+    if (host === 'web.archive.org' && (m = u.pathname.match(/^\/web\/(\d{4})(\d{2})(\d{2})\d{0,6}[a-z_]*\/(.+)$/))) orig = m[4];
+    else if (ARCHIVE_HOSTS.indexOf(host) !== -1) {
+      if ((m = u.pathname.match(/^\/(\d{4})\.(\d{2})\.(\d{2})-\d{6}\/(.+)$/))) orig = m[4];
+      else { f.archiveUrl = u.href; notes.push('This is an archive link with no original address in it. Paste the original link too.'); return { type: '', fields: f, notes: notes, known: false }; }
+    }
+    if (orig) {
+      var inner = parseUrl(normUrl(orig + u.search + u.hash).url);
+      f.archiveUrl = u.href;
+      if (+m[2] >= 1 && +m[2] <= 12 && +m[3] >= 1 && +m[3] <= 31) f.archiveDate = pad2(+m[3]) + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1];
+      notes.push('This is an archive link, so it went in as the archive copy and the original address was read from it.');
+      if (!inner) return { type: '', fields: f, notes: notes, known: false };
+      u = inner; host = u.hostname.toLowerCase().replace(/^(www|m|mobile)\./, '');
+    }
+
+    function dateFromId(ms, minYear, why) {
+      if (isFinite(ms) && ms >= Date.UTC(minYear, 0, 1) && ms <= now + 1728e5) { f.date = utcDate(ms); notes.push(why); }
+    }
+    function dropParams(test) {
+      var keep = [], dropped = false;
+      u.searchParams.forEach(function (v, k) { if (test(k)) dropped = true; else keep.push([k, v]); });
+      if (!dropped) return;
+      u.search = '';
+      keep.forEach(function (kv) { u.searchParams.append(kv[0], kv[1]); });
+    }
+    var seg = u.pathname.split('/').filter(Boolean), handleNote = 'The author is the handle from the link. Use the account name instead if it differs.';
+    dropParams(function (k) { return TRACKERS.test(k); });
+    if (/^#:~:/.test(u.hash)) u.hash = '';
+
+    if (host === 'x.com' || host === 'twitter.com') {
+      type = 'social'; known = true; f.location = 'X'; f.descType = 'Social Media Post';
+      if (seg.length >= 3 && seg[1] === 'status' && /^\d+$/.test(seg[2])) {
+        if (!/^(i|intent|home|search)$/.test(seg[0])) { f.authors = '@' + seg[0]; notes.push(handleNote); }
+        if (seg[2].length >= 15) dateFromId(shiftRight(seg[2], 22) + 1288834974657, 2010, 'The date was read from the post ID and is in UTC.');
+        u.search = ''; u.pathname = '/' + seg.slice(0, 3).join('/');
+      } else if (seg.length === 1) { f.authors = '@' + seg[0]; f.descType = 'Account Profile'; }
+    } else if (host === 't.me' || host === 'telegram.me') {
+      type = 'social'; known = true; f.location = 'Telegram'; f.descType = 'Channel Post';
+      if (seg[0] === 's') { seg = seg.slice(1); u.pathname = '/' + seg.join('/'); }
+      if (seg[0] === 'c') notes.push('This is a private-channel link. Readers without access cannot open it, so say that in the commentary.');
+      else if (seg[0] && !/^(joinchat|addstickers|share|\+)/.test(seg[0])) { f.authors = seg[0]; notes.push('The author is the channel name from the link. Use the channel\'s display name if it differs.'); }
+    } else if (host === 'youtube.com' || host === 'youtu.be' || host === 'music.youtube.com') {
+      type = 'video'; known = true; f.location = 'YouTube'; f.descType = seg[0] === 'shorts' ? 'Short-Form Video' : 'Video';
+      var t = clockOf(u.searchParams.get('t') || u.searchParams.get('start') || '');
+      if (t) { f.locator = 'See ' + t; notes.push('The link pointed at a moment in the video, which went in as the locator.'); }
+      dropParams(function (k) { return /^(si|feature|pp|t|start)$/.test(k); });
+    } else if (host === 'tiktok.com') {
+      type = 'social'; known = true; f.location = 'TikTok'; f.descType = 'Short-Form Video';
+      if (seg[0] && seg[0].charAt(0) === '@') { f.authors = seg[0]; notes.push(handleNote); }
+      if (seg[1] === 'video' && /^\d{17,}$/.test(seg[2] || '')) dateFromId(shiftRight(seg[2], 32) * 1000, 2016, 'The date was read from the video ID and is in UTC.');
+      u.search = '';
+    } else if (host === 'bsky.app') {
+      type = 'social'; known = true; f.location = 'Bluesky'; f.descType = 'Social Media Post';
+      if (seg[0] === 'profile' && seg[1]) { f.authors = '@' + seg[1]; notes.push(handleNote); }
+      if (seg[2] === 'post' && /^[234567a-z]{13}$/.test(seg[3] || '')) {
+        var v = 0, i;
+        for (i = 0; i < 13; i++) v = v * 32 + B32.indexOf(seg[3].charAt(i));
+        dateFromId(v / 1024 / 1000, 2022, 'The date was read from the post ID and is in UTC.');
+      }
+    } else if (host === 'discord.com' || host === 'discordapp.com') {
+      type = 'social'; known = true; f.location = 'Discord'; f.descType = 'Group Chat Message';
+      if (seg[0] === 'channels' && /^\d{15,}$/.test(seg[3] || '')) dateFromId(shiftRight(seg[3], 22) + 1420070400000, 2015, 'The date was read from the message ID and is in UTC.');
+      notes.push('Discord links open only for members of that server, so say that in the commentary.');
+    } else if (host === 'github.com' && seg.length >= 2) {
+      type = 'web'; known = true; f.location = 'GitHub'; f.descType = 'Code Repository'; f.authors = seg[0]; f.title = seg[1];
+    } else if (host === 'arxiv.org' && (m = u.pathname.match(/^\/(?:abs|pdf)\/(\d{2})(\d{2})\.\d{4,5}/))) {
+      type = 'journal'; known = true; f.location = 'arXiv'; f.descType = 'Preprint Paper';
+      if (+m[2] >= 1 && +m[2] <= 12) { f.date = MONTHS[+m[2] - 1] + ' 20' + m[1]; notes.push('The month was read from the arXiv number.'); }
+    } else if (host === 'doi.org') {
+      type = 'journal'; known = true;
+    } else if ((host === 'google.com' && seg[0] === 'maps') || host === 'maps.google.com' || host === 'earth.google.com') {
+      type = 'imagery'; known = true; f.location = host === 'earth.google.com' ? 'Google Earth' : 'Google Maps'; f.accessed = today;
+      if ((m = u.pathname.match(/@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/))) {
+        f.descDetails = Math.abs(+m[1]).toFixed(4) + '° ' + (+m[1] < 0 ? 'S' : 'N') + ', ' + Math.abs(+m[2]).toFixed(4) + '° ' + (+m[2] < 0 ? 'W' : 'E');
+        notes.push('The coordinates were read from the link.');
+      }
+    } else {
+      var site = siteFor(host);
+      if (site) {
+        type = site[0]; known = true; f.location = site[1];
+        if (site[2]) f.descType = site[2];
+        if (site[3]) Object.keys(site[3]).forEach(function (k) { f[k] = site[3][k]; });
+        if (host.slice(-13) === '.substack.com') f.publisher = host.slice(0, -13);
+        if (host === 'instagram.com' && (seg[0] === 'reel' || seg[0] === 'reels')) f.descType = 'Short-Form Video';
+        if (host === 'reddit.com' && seg[0] === 'r' && seg[1]) f.descDetails = 'r/' + seg[1];
+        if ((host === 'threads.net' || host === 'threads.com' || host === 'truthsocial.com') && seg[0] && seg[0].charAt(0) === '@') { f.authors = seg[0]; notes.push(handleNote); }
+        if (type === 'live') f.accessed = today;
+      } else if (/\.(gov|mil)$/.test(host)) {
+        type = 'web'; f.descType = 'Government Web Page';
+      }
+    }
+    var pdf = /\.pdf$/i.test(u.pathname);
+    if (pdf && (type === 'web' || type === 'news' || type === '')) { type = 'report'; if (f.descType === 'Government Web Page') delete f.descType; }
+
+    // A date in the path, unless the path is an upload folder (those carry the upload month, not the publication date).
+    if (!f.date && !/\/(wp-content|uploads|files|sites\/default|media|assets|images|static)\//i.test(u.pathname)) {
+      var p = u.pathname;
+      if ((m = p.match(/\/((?:19|20)\d{2})[\/-](\d{1,2})[\/-](\d{1,2})(?:[\/-]|$)/)) || (m = p.match(/\/((?:19|20)\d{2})(\d{2})(\d{2})(?:[\/-]|$)/)) || (m = p.match(/-((?:19|20)\d{2})-(\d{2})-(\d{2})(?:\/|$)/))) {
+        if (+m[2] >= 1 && +m[2] <= 12 && +m[3] >= 1 && +m[3] <= 31) { f.date = pad2(+m[3]) + ' ' + MONTHS[+m[2] - 1] + ' ' + m[1]; notes.push('The date was read from the link. Check it against the page.'); }
+      } else if ((m = p.match(/\/((?:19|20)\d{2})\/(\d{1,2})\//)) && +m[2] >= 1 && +m[2] <= 12) {
+        f.date = MONTHS[+m[2] - 1] + ' ' + m[1]; notes.push('Only the month is in the link. Add the day from the page.');
+      }
+    }
+    if (!known && !f.descType) notes.push('This site is not one the tool knows, so only the link' + (f.date ? ' and date were' : ' was') + ' read.');
+    f.url = u.href;
+    return { type: type, fields: f, notes: notes, known: known };
+  }
+
+  // ---- auditing a whole list ----
+  function auditList(states) {
+    var rows = [], flagged = {}, byUrl = {}, byShort = {}, unrated = 0, total = 0;
+    states.forEach(function (st, i) {
+      var n = i + 1, r = build(st), u, sf;
+      if (r.empty) return;
+      total++;
+      r.checks.forEach(function (c) { if (c.level !== 'note') { rows.push({ n: n, level: c.level, msg: c.msg }); flagged[n] = 1; } });
+      if (!r.rating && !st.ai) unrated++;
+      u = normUrl(st.url).url.replace(/#.*$/, '').replace(/\/$/, '');
+      if (u) (byUrl[u] = byUrl[u] || []).push(n);
+      sf = toPlain(shortForms(Object.assign({}, st, { locator: '' })).short);
+      if (sf) (byShort[sf] = byShort[sf] || []).push({ n: n, u: u });
+    });
+    Object.keys(byUrl).forEach(function (u) {
+      var g = byUrl[u];
+      if (g.length < 2) return;
+      rows.push({ n: g[0], nums: g, level: 'check', msg: 'Sources ' + listJoin(g.map(String)) + ' cite the same link. If this is one source cited more than once, keep one entry and use its short form for the later citations.' });
+      g.forEach(function (x) { flagged[x] = 1; });
+    });
+    Object.keys(byShort).forEach(function (k) {
+      var g = byShort[k], sameLink = g.every(function (x) { return x.u && x.u === g[0].u; }), nums;
+      if (g.length < 2 || sameLink) return;
+      nums = g.map(function (x) { return x.n; });
+      rows.push({ n: nums[0], nums: nums, level: 'check', msg: 'Sources ' + listJoin(nums.map(String)) + ' share the short form ' + k + ' Give each a short title that tells them apart.' });
+      nums.forEach(function (x) { flagged[x] = 1; });
+    });
+    var order = { fix: 0, check: 1 };
+    rows.sort(function (a, b) { return a.n - b.n || order[a.level] - order[b.level]; });
+    return { total: total, attention: Object.keys(flagged).length, unrated: unrated, rows: rows };
+  }
+
   var LIB_INDEX = {};
   function setLibrary(idx) { LIB_INDEX = idx || {}; }
 
-  return { build: build, shortForms: shortForms, setLibrary: setLibrary, accessOf: accessOf, toHTML: toHTML, toMarkdown: toMarkdown, toPlain: toPlain, joinSources: joinSources, docxBytes: docxBytes, mdText: mdText, csvText: csvText, listFile: listFile, parseListFile: parseListFile,
+  return { build: build, shortForms: shortForms, setLibrary: setLibrary, accessOf: accessOf, toHTML: toHTML, toMarkdown: toMarkdown, toPlain: toPlain, joinSources: joinSources, docxBytes: docxBytes, mdText: mdText, csvText: csvText, listFile: listFile, parseListFile: parseListFile, readLink: readLink, auditList: auditList,
     normDate: normDate, normLocator: normLocator, normUrl: normUrl, zoneOf: zoneOf, REL: REL, CRED: CRED, ZNAME: ZNAME, MONTHS: MONTHS, esc: esc };
 })();
 </script>
@@ -1110,6 +1375,7 @@ var OSINT = (function () {
     $('accessNoteWrap').hidden = st.access.indexOf('other') === -1;
     $('qualCount').textContent = st.quals.length ? st.quals.length + ' ticked' : 'optional';
     describeType(st.descType);
+    paintArchive(st);
 
     var strip = $('strip'); strip.textContent = '';
     SLOT_NAMES.forEach(function (s) {
@@ -1301,8 +1567,8 @@ var OSINT = (function () {
   })();
 
   // events
-  $('f').addEventListener('input', function (e) { if (e.target.id === 'libFilter') return; if (e.target.name !== 'type') touched(); render(); });
-  $('f').addEventListener('change', function (e) { if (e.target.id === 'libFilter') return; if (e.target.name !== 'type') { touched(); render(); } });
+  $('f').addEventListener('input', function (e) { if (e.target.id === 'libFilter' || e.target.id === 'linkIn') return; if (e.target.name !== 'type') touched(); render(); });
+  $('f').addEventListener('change', function (e) { if (e.target.id === 'libFilter' || e.target.id === 'linkIn') return; if (e.target.name !== 'type') { touched(); render(); } });
   $('f').addEventListener('submit', function (e) { e.preventDefault(); });
   Array.prototype.forEach.call(document.querySelectorAll('[data-today]'), function (b) {
     b.addEventListener('click', function () { $(b.dataset.today).value = today(); touched(); render(); });
@@ -1342,6 +1608,93 @@ var OSINT = (function () {
     clearArmed = false; b.textContent = 'Empty the list'; var left = releaseFile(); saved = []; editingId = null; listChanged(); renderSaved(); render();
     if (left) fileSay('List emptied. ' + left + ' was left as it was and is no longer linked.');
   });
+
+  // ---- start from a link, archive helper, list audit ----
+  var FIELD_WORDS = { url: 'link', location: 'location', authors: 'author', publisher: 'publisher', date: 'date', accessed: 'access date', descType: 'kind of source', descDetails: 'details', archiveUrl: 'archive link', archiveDate: 'capture date', locator: 'locator', title: 'title' };
+  function hintSay(id, msg, bad) { var s = $(id); s.textContent = msg; s.className = 'filemsg' + (bad ? ' bad' : ''); }
+  function wordList(a) {
+    if (a.length <= 1) return a[0] || '';
+    if (a.length === 2) return a[0] + ' and ' + a[1];
+    return a.slice(0, -1).join(', ') + ', and ' + a[a.length - 1];
+  }
+  function fillFromLink() {
+    var res = C.readLink($('linkIn').value, Date.now(), today());
+    if (!res) { hintSay('linkMsg', 'That does not look like a web link. Paste the full address, for example https://x.com/account/status/123.', true); return; }
+    var cur = read(), fresh = usingExample || C.build(cur).empty;
+    var st = fresh ? blank(res.type || cur.type) : cur, filled = [], kept = [], need = [];
+    if (fresh && res.type) filled.push('source type');
+    Object.keys(res.fields).forEach(function (k) {
+      if (!st[k]) { st[k] = res.fields[k]; filled.push(FIELD_WORDS[k] || k); }
+      else if (st[k] !== res.fields[k]) kept.push(FIELD_WORDS[k] || k);
+    });
+    usingExample = false;
+    write(st); dressType(); render();
+    if (res.fields.url || res.fields.archiveUrl) {
+      if (!st.title) need.push('title');
+      if (!st.authors) need.push('author');
+      if (!st.descType) need.push('kind of source');
+      if (!st.date) need.push('date');
+    }
+    hintSay('linkMsg', (filled.length ? 'Filled from the link: ' + wordList(filled) + '.' : 'Nothing new could be read from that link.')
+      + (res.notes.length ? ' ' + res.notes.join(' ') : '')
+      + (kept.length ? ' Left as you had ' + (kept.length === 1 ? 'it' : 'them') + ': ' + wordList(kept) + '.' : '')
+      + (need.length ? ' Still to add: ' + wordList(need) + '.' : ''), false);
+  }
+  $('linkGo').addEventListener('click', fillFromLink);
+  $('linkIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); fillFromLink(); } });
+
+  function paintArchive(st) {
+    var u = C.normUrl(st.url).url, ok = /^https?:\/\/[^\s\/]+\.[^\s]+$/i.test(u);
+    [['archWayback', 'https://web.archive.org/save/' + u], ['archToday', 'https://archive.today/?run=1&url=' + encodeURIComponent(u)], ['archFind', 'https://web.archive.org/web/*/' + u]].forEach(function (a) {
+      var el = $(a[0]);
+      if (ok) { el.setAttribute('href', a[1]); el.setAttribute('aria-disabled', 'false'); }
+      else { el.removeAttribute('href'); el.setAttribute('aria-disabled', 'true'); }
+    });
+    if (!st.archiveUrl && $('archMsg').textContent) hintSay('archMsg', '', false);
+  }
+  ['clearBtn', 'sampleBtn'].forEach(function (id) {
+    $(id).addEventListener('click', function () { $('linkIn').value = ''; hintSay('linkMsg', '', false); });
+  });
+  function archivePasted() {
+    var v = $('archiveUrl').value.trim(), res, msg = '';
+    if (!v) { hintSay('archMsg', '', false); return; }
+    res = C.readLink(v, Date.now(), today());
+    if (!$('archiveDate').value) {
+      if (res && res.fields.archiveDate) { $('archiveDate').value = res.fields.archiveDate; msg = 'Capture date read from the archive link.'; }
+      else { $('archiveDate').value = today(); msg = 'Capture date set to today. Change it if you made this copy earlier.'; }
+    }
+    if (res && res.fields.archiveUrl && res.fields.url && !$('url').value) { $('url').value = res.fields.url; msg += ' The original link was read from it too.'; }
+    if (msg) { touched(); render(); hintSay('archMsg', msg.trim(), false); }
+  }
+  $('archiveUrl').addEventListener('change', archivePasted);
+
+  function runAudit() {
+    var a = C.auditList(saved.map(function (x) { return x.st; })), ul = $('auditRows'), sum = $('auditSum');
+    $('auditOut').hidden = false;
+    ul.textContent = '';
+    if (!a.attention) { sum.className = 'auditsum ok'; sum.textContent = a.total === 1 ? 'The one source passes every check.' : 'All ' + a.total + ' sources pass every check.'; }
+    else { sum.className = 'auditsum'; sum.textContent = (a.total - a.attention) + ' of ' + a.total + ' sources are clear. ' + a.attention + (a.attention === 1 ? ' needs' : ' need') + ' a look.'; }
+    a.rows.forEach(function (r) {
+      var li = document.createElement('li'), tag = document.createElement('span'), body = document.createElement('span'), who = document.createElement('button');
+      tag.className = 'tag ' + r.level; tag.textContent = r.level;
+      who.type = 'button'; who.className = 'who'; who.textContent = 'Source ' + r.n;
+      who.addEventListener('click', function () {
+        var item = saved[r.n - 1];
+        if (!item) return;
+        editingId = item.id; usingExample = false; write(item.st); dressType(); render(); renderSaved(); $('authors').focus();
+      });
+      body.appendChild(who); body.appendChild(document.createTextNode(r.msg));
+      li.appendChild(tag); li.appendChild(body); ul.appendChild(li);
+    });
+    $('auditNote').textContent = (a.rows.length ? 'Click a source number to open it in the form, fix it, and choose Update this source. ' : '')
+      + (a.unrated ? a.unrated + (a.unrated === 1 ? ' source carries' : ' sources carry') + ' no rating, which is fine wherever no reader would question the source.' : '');
+  }
+  function refreshAudit() {
+    if ($('auditOut').hidden) return;
+    if (!saved.length) { $('auditOut').hidden = true; return; }
+    runAudit();
+  }
+  $('auditBtn').addEventListener('click', runAudit);
 
   // ---- list file: save, open, export ----
   var K_NAME = 'osint-cite-listname-v1';
@@ -1384,6 +1737,7 @@ var OSINT = (function () {
     if (linked) writeLinked(false);
     else if (fileStatus === 'clean') fileStatus = 'changed';
     paintFile();
+    refreshAudit();
   }
   function releaseFile() {
     if (!linked) return '';
@@ -1498,7 +1852,7 @@ var OSINT = (function () {
       if (added) listChanged();
       fileSay('Added ' + added + ' from ' + p.fname + (added < n ? '; ' + (n - added) + ' were already in the list.' : '.'));
     }
-    renderSaved(); render();
+    renderSaved(); render(); refreshAudit();
   }
   function openListFile() {
     if (fsOK) {

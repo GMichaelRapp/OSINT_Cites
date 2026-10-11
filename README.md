@@ -29,8 +29,8 @@ A finished footnote looks like this:
 
 Open `index.html` in any current browser, or use the hosted copy linked in this repository's About box.
 
-1. Pick a source type. Each one loads an example you can clear.
-2. Fill in the slots. The footnote assembles as you type.
+1. Paste a link into "Start from a link" if the source has one, or pick a source type yourself. Each type loads an example you can clear.
+2. Fill in the remaining slots. The footnote assembles as you type.
 3. Read the checks under the footnote. They flag things like an empty description bracket, a link shortener, a social media post with no archive link, or a live tracker with no access date.
 4. Copy the footnote with italics, as Markdown, or as plain text.
 
@@ -45,15 +45,36 @@ The tool does a few things for you:
 
 The kind-of-source field searches a library of 770 descriptions in 16 categories. You can also type your own.
 
+### Starting from a link
+
+Paste a link and choose **Fill from link**. The tool reads the address itself, without visiting it, and fills in what the address shows:
+
+- the source type and platform, for the major social and video sites and for about 100 news outlets, think tanks, government sites, and trackers
+- the account or channel handle
+- the date. For posts on X, TikTok, Bluesky, and Discord it is decoded from the post's ID and given in UTC. For articles it is read from the path where the path carries one.
+- a timestamp on a YouTube link, which becomes the locator
+- coordinates in a Google Maps link
+- for a Wayback Machine or archive.today link, both the archive copy with its capture date and the original address inside it
+
+Share and tracking parameters are removed from the link. Fields you have already filled are left alone. A link does not carry a title, so the title is always yours to add, and a handle is not always the account's display name.
+
+### Archive copies
+
+Under the link field, **Wayback Machine** and **archive.today** open that archive in a new tab and hand it the link, so you can make a copy at the moment you cite. **Look for existing copies** opens the Wayback Machine's list for the link. When you paste the archive's address back, the capture date fills in: from the address if it carries one, otherwise today.
+
 ## Your data
 
-The page runs entirely in your browser. It makes no network requests. What you type is kept in that browser's local storage on your device, so it is still there when you come back, and nothing is sent anywhere.
+The page runs entirely in your browser and makes no network requests of its own. What you type is kept in that browser's local storage on your device, so it is still there when you come back.
+
+There is one way a link leaves the page: the archive buttons open the archive site you choose in a new tab and hand it the link you entered. Nothing else is sent anywhere.
 
 Clearing your browser's site data clears the form and the source list. Save the list to a file if you want to keep it.
 
 ## Source lists and files
 
 Add sources to the list as you go, then copy them one per line or as a single footnote separated by semicolons.
+
+**Audit the list** runs every check across the whole list before you publish. It names each source that needs a fix or a second look, such as a volatile source with no archive copy, a live source with no access date, or a rating that cannot carry a claim alone. It also catches two things no single source can show: the same link cited twice, and two sources whose short forms cannot be told apart. Click a source number to open it in the form.
 
 **Save list to a file** writes a `.json` file holding every field of every source. **Open a list file** loads it back with every source still editable, on any computer. If the list already has sources in it, you choose whether to add the file's sources or replace the list.
 
@@ -93,9 +114,9 @@ Each source type loads an example. Some are real, checkable sources. Those that 
 
 ## Status
 
-This is version 2.1 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
+This is version 3.0 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
 
-Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool.
+Access notes in the bracket, such as `paywalled`, are a convention introduced with this tool. The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
 
 ## License
 
@@ -123,7 +144,7 @@ Open an issue if a description is missing from the library, a rule is applied wr
 
 Everything is in `index.html`: markup, styles, and two scripts.
 
-- `<script id="core">` holds the formatter. It has no dependence on the page, which is what lets the tests run it directly. `build()` assembles the footnote and the checks. The file formats (`listFile`, `parseListFile`, `docxBytes`, `csvText`, `mdText`) are here too.
+- `<script id="core">` holds the formatter. It has no dependence on the page, which is what lets the tests run it directly. `build()` assembles the footnote and the checks. `readLink()` reads a pasted link, using the `SITES` table of known hosts, and `auditList()` checks a whole list. The file formats (`listFile`, `parseListFile`, `docxBytes`, `csvText`, `mdText`) are here too.
 - The second script is the page itself. Near its top are the tables you are most likely to edit:
   - `TYPES`: the source types, their default title style, suggested descriptions, placeholder text, and built-in example
   - `LIB`: the description library, grouped by category
@@ -138,7 +159,7 @@ The version number appears in two places in `index.html`: the label beside the p
 node Tests/run.js
 ```
 
-This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, and the three exports. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
+This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, and the list audit. Run it after any change to the formatter or to an example. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match.
 
 ### Hosting
 
