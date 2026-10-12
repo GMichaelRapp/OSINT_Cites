@@ -1,0 +1,30 @@
+name: Footnote problem
+description: A rule applied wrongly, a check that misfires, or a source type with no good fit
+title: "Footnote problem: "
+body:
+  - type: textarea
+    id: entered
+    attributes:
+      label: What you entered
+      description: The source type and the fields you filled in, or the link you started from.
+    validations:
+      required: true
+  - type: textarea
+    id: produced
+    attributes:
+      label: What the tool produced
+      description: The footnote or the check, copied with Copy plain.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: The footnote you expected, and the rule in the OSINT Style Guide behind it if you know it.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      description: Optional, for problems with the page rather than the footnote.
