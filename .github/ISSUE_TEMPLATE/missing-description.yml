@@ -1,0 +1,23 @@
+name: Missing description
+description: A kind of source that the Source Description Library does not have
+title: "Missing description: "
+body:
+  - type: input
+    id: description
+    attributes:
+      label: Suggested description
+      description: Ten words or fewer, in the library's style, for example "Port Call Record".
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: What you were citing
+      description: A link to the source or a short account of it, and the footnote you wrote for it.
+    validations:
+      required: true
+  - type: input
+    id: nearest
+    attributes:
+      label: Closest description in the library now
+      description: The nearest one you found, if any, and why it does not fit.
