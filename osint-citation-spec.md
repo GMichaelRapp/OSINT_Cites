@@ -2,7 +2,7 @@
 
 This file tells an AI assistant how to cite sources in the form set out by the OSINT Style Guide. Give it to your assistant, or point the assistant at this address, and ask it to cite this way.
 
-It matches version 3.2 of the OSINT Citation Generator: https://gmichaelrapp.github.io/OSINT_Cites/
+It matches version 1.5 of the OSINT Style Guide and version 3.2.1 of the OSINT Citation Generator: https://gmichaelrapp.github.io/OSINT_Cites/
 
 The point of the form is that a reader can find every source and judge it before trusting it. A citation that cannot be followed, or that hides what kind of thing it points to, has failed even if it is formatted correctly.
 

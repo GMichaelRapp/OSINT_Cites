@@ -209,6 +209,7 @@ a.btn { text-decoration: none; display: inline-block; }
 .audit .who { font: inherit; font-family: var(--font-mono); font-size: 11.5px; color: var(--accent); background: none; border: 0; padding: 0; margin-right: 6px; cursor: pointer; text-decoration: underline; }
 #fallbackBox { font-family: var(--font-mono); font-size: 12px; }
 .foot { color: var(--muted); font-size: 12.5px; margin: 0; max-width: 72ch; }
+.foot a { color: var(--accent); }
 
 /* kind of source: a list that opens under the field */
 .combo { position: relative; min-width: 0; }
@@ -250,7 +251,7 @@ summary .tip { margin-left: 6px; vertical-align: middle; }
 <div class="wrap">
   <header class="mast">
     <div class="masttop">
-      <h1>OSINT Citation Generator <span class="ver">v3.2</span></h1>
+      <h1>OSINT Citation Generator <span class="ver">v3.2.1</span></h1>
       <div class="optline">
         <span id="themeLabel">Theme</span>
         <span class="seg" role="radiogroup" aria-labelledby="themeLabel">
@@ -631,8 +632,9 @@ summary .tip { margin-left: 6px; vertical-align: middle; }
     </aside>
   </div>
 
-  <p class="foot">Version 3.2. Built to version 1.4 of the OSINT Style Guide, with the v1.5 draft Source Description Library (771 descriptions) and its qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">Version 3.2.1. Built to version 1.5 of the OSINT Style Guide, including its Source Description Library (771 descriptions) and qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
   <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere, with one exception: the archive buttons open the archive site you choose and hand it the link you entered. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
+  <p class="foot">To have an AI assistant cite in this form, give it <a href="osint-citation-spec.md">osint-citation-spec.md</a>. Changes from version to version are listed in the <a href="https://github.com/gmichaelrapp/OSINT_Cites/blob/main/CHANGELOG.md">changelog</a>.</p>
   <p class="foot">&copy; 2026 G. Michael Rapp. The software is under the MIT License. The guide content it carries (citation rules, description library, qualifier and access lists) is under Creative Commons Attribution 4.0 International.</p>
 </div>
 

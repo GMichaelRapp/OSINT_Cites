@@ -157,7 +157,7 @@ You can also export the footnotes as:
 }
 ```
 
-`footnote` is there so the file can be read without the tool. Only `fields` is used when a file is opened, and the footnote is rebuilt from it. Files saved by earlier versions still open; names from the old combined editors, translators, and contributors box are moved into the three separate fields.
+`footnote` is there so the file can be read without the tool. Only `fields` is used when a file is opened, and the footnote is rebuilt from it. Files saved by earlier versions still open; names from the old combined editors, translators, and contributors box are moved into the three separate fields. Format 2 is stable: files saved in it will keep opening in later versions.
 
 ## Examples in the tool
 
@@ -165,17 +165,17 @@ Each source type loads an example. Some are real, checkable sources. Those that 
 
 ## Status
 
-This is version 3.2 of the tool. It follows version 1.4 of the OSINT Style Guide and carries the draft Source Description Library and qualifier list from version 1.5, so in those two areas it runs ahead of the published guide.
+This is version 3.2.1 of the tool. It follows version 1.5 of the OSINT Style Guide, including its Source Description Library and qualifier list. Version 1.5 of the guide also adopted the conventions this tool introduced:
 
-Some conventions were introduced with this tool and are not yet in the published guide:
-
-- access notes in the bracket, such as `paywalled`
+- the fixed order inside the bracket: kind of source; details; qualifiers; language; access; rating
+- access notes, such as `paywalled`
 - `translated from …` for a published translation
-- the description Journal Article, used with a review-status qualifier when a journal is not peer-reviewed or its review could not be established
-- the default of Trade Book when a book could be either a Monograph or a Trade Book
-- the opening words of a social media post as its title
+- Journal Article, with a review-status qualifier, when a journal is not known to be peer-reviewed
+- Trade Book when a book could be either a Monograph or a Trade Book
+- a social media post's own words as its title, cut after about a dozen words with an ellipsis
+- a chapter's containing volume may run past the ten-word limit on locations
 
-The tool also lets a chapter's containing volume run past the guide's ten-word limit on locations, since a title cannot be shortened.
+The changes in each version are listed in `CHANGELOG.md`.
 
 ## License
 
@@ -205,7 +205,7 @@ The file tells the assistant to cite only sources it actually opened, never to g
 
 ## Suggesting a change
 
-Open an issue if a description is missing from the library, a rule is applied wrongly, or a source type you cite often has no good fit. Say what you were citing and what you expected the footnote to look like.
+Open an issue and pick the form that fits: **Missing description** for a kind of source the library lacks, or **Footnote problem** for a rule applied wrongly or a source type with no good fit. Say what you were citing and what you expected the footnote to look like.
 
 ## For maintainers
 
@@ -229,6 +229,8 @@ node Tests/run.js
 ```
 
 This needs Node 18 or later and no packages. It checks every built-in example against its expected footnote, then the date and page rules, the short forms, saving and reopening a list, the three exports, link reading, the list audit, the three roles, the language settings, and the checks for journals, books, and social posts. It also confirms that every suggested description and every search word points at a real library entry, and that every tip belongs to a part of the page. Run it after any change to the formatter, an example, or one of the tables. If you change an example in `TYPES`, update its expected footnote in `Tests/run.js` to match. If you add or remove a library description, update the count in `Tests/run.js` and in the page footer.
+
+The same tests run on GitHub whenever a change is pushed, set up in `.github/workflows/tests.yml`. A green check beside a commit means they passed; a red cross means one failed, and the run's log names it.
 
 ### Hosting
 
