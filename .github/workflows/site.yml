@@ -1,0 +1,22 @@
+name: Update zerohistory.net
+# zerohistory.net serves a copy of this tool at /tools/cites/. A push to main asks Netlify to rebuild the
+# site so the copy follows. It needs the repository secret NETLIFY_BUILD_HOOK (the same build hook URL the
+# zerohistory and anabasis repositories use); without it the job does nothing.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask Netlify to rebuild zerohistory.net
+        env:
+          HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "No NETLIFY_BUILD_HOOK secret set; skipping."; exit 0; fi
+          curl -fsS -X POST -d '{}' "$HOOK"

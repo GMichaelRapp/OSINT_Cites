@@ -4,6 +4,25 @@ A fill-in-the-blanks tool that builds footnotes in the form set out by the OSINT
 
 It is one web page. There is nothing to install, no account, and no server.
 
+**Open it:** [zerohistory.net/tools/cites](https://zerohistory.net/tools/cites/), or the copy on [GitHub Pages](https://gmichaelrapp.github.io/OSINT_Cites/). Published by [Zero History](https://zerohistory.net/), a publisher of free, open-source research and writing tools.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
+  <img src="docs/screenshot.png" width="1440" height="900" alt="The OSINT Citation Generator">
+</picture>
+
+## Quick start
+
+1. **Pick the source type.** Book, journal article, news, social media post and the rest. It sets the title style, the usual description, and which checks run.
+2. **Or start from a link.** Paste the address under **Start from a link** and press **Fill from link**. The type, platform, account and date fill in, and nothing is sent anywhere.
+3. **Fill in the slots.** Author, title, location, description, publisher, date, link and locator. The **?** beside each part explains it, and **Checks against the guide** lists anything to fix.
+4. **Copy the footnote.** **Copy with italics** pastes into Word or Google Docs, and **Copy as Markdown** suits Substack. The short form for later citations sits just below.
+5. **Keep a list.** **Add this source** builds a list for the whole piece, **Audit the list** checks every entry at once, and **Save list to a file** gives you a file the Timeline, Dashboard and Map Builders can open.
+
+The rules behind every check are in the [OSINT Style Guide](AN_OSINT_STYLE_GUIDE_v1.5.pdf) and its [quick reference](AN_OSINT_STYLE_GUIDE_v1.5_Quick_Reference.pdf).
+
+In the app, press the version number beside the name for this quick start, what’s new in each version, and where the tool comes from. It opens by itself the first time you visit, and once after each update.
+
 ## The citation form
 
 The OSINT Style Guide is a footnote system for open-source research. Every footnote is built from the same eight slots:
@@ -27,7 +46,7 @@ A finished footnote looks like this:
 
 ## Using it
 
-Open `index.html` in any current browser, or use the hosted copy linked in this repository's About box.
+Open `index.html` in any current browser, or use the hosted copy linked at the top of this page.
 
 1. Paste a link into "Start from a link" if the source has one, or pick a source type yourself. Each type loads an example you can clear.
 2. Fill in the remaining slots. The footnote assembles as you type.
@@ -221,6 +240,10 @@ Everything is in `index.html`: markup, styles, and two scripts.
   - `TIPS`: the text behind each **?**, paired with the part of the page it belongs to
 
 The version number appears in two places in `index.html`: the label beside the page title and the footer.
+
+### The About box
+
+The version button and the box it opens (quick start, what’s new, about) are shared with Zero History’s other tools. In `index.html`, `<style id="zh-about-css">` and `<script id="zh-about">` hold the shared code, refreshed from [`tools/about/`](https://github.com/gmichaelrapp/zerohistory/tree/main/tools/about) in the zerohistory repository; `<script id="zh-about-cfg">` holds this tool’s own words. When you release, raise the version there, add the release to its `news` (keep the last three), and add it to `CHANGELOG.md`. The box never appears in published pages.
 
 ### Tests
 

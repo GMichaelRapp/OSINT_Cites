@@ -117,6 +117,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 [hidden] { display: none !important; }
 .chip.box input:checked + span::before { content: '\2713\00a0'; }
 .ver { font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-soft); border-radius: 3px; padding: 2px 7px; vertical-align: middle; margin-left: 4px; }
+button.ver { border: 0; cursor: pointer } button.ver:hover { text-decoration: underline }
 .qg { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 8px; padding: 6px 0; align-items: start; }
 .qg .gn { font-size: 12.5px; color: var(--muted); padding-top: 4px; }
 .qgroups { display: flex; flex-direction: column; }
@@ -242,6 +243,47 @@ summary .tip { margin-left: 6px; vertical-align: middle; }
 .tipbox { position: fixed; z-index: 60; left: 0; top: 0; width: max-content; max-width: min(320px, calc(100vw - 24px)); background: var(--ink); color: var(--bg); font-size: 12.5px; line-height: 1.45; padding: 9px 11px; border-radius: 5px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) { .btn, .mc, .pick { transition: border-color 120ms ease, filter 120ms ease; } }
 </style>
+<style id="zh-about-css">
+/* About box, shared by Zero History's tools. Uses the tool's own --accent when it has one. */
+.zh-dlg{--zh-bg:#fff;--zh-ink:#16202C;--zh-muted:#4A5763;--zh-line:#D5DCD3;--zh-soft:#F2F5F0;--zh-acc:var(--accent,#24456E);
+  border:0;padding:0;border-radius:12px;width:min(580px,calc(100vw - 24px));max-height:min(760px,calc(100vh - 32px));
+  background:var(--zh-bg);color:var(--zh-ink);box-shadow:0 0 0 1px rgba(22,32,44,.12),0 30px 70px -20px rgba(22,32,44,.5);
+  font:15.5px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;text-align:left;overflow:hidden;flex-direction:column}
+.zh-dlg[open]{display:flex}
+.zh-dlg[data-dark]{--zh-bg:#1B232D;--zh-ink:#E3E8EE;--zh-muted:#AAB5C1;--zh-line:#334050;--zh-soft:#222C38;--zh-acc:var(--accent,#9DBBE3);color-scheme:dark}
+.zh-dlg::backdrop{background:rgba(16,23,32,.45)}
+.zh-dlg *{box-sizing:border-box}
+.zh-dlg header{display:flex;align-items:flex-start;gap:12px;padding:20px 22px 12px}
+.zh-dlg header div{flex:1}
+.zh-dlg h2{margin:0;font-size:21px;line-height:1.2;font-weight:700;color:var(--zh-ink)}
+.zh-dlg .zh-v{margin:3px 0 0;font-size:13.5px;color:var(--zh-muted)}
+.zh-dlg .zh-x{flex:none;width:34px;height:34px;border:1px solid var(--zh-line);border-radius:8px;background:none;color:var(--zh-ink);font-size:20px;line-height:1;cursor:pointer}
+.zh-dlg .zh-tabs{display:flex;gap:4px;padding:0 22px;border-bottom:1px solid var(--zh-line)}
+.zh-dlg .zh-tabs button{border:0;background:none;color:var(--zh-muted);font:inherit;font-size:14.5px;font-weight:600;padding:8px 10px 9px;margin-bottom:-1px;border-bottom:3px solid transparent;cursor:pointer}
+.zh-dlg .zh-tabs button[aria-selected="true"]{color:var(--zh-ink);border-bottom-color:var(--zh-acc)}
+.zh-dlg .zh-body{overflow:auto;padding:16px 22px 18px;flex:1}
+.zh-dlg section p{margin:0 0 12px}
+.zh-dlg .zh-lede{font-size:16px}
+.zh-dlg .zh-steps{margin:0 0 12px;padding:0;list-style:none;counter-reset:zh}
+.zh-dlg .zh-steps li{counter-increment:zh;position:relative;padding:9px 0 9px 38px;border-top:1px solid var(--zh-line)}
+.zh-dlg .zh-steps li::before{content:counter(zh);position:absolute;left:0;top:9px;width:26px;height:26px;border-radius:50%;background:var(--zh-acc);color:var(--zh-bg);font-weight:700;font-size:13.5px;line-height:26px;text-align:center}
+.zh-dlg .zh-steps .zh-st{display:block}
+.zh-dlg h3{margin:16px 0 6px;font-size:16.5px;color:var(--zh-ink)}
+.zh-dlg h3:first-child{margin-top:2px}
+.zh-dlg h3 span{font-weight:400;font-size:13.5px;color:var(--zh-muted);margin-left:4px}
+.zh-dlg ul{margin:0 0 10px;padding-left:20px}
+.zh-dlg li{margin:4px 0}
+.zh-dlg .zh-more{font-size:14px;color:var(--zh-muted)}
+.zh-dlg .zh-links{list-style:none;padding:0;display:grid;gap:4px}
+.zh-dlg a{color:var(--zh-acc);text-underline-offset:.15em}
+.zh-dlg code{font:13.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--zh-soft);padding:1px 4px;border-radius:4px}
+.zh-dlg footer{display:flex;align-items:center;gap:10px;padding:11px 22px;background:var(--zh-soft);border-top:1px solid var(--zh-line);font-size:13.5px;color:var(--zh-muted)}
+.zh-dlg footer svg{flex:none}
+.zh-dlg :focus-visible{outline:2px solid var(--zh-acc);outline-offset:2px;border-radius:4px}
+.zh-dlg .zh-tabs button:focus-visible{outline-offset:-3px;border-radius:7px}
+.zh-ver{font:inherit;cursor:pointer}
+@media (max-width:520px){.zh-dlg header,.zh-dlg .zh-body{padding-left:16px;padding-right:16px}.zh-dlg .zh-tabs{padding:0 12px}.zh-dlg footer{padding:10px 16px}}
+</style>
 </head>
 <body>
 <script id="theme-early">
@@ -251,7 +293,7 @@ summary .tip { margin-left: 6px; vertical-align: middle; }
 <div class="wrap">
   <header class="mast">
     <div class="masttop">
-      <h1>OSINT Citation Generator <span class="ver">v3.2.1</span></h1>
+      <h1>OSINT Citation Generator <button type="button" class="ver zh-ver" data-zh-about="news" title="Quick start, what’s new and about">v3.2.2</button></h1>
       <div class="optline">
         <span id="themeLabel">Theme</span>
         <span class="seg" role="radiogroup" aria-labelledby="themeLabel">
@@ -632,9 +674,10 @@ summary .tip { margin-left: 6px; vertical-align: middle; }
     </aside>
   </div>
 
-  <p class="foot">Version 3.2.1. Built to version 1.5 of the OSINT Style Guide, including its Source Description Library (771 descriptions) and qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
+  <p class="foot">Version 3.2.2 (<a href="#" data-zh-about="news">what’s new</a>). Built to version 1.5 of the OSINT Style Guide, including its Source Description Library (771 descriptions) and qualifier vocabulary. The full guide governs wherever this tool is silent. Grade each source on its record, and check every quotation against the original before it goes out.</p>
   <p class="foot">This page runs entirely in your browser. What you type is stored on this device and is not sent anywhere, with one exception: the archive buttons open the archive site you choose and hand it the link you entered. Examples that use Jane Doe, John Doe, or an address containing "example" are placeholders, not real sources.</p>
   <p class="foot">To have an AI assistant cite in this form, give it <a href="osint-citation-spec.md">osint-citation-spec.md</a>. Changes from version to version are listed in the <a href="https://github.com/gmichaelrapp/OSINT_Cites/blob/main/CHANGELOG.md">changelog</a>.</p>
+  <p class="foot">Published by <a href="https://zerohistory.net/">Zero History</a>, a publisher of free, open-source research and writing tools. Also at <a href="https://zerohistory.net/tools/cites/">zerohistory.net/tools/cites</a>.</p>
   <p class="foot">&copy; 2026 G. Michael Rapp. The software is under the MIT License. The guide content it carries (citation rules, description library, qualifier and access lists) is under Creative Commons Attribution 4.0 International.</p>
 </div>
 
@@ -2373,6 +2416,151 @@ var OSINT = (function () {
   else { usingExample = true; write(sampleState('news')); }
   dressType(); render(); renderSaved();
 })();
+</script>
+<script id="zh-about">
+/* About this tool: its version, a quick start, what's new, and who publishes it.
+   Shared by the tools Zero History publishes (https://zerohistory.net/tools/).
+   The tool calls ZH_ABOUT.init({...}) with its own words; any element with data-zh-about="start|news|about"
+   opens the box at that tab. It opens by itself once for a newcomer (quick start) and once after each update
+   (what's new), never in a published page. MIT License. */
+var ZH_ABOUT = (function () {
+  'use strict';
+  var C = null, dlg = null, last = null, TABS = [['start', 'Quick start'], ['news', 'What’s new'], ['about', 'About']];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // **bold**, *italic*, `code` and [text](https://…), nothing else.
+  function md(s) {
+    return esc(s).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/\*([^*]+)\*/g, '<i>$1</i>').replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|[\w./-]+\.(?:md|html|pdf|json))\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }
+  function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function dark() {
+    var el = document.body, c;
+    while (el) { c = getComputedStyle(el).backgroundColor; if (c && !/rgba\(.*,\s*0\)$|transparent/.test(c)) break; el = el.parentElement; }
+    var m = /(\d+)\D+(\d+)\D+(\d+)/.exec(c || '');
+    return m ? (0.299 * m[1] + 0.587 * m[2] + 0.114 * m[3]) < 128 : matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function build() {
+    var c = C;
+    dlg = document.createElement('dialog');
+    dlg.className = 'zh-dlg';
+    dlg.setAttribute('aria-labelledby', 'zh-h');
+    dlg.innerHTML =
+      '<header><div><h2 id="zh-h">' + esc(c.name) + '</h2><p class="zh-v">Version ' + esc(c.version) + (c.date ? ', ' + esc(c.date) : '') + '</p></div>' +
+      '<button type="button" class="zh-x" aria-label="Close">×</button></header>' +
+      '<div class="zh-tabs" role="tablist" aria-label="About ' + esc(c.name) + '">' + TABS.map(function (t) {
+        return '<button type="button" role="tab" id="zh-t-' + t[0] + '" aria-controls="zh-p-' + t[0] + '" data-zh-tab="' + t[0] + '">' + t[1] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="zh-body">' +
+      '<section role="tabpanel" id="zh-p-start" aria-labelledby="zh-t-start"><p class="zh-lede">' + md(c.tagline) + '</p><ol class="zh-steps">' +
+        c.quick.map(function (q) { return '<li><strong class="zh-st">' + md(q[0]) + '</strong>' + md(q[1]) + '</li>'; }).join('') + '</ol>' +
+        (c.quickMore ? '<p class="zh-more">' + md(c.quickMore) + '</p>' : '') + '</section>' +
+      '<section role="tabpanel" id="zh-p-news" aria-labelledby="zh-t-news">' + c.news.map(function (n) {
+        return '<h3>' + esc(n.v) + (n.date ? ' <span>' + esc(n.date) + '</span>' : '') + '</h3><ul>' + n.items.map(function (i) { return '<li>' + md(i) + '</li>'; }).join('') + '</ul>';
+      }).join('') + '<p class="zh-more">Every change, version by version, is in the <a href="' + esc(c.repo) + '/blob/main/CHANGELOG.md" target="_blank" rel="noopener">changelog</a>.</p></section>' +
+      '<section role="tabpanel" id="zh-p-about" aria-labelledby="zh-t-about">' + c.about.map(function (p) { return '<p>' + md(p) + '</p>'; }).join('') +
+        '<p><b>Your work stays with you.</b> ' + md(c.privacy) + '</p>' +
+        '<p>' + md(c.license) + '</p>' +
+        '<ul class="zh-links">' + [['Source code on GitHub', c.repo], ['Report a problem or ask for a change', c.repo + '/issues']].concat(c.links || []).map(function (l) {
+          return '<li><a href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + '</a></li>'; }).join('') + '</ul></section>' +
+      '</div>' +
+      '<footer><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#24456E"/><rect x="14" y="16" width="36" height="32" rx="10" fill="none" stroke="#D9A440" stroke-width="7"/><path d="M25 41 39 23" stroke="#D9A440" stroke-width="7"/></svg>' +
+        '<span>Published by <a href="https://zerohistory.net/" target="_blank" rel="noopener">Zero History</a>, free and open source. <a href="https://zerohistory.net/tools/" target="_blank" rel="noopener">More of our tools</a></span></footer>';
+    document.body.appendChild(dlg);
+    dlg.querySelector('.zh-x').addEventListener('click', function () { dlg.close(); });
+    dlg.addEventListener('click', function (e) {
+      if (e.target === dlg) dlg.close();
+      var t = e.target.closest && e.target.closest('[data-zh-tab]');
+      if (t) show(t.getAttribute('data-zh-tab'), false);
+    });
+    dlg.addEventListener('keydown', function (e) {
+      var t = e.target.closest && e.target.closest('[data-zh-tab]');
+      if (!t) return;
+      var i = TABS.map(function (x) { return x[0]; }).indexOf(t.getAttribute('data-zh-tab'));
+      var j = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault(); show(TABS[(j + TABS.length) % TABS.length][0], true);
+    });
+    dlg.addEventListener('close', function () { if (last && last.focus && document.contains(last)) last.focus(); });
+  }
+  function show(tab, focus) {
+    TABS.forEach(function (t) {
+      var on = t[0] === tab, b = dlg.querySelector('#zh-t-' + t[0]);
+      b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1;
+      dlg.querySelector('#zh-p-' + t[0]).hidden = !on;
+      if (on && focus) b.focus();
+    });
+    dlg.querySelector('.zh-body').scrollTop = 0;
+  }
+  function open(tab) {
+    if (!C) return;
+    if (!dlg) build();
+    last = document.activeElement;
+    if (dark()) dlg.setAttribute('data-dark', ''); else dlg.removeAttribute('data-dark');
+    show(tab || 'news', false);
+    if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); }
+    dlg.querySelector('#zh-t-' + (tab || 'news')).focus();
+  }
+  function init(cfg) {
+    C = cfg;
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest && e.target.closest('[data-zh-about]');
+      if (!t) return;
+      e.preventDefault();
+      var d = t.closest('details'); if (d) d.open = false;
+      open(t.getAttribute('data-zh-about') || 'news');
+    });
+    var pub = false; try { pub = !!(cfg.published && cfg.published()); } catch (e) {}
+    if (pub || cfg.auto === false || /[?&]about=0\b/.test(location.search)) return;
+    var key = cfg.key + '-seen', seen = ls(key), returning = false;
+    try { returning = !!(cfg.returning && cfg.returning()); } catch (e) {}
+    if (seen === cfg.version) return;
+    var tab = seen || returning ? 'news' : 'start';
+    ls(key, cfg.version);
+    setTimeout(function () { if (!document.querySelector('dialog[open]')) open(tab); }, 600);
+  }
+  return { init: init, open: open, version: function () { return C && C.version; } };
+})();
+</script>
+<script id="zh-about-cfg">
+ZH_ABOUT.init({
+  key: 'osint-cite-about',
+  name: 'OSINT Citation Generator',
+  version: '3.2.2',
+  date: '25 November 2026',
+  repo: 'https://github.com/gmichaelrapp/OSINT_Cites',
+  tagline: 'Build footnotes in the form set out by the OSINT Style Guide: fill in the slots, then copy a finished footnote with its punctuation, italics and description already in place.',
+  quick: [
+    ['Pick the source type.', 'Book, journal article, news, social media post and the rest. It sets the title style, the usual description, and which checks run.'],
+    ['Or start from a link.', 'Paste the address under **Start from a link** and press **Fill from link**. The type, platform, account and date fill in, and nothing is sent anywhere.'],
+    ['Fill in the slots.', 'Author, title, location, description, publisher, date, link and locator. The **?** beside each part explains it, and **Checks against the guide** lists anything to fix.'],
+    ['Copy the footnote.', '**Copy with italics** pastes into Word or Google Docs, and **Copy as Markdown** suits Substack. The short form for later citations sits just below.'],
+    ['Keep a list.', '**Add this source** builds a list for the whole piece, **Audit the list** checks every entry at once, and **Save list to a file** gives you a file the Timeline, Dashboard and Map Builders can open.']
+  ],
+  quickMore: 'The rules behind every check are in the [OSINT Style Guide](AN_OSINT_STYLE_GUIDE_v1.5.pdf) and its [quick reference](AN_OSINT_STYLE_GUIDE_v1.5_Quick_Reference.pdf).',
+  news: [
+    { v: '3.2.2', date: '25 November 2026', items: [
+      '**About this tool.** Press the version number beside the title for a quick start, what’s new, and where the tool comes from.',
+      'Published by Zero History, and now also at [zerohistory.net/tools/cites](https://zerohistory.net/tools/cites/). The GitHub Pages address keeps working.',
+      'Nothing about how footnotes are built has changed.'] },
+    { v: '3.2.1', date: '12 October 2026', items: [
+      'Follows version 1.5 of the OSINT Style Guide, which adopted the conventions this tool introduced.',
+      'The footer links to the [instructions for AI assistants](osint-citation-spec.md) and to the changelog.',
+      'List file format 2 is stable: lists saved now will open in later versions.'] },
+    { v: '3.2', date: '11 October 2026', items: [
+      'The kind-of-source field opens the whole description library: suggestions for the source type first, then 16 categories. Everyday words such as `tweet` or `study` find the right description.',
+      'A review status for journal articles, advice on social media post titles, and advice on choosing between Monograph and Trade Book.',
+      'A **?** beside every part of the page explains it; F1 in a field shows the same tip.'] }
+  ],
+  about: [
+    'The OSINT Style Guide is a footnote system for open-source research. Every footnote is built from eight slots: *Author, "Title," Location [Description] (Publisher: Date) URL: Locator.* The bracketed description tells the reader what kind of source they are about to open, and can carry an Admiralty-style rating of the source and the information.',
+    'Made by G. Michael Rapp.'
+  ],
+  privacy: 'The tool runs entirely in your browser. What you type is kept on this device and is not sent anywhere, except that the archive buttons hand the link you entered to the archive site you choose.',
+  license: 'The code is under the MIT License. The guide content it carries is under Creative Commons Attribution 4.0 International.',
+  links: [['The OSINT Style Guide (PDF)', 'AN_OSINT_STYLE_GUIDE_v1.5.pdf'], ['Instructions for AI assistants', 'osint-citation-spec.md']],
+  // The draft is written on every visit, so only a saved list marks someone who used an earlier version.
+  returning: function () { var l = localStorage.getItem('osint-cite-list-v1'); return !!l && l.length > 4; }
+});
 </script>
 </body>
 </html>

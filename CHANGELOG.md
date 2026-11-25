@@ -2,6 +2,12 @@
 
 Changes to the OSINT Citation Generator, newest first. Version 3.2.1 follows version 1.5 of the OSINT Style Guide.
 
+## 3.2.2 — 25 November 2026
+
+- **About this tool.** The version number beside the name opens a box with a quick start, what’s new in the last three versions, and where the tool comes from. It opens by itself on a first visit and once after each update.
+- Published by [Zero History](https://zerohistory.net/), and also served at [zerohistory.net/tools/cites](https://zerohistory.net/tools/cites/). The GitHub Pages address keeps working.
+- The README opens with a quick start and a screenshot.
+
 ## 3.2.1 — 12 October 2026
 
 A maintenance release. Nothing about how footnotes are built has changed.
