@@ -8,7 +8,7 @@ It is one web page. There is nothing to install, no account, and no server.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png">
-  <img src="docs/screenshot.png" width="1440" height="900" alt="The OSINT Citation Generator">
+  <img src="docs/screenshot.png" alt="The OSINT Citation Generator">
 </picture>
 
 ## Quick start
